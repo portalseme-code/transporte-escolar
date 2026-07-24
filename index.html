@@ -111,14 +111,14 @@
   /* trilha de progresso */
   .trilha-wrapper{
     position:relative;
-    padding-top:16px;
+    padding-top:8px;
   }
   .onibus-progresso{
     position:absolute;
-    top:6px;
+    top:0;
     left:0;
     transform:translateX(-50%);
-    font-size:22px;
+    font-size:20px;
     line-height:1;
     z-index:4;
     transition:left .5s cubic-bezier(.4,0,.2,1);
@@ -127,7 +127,7 @@
   .trilha{
     display:flex;
     align-items:flex-start;
-    padding:22px 24px 0;
+    padding:18px 24px 0;
     gap:0;
   }
   .parada{
@@ -411,6 +411,28 @@
   .metrica .num{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:600;color:var(--verde-escuro);}
   .metrica .lbl{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
   .rodape-admin{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+
+  .titulo-lista-recentes{
+    font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;
+    color:var(--verde-escuro);margin:22px 0 10px;
+  }
+  .lista-recentes{display:flex;flex-direction:column;gap:10px;}
+  .card-recente{
+    background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
+    padding:13px 15px;box-shadow:var(--sombra);
+  }
+  .card-recente-topo{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--borda);
+  }
+  .card-recente-topo strong{font-size:14px;color:var(--tinta);}
+  .card-recente-topo span{
+    font-size:11px;font-weight:600;color:var(--verde-escuro);background:var(--verde-suave);
+    padding:2px 8px;border-radius:99px;white-space:nowrap;
+  }
+  .card-recente-linha{display:flex;gap:8px;font-size:12.5px;padding:2px 0;}
+  .card-recente-linha span:first-child{color:var(--texto-suave);flex:0 0 88px;}
+  .card-recente-linha span:last-child{color:var(--tinta);font-weight:500;}
 
   .abas-admin{
     display:flex;gap:6px;margin:18px 0 14px;
@@ -885,6 +907,9 @@
             <tbody id="corpoTabela"></tbody>
           </table>
         </div>
+
+        <p class="titulo-lista-recentes">Últimos cadastros</p>
+        <div id="listaRecentes" class="lista-recentes"></div>
 
         <div class="rodape-admin">
           <button class="btn-mapa" id="btnExportar" type="button">Exportar CSV</button>
@@ -1450,6 +1475,27 @@
     return n === null ? '—' : n.toFixed(5);
   }
 
+  function renderizarListaRecentes(lista){
+    var container = document.getElementById('listaRecentes');
+    if(!lista.length){
+      container.innerHTML = '<p class="sem-dados-grafico">Nenhum cadastro enviado ainda.</p>';
+      return;
+    }
+    var recentes = lista.slice().sort(function(a, b){
+      return new Date(b.dataEnvio || 0) - new Date(a.dataEnvio || 0);
+    }).slice(0, 15);
+    container.innerHTML = recentes.map(function(r){
+      var endereco = escapeHtml(r.rua || '—') + (r.numero ? ', ' + escapeHtml(r.numero) : '') + ' — ' + escapeHtml(r.localidade || '—');
+      return '<div class="card-recente">' +
+        '<div class="card-recente-topo"><strong>' + escapeHtml(r.nomeAluno) + '</strong><span>' + escapeHtml(r.turno) + '</span></div>' +
+        '<div class="card-recente-linha"><span>Escola</span><span>' + escapeHtml(r.escola) + '</span></div>' +
+        '<div class="card-recente-linha"><span>Série</span><span>' + escapeHtml(r.serie) + '</span></div>' +
+        '<div class="card-recente-linha"><span>Endereço</span><span>' + endereco + '</span></div>' +
+        '<div class="card-recente-linha"><span>Responsável</span><span>' + escapeHtml(r.nomeResp) + '</span></div>' +
+        '</div>';
+    }).join('');
+  }
+
   function renderizarAdmin(lista){
     document.getElementById('mTotal').textContent = lista.length;
     document.getElementById('mEscolas').textContent = new Set(lista.map(function(r){return r.escola;})).size;
@@ -1472,6 +1518,12 @@
       renderizarGraficos(lista);
     } catch(erro){
       console.error('Erro ao montar os gráficos:', erro);
+    }
+
+    try {
+      renderizarListaRecentes(lista);
+    } catch(erro){
+      console.error('Erro ao montar a lista de últimos cadastros:', erro);
     }
 
     try {
