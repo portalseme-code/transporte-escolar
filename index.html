@@ -466,6 +466,32 @@
     display:flex;align-items:center;justify-content:center;
     font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;
   }
+  .pino-cluster-proximidade{
+    background:rgba(182,130,26,.92);
+    border:2.5px dashed #fff;
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;
+    box-shadow:0 1px 6px rgba(0,0,0,.35);
+  }
+
+  .controle-cluster{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
+    padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tinta);
+  }
+  .controle-cluster label{font-weight:600;}
+  .controle-cluster input[type=number]{
+    width:80px;padding:7px 9px;border:1.5px solid var(--borda);border-radius:8px;
+    font-size:13px;font-family:inherit;background:#FCFCFA;
+  }
+  .controle-cluster input[type=number]:focus{outline:none;border-color:var(--verde);background:#fff;}
+  .status-cluster{
+    margin-left:auto;font-size:12px;color:var(--texto-suave);font-style:italic;
+  }
+  @media(max-width:480px){
+    .status-cluster{margin-left:0;width:100%;}
+  }
   .lista-recentes{display:flex;flex-direction:column;gap:10px;}
   .card-recente{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
@@ -962,6 +988,13 @@
               <div class="lista-barras" id="graficoLocalidade"></div>
             </div>
           </div>
+        </div>
+
+        <div class="controle-cluster" id="controleCluster" style="display:none;">
+          <label for="raioCluster">Agrupar alunos num raio de</label>
+          <input type="number" id="raioCluster" value="200" min="0" max="2000" step="50">
+          <span>metros</span>
+          <span class="status-cluster" id="statusCluster"></span>
         </div>
 
         <div id="mapaAdmin" style="width:100%;height:320px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
@@ -1634,6 +1667,7 @@
       var aba = botao.getAttribute('data-aba');
       document.getElementById('painelResumo').style.display = (aba === 'resumo') ? '' : 'none';
       document.getElementById('mapaAdmin').style.display = (aba === 'mapa') ? '' : 'none';
+      document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
       if(aba === 'mapa' && mapaAdmin){
         setTimeout(function(){ mapaAdmin.invalidateSize(); }, 100);
       }
@@ -1764,14 +1798,69 @@
   });
 
   // ---------- MAPA ----------
+  var LIMITE_ZOOM_INDIVIDUAL = 16; // a partir desse zoom, mostra pontos exatos em vez de agrupar por proximidade
+
+  function distanciaMetros(lat1, lng1, lat2, lng2){
+    var R = 6371000;
+    var toRad = function(g){ return g * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function agruparPorProximidade(grupos, raioMetros){
+    var n = grupos.length;
+    var visitado = new Array(n).fill(false);
+    var clusters = [];
+    for(var i = 0; i < n; i++){
+      if(visitado[i]){ continue; }
+      var pilha = [i];
+      visitado[i] = true;
+      var membros = [];
+      while(pilha.length){
+        var atual = pilha.pop();
+        membros.push(grupos[atual]);
+        for(var j = 0; j < n; j++){
+          if(!visitado[j] && distanciaMetros(grupos[atual].lat, grupos[atual].lng, grupos[j].lat, grupos[j].lng) <= raioMetros){
+            visitado[j] = true;
+            pilha.push(j);
+          }
+        }
+      }
+      var alunos = [], somaLat = 0, somaLng = 0, total = 0;
+      membros.forEach(function(m){
+        alunos = alunos.concat(m.alunos);
+        somaLat += m.lat * m.alunos.length;
+        somaLng += m.lng * m.alunos.length;
+        total += m.alunos.length;
+      });
+      clusters.push({ lat: somaLat / total, lng: somaLng / total, alunos: alunos, pontos: membros.length });
+    }
+    return clusters;
+  }
+
+  function popupAlunos(titulo, alunos){
+    var CAP = 18;
+    var visiveis = alunos.slice(0, CAP);
+    var html = '<b>' + titulo + '</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
+      visiveis.map(function(r){
+        return '<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.serie);
+      }).join('<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">');
+    if(alunos.length > CAP){
+      html += '<hr style="margin:6px 0;border:none;border-top:1px solid #eee;"><i>+ ' + (alunos.length - CAP) + ' outro(s) aluno(s) nesta área</i>';
+    }
+    return html;
+  }
+
   function renderizarMapa(lista){
     if(!mapaAdmin){
       mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19, attribution: '© OpenStreetMap'
       }).addTo(mapaAdmin);
+      mapaAdmin.on('zoomend', function(){ renderizarMapa(listaFiltradaCache); });
     } else {
-      mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
+      mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker || l instanceof L.Circle) mapaAdmin.removeLayer(l); });
     }
 
     var grupos = {};
@@ -1782,34 +1871,56 @@
       if(!grupos[chave]){ grupos[chave] = { lat: lat, lng: lng, alunos: [] }; }
       grupos[chave].alunos.push(r);
     });
+    var gruposArray = Object.keys(grupos).map(function(k){ return grupos[k]; });
 
-    Object.keys(grupos).forEach(function(chave){
-      var grupo = grupos[chave];
-      var qtd = grupo.alunos.length;
-      var tamanho = qtd > 1 ? 28 : 16;
-      var iconeHtml = '<div class="pino-mapa-admin' + (qtd > 1 ? ' pino-mapa-admin-grupo' : '') + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
-      var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
+    var zoomAtual = mapaAdmin.getZoom();
+    var statusEl = document.getElementById('statusCluster');
 
-      var popupHtml;
-      if(qtd === 1){
-        var r0 = grupo.alunos[0];
-        popupHtml = '<b>' + escapeHtml(r0.nomeAluno) + '</b><br>' + escapeHtml(r0.escola) + ' — ' + escapeHtml(r0.turno) + '<br>' + escapeHtml(r0.serie) + '<br>' + escapeHtml(r0.localidade);
-      } else {
-        popupHtml = '<b>' + qtd + ' alunos nesta localização</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
-          grupo.alunos.map(function(r){
-            return '<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.serie);
-          }).join('<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">');
-      }
+    if(zoomAtual >= LIMITE_ZOOM_INDIVIDUAL){
+      statusEl.textContent = 'Mostrando pontos individuais (afaste o zoom para agrupar)';
+      gruposArray.forEach(function(grupo){
+        var qtd = grupo.alunos.length;
+        var tamanho = qtd > 1 ? 28 : 16;
+        var iconeHtml = '<div class="pino-mapa-admin' + (qtd > 1 ? ' pino-mapa-admin-grupo' : '') + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
+        var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
+        var titulo = qtd === 1 ? escapeHtml(grupo.alunos[0].nomeAluno) : qtd + ' alunos nesta residência';
+        L.marker([grupo.lat, grupo.lng], { icon: icone })
+          .addTo(mapaAdmin)
+          .bindPopup(qtd === 1
+            ? '<b>' + escapeHtml(grupo.alunos[0].nomeAluno) + '</b><br>' + escapeHtml(grupo.alunos[0].escola) + ' — ' + escapeHtml(grupo.alunos[0].turno) + '<br>' + escapeHtml(grupo.alunos[0].serie) + '<br>' + escapeHtml(grupo.alunos[0].localidade)
+            : popupAlunos(titulo, grupo.alunos), { maxWidth: 260 });
+      });
+    } else {
+      var raio = parseInt(document.getElementById('raioCluster').value, 10) || 0;
+      statusEl.textContent = 'Agrupando alunos num raio de ' + raio + 'm (dê zoom para ver pontos individuais)';
+      var clusters = raio > 0 ? agruparPorProximidade(gruposArray, raio) : gruposArray.map(function(g){ return { lat: g.lat, lng: g.lng, alunos: g.alunos, pontos: 1 }; });
 
-      L.marker([grupo.lat, grupo.lng], { icon: icone })
-        .addTo(mapaAdmin)
-        .bindPopup(popupHtml, { maxWidth: 260 });
-    });
+      clusters.forEach(function(cluster){
+        var qtd = cluster.alunos.length;
+        if(raio > 0 && cluster.pontos > 1){
+          L.circle([cluster.lat, cluster.lng], { radius: raio, color: '#B6821A', weight: 1, fillColor: '#F0B429', fillOpacity: 0.12 }).addTo(mapaAdmin);
+        }
+        var tamanho = Math.min(52, 20 + qtd * 3);
+        var classeExtra = cluster.pontos > 1 ? ' pino-cluster-proximidade' : (qtd > 1 ? ' pino-mapa-admin-grupo' : '');
+        var iconeHtml = '<div class="pino-mapa-admin' + classeExtra + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
+        var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
+        var titulo = qtd === 1 ? escapeHtml(cluster.alunos[0].nomeAluno) : qtd + ' alunos nesta área (raio de ' + raio + 'm)';
+        L.marker([cluster.lat, cluster.lng], { icon: icone })
+          .addTo(mapaAdmin)
+          .bindPopup(qtd === 1
+            ? '<b>' + escapeHtml(cluster.alunos[0].nomeAluno) + '</b><br>' + escapeHtml(cluster.alunos[0].escola) + ' — ' + escapeHtml(cluster.alunos[0].turno) + '<br>' + escapeHtml(cluster.alunos[0].serie) + '<br>' + escapeHtml(cluster.alunos[0].localidade)
+            : popupAlunos(titulo, cluster.alunos), { maxWidth: 260 });
+      });
+    }
 
     if(document.getElementById('mapaAdmin').style.display !== 'none'){
       setTimeout(function(){ mapaAdmin.invalidateSize(); }, 150);
     }
   }
+
+  document.getElementById('raioCluster').addEventListener('input', function(){
+    if(mapaAdmin){ renderizarMapa(listaFiltradaCache); }
+  });
 
   // ---------- EDITAR ----------
   function abrirModalEdicao(registro){
