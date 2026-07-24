@@ -1441,35 +1441,58 @@
     });
   });
 
+  function paraNumero(v){
+    var n = typeof v === 'number' ? v : parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+  function formatarCoord(v){
+    var n = paraNumero(v);
+    return n === null ? '—' : n.toFixed(5);
+  }
+
   function renderizarAdmin(lista){
     document.getElementById('mTotal').textContent = lista.length;
     document.getElementById('mEscolas').textContent = new Set(lista.map(function(r){return r.escola;})).size;
     document.getElementById('mLocalidades').textContent = new Set(lista.map(function(r){return r.localidade;})).size;
 
-    var corpo = document.getElementById('corpoTabela');
-    if(!lista.length){
-      corpo.innerHTML = '<tr><td colspan="9">Nenhum cadastro enviado ainda.</td></tr>';
-    } else {
-      corpo.innerHTML = lista.map(function(r){
-        return '<tr><td>' + escapeHtml(r.nomeAluno) + '</td><td>' + escapeHtml(r.escola) + '</td><td>' + escapeHtml(r.turno) + '</td><td>' + escapeHtml(r.serie) + '</td><td>' + escapeHtml(r.rua) + '</td><td>' + escapeHtml(r.numero) + '</td><td>' + escapeHtml(r.localidade) + '</td><td>' + escapeHtml(r.nomeResp) + '</td><td>' + r.lat.toFixed(5) + ', ' + r.lng.toFixed(5) + '</td></tr>';
-      }).join('');
+    try {
+      var corpo = document.getElementById('corpoTabela');
+      if(!lista.length){
+        corpo.innerHTML = '<tr><td colspan="9">Nenhum cadastro enviado ainda.</td></tr>';
+      } else {
+        corpo.innerHTML = lista.map(function(r){
+          return '<tr><td>' + escapeHtml(r.nomeAluno) + '</td><td>' + escapeHtml(r.escola) + '</td><td>' + escapeHtml(r.turno) + '</td><td>' + escapeHtml(r.serie) + '</td><td>' + escapeHtml(r.rua) + '</td><td>' + escapeHtml(r.numero) + '</td><td>' + escapeHtml(r.localidade) + '</td><td>' + escapeHtml(r.nomeResp) + '</td><td>' + formatarCoord(r.lat) + ', ' + formatarCoord(r.lng) + '</td></tr>';
+        }).join('');
+      }
+    } catch(erro){
+      console.error('Erro ao montar a tabela de cadastros:', erro);
     }
 
-    renderizarGraficos(lista);
-
-    if(!mapaAdmin){
-      mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19, attribution: '© OpenStreetMap'
-      }).addTo(mapaAdmin);
-    } else {
-      mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
+    try {
+      renderizarGraficos(lista);
+    } catch(erro){
+      console.error('Erro ao montar os gráficos:', erro);
     }
-    lista.forEach(function(r){
-      L.circleMarker([r.lat, r.lng], {radius:6, color:'#0C4A2E', fillColor:'#F0B429', fillOpacity:0.95, weight:2})
-        .addTo(mapaAdmin)
-        .bindPopup('<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.localidade));
-    });
+
+    try {
+      if(!mapaAdmin){
+        mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, attribution: '© OpenStreetMap'
+        }).addTo(mapaAdmin);
+      } else {
+        mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
+      }
+      lista.forEach(function(r){
+        var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+        if(lat === null || lng === null){ return; }
+        L.circleMarker([lat, lng], {radius:6, color:'#0C4A2E', fillColor:'#F0B429', fillOpacity:0.95, weight:2})
+          .addTo(mapaAdmin)
+          .bindPopup('<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.localidade));
+      });
+    } catch(erro){
+      console.error('Erro ao montar o mapa:', erro);
+    }
     if(document.getElementById('mapaAdmin').style.display !== 'none'){
       setTimeout(function(){ mapaAdmin.invalidateSize(); }, 150);
     }
