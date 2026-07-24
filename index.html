@@ -412,6 +412,42 @@
   .metrica .lbl{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
   .rodape-admin{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
 
+  .barra-filtros{
+    display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
+    margin-top:16px;padding:14px;background:var(--superficie);
+    border:1px solid var(--borda);border-radius:var(--raio-sm);
+  }
+  .campo-filtro{display:flex;flex-direction:column;gap:4px;flex:1 1 140px;min-width:130px;}
+  .campo-filtro label{font-size:11px;font-weight:600;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.03em;}
+  .campo-filtro select{
+    padding:9px 10px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    font-size:13px;font-family:inherit;background:#FCFCFA;color:var(--tinta);
+  }
+  .campo-filtro select:focus{outline:none;border-color:var(--verde);background:#fff;}
+  .contagem-filtro{font-size:12px;color:var(--texto-suave);margin:8px 2px 0;}
+
+  .overlay-modal{
+    position:fixed;inset:0;background:rgba(20,30,20,.45);
+    display:flex;align-items:center;justify-content:center;
+    z-index:200;padding:16px;
+  }
+  .caixa-modal{
+    background:var(--superficie);border-radius:var(--raio);
+    padding:24px;max-width:480px;width:100%;
+    max-height:88vh;overflow:auto;
+    box-shadow:0 10px 40px rgba(0,0,0,.3);
+  }
+
+  .card-recente-acoes{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);}
+  .btn-acao-cartao{
+    flex:1;background:#fff;border:1.5px solid var(--borda);border-radius:8px;
+    padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer;
+    color:var(--verde-escuro);
+  }
+  .btn-acao-cartao:hover{border-color:var(--verde);background:var(--verde-suave);}
+  .btn-acao-cartao.excluir{color:var(--erro);}
+  .btn-acao-cartao.excluir:hover{border-color:var(--erro);background:var(--erro-bg);}
+
   .titulo-lista-recentes{
     font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;
     color:var(--verde-escuro);margin:22px 0 10px;
@@ -885,6 +921,23 @@
           <div class="metrica"><div class="num" id="mLocalidades">0</div><div class="lbl">Localidades</div></div>
         </div>
 
+        <div class="barra-filtros">
+          <div class="campo-filtro">
+            <label for="filtroEscola">Escola</label>
+            <select id="filtroEscola"><option value="">Todas as escolas</option></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroTurno">Turno</label>
+            <select id="filtroTurno"><option value="">Todos os turnos</option></select>
+          </div>
+          <div class="campo-filtro">
+            <label for="filtroLocalidade">Localidade</label>
+            <select id="filtroLocalidade"><option value="">Todas as localidades</option></select>
+          </div>
+          <button class="btn-mapa" id="btnLimparFiltros" type="button">Limpar filtros</button>
+        </div>
+        <p class="contagem-filtro" id="contagemFiltro"></p>
+
         <div class="abas-admin">
           <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
           <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
@@ -915,6 +968,7 @@
 
         <div class="rodape-admin">
           <button class="btn-mapa" id="btnExportar" type="button">Exportar CSV</button>
+          <button class="btn-mapa" id="btnExportarKml" type="button">Exportar KML</button>
           <button class="btn-mapa" id="btnAtualizar" type="button">Atualizar lista</button>
           <button class="secundario" id="sairAdmin" type="button">Sair da área da secretaria</button>
         </div>
@@ -928,10 +982,112 @@
           </table>
         </div>
 
-        <p class="titulo-lista-recentes">Últimos cadastros</p>
+        <p class="titulo-lista-recentes">Cadastros <span id="rotuloQtdLista"></span></p>
         <div id="listaRecentes" class="lista-recentes"><p class="sem-dados-grafico">Carregando...</p></div>
       </div>
     </section>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div class="overlay-modal" id="modalEditar" style="display:none;">
+      <div class="caixa-modal">
+        <p class="rotulo-secao" style="margin-bottom:2px;">Editar cadastro</p>
+        <p class="ajuda-secao">O endereço em texto pode ser corrigido aqui. Para corrigir o ponto no mapa, exclua e peça um novo cadastro.</p>
+
+        <div class="aviso-erro" id="erroEdicao"></div>
+
+        <div class="campo">
+          <label for="editNomeAluno">Nome do aluno</label>
+          <input type="text" id="editNomeAluno">
+        </div>
+        <div class="linha-dupla">
+          <div class="campo">
+            <label for="editEscola">Escola</label>
+            <select id="editEscola">
+              <option value="">Selecione a escola</option>
+            <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
+            <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
+            <option value="CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES">CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES</option>
+            <option value="CMEI BELMIRO ALBERTO ALPOIM">CMEI BELMIRO ALBERTO ALPOIM</option>
+            <option value="CMEI ENIDE CORRÊA GUAITOLINI">CMEI ENIDE CORRÊA GUAITOLINI</option>
+            <option value="CMEI PADRE JOSE DE ANCHIETA">CMEI PADRE JOSE DE ANCHIETA</option>
+            <option value="CMEI TIA IRENI AMARAL">CMEI TIA IRENI AMARAL</option>
+            <option value="EMEB ALCIDES CECCON">EMEB ALCIDES CECCON</option>
+            <option value="EMEB AMARILIS FERNANDES GARCIA">EMEB AMARILIS FERNANDES GARCIA</option>
+            <option value="EMEB DUAS BARRAS">EMEB DUAS BARRAS</option>
+            <option value="EMEB DULCINEA SILVA LYRIO RUPF">EMEB DULCINEA SILVA LYRIO RUPF</option>
+            <option value="EMEB JOSEFINA RAMOS NUNES - DONA MULATA">EMEB JOSEFINA RAMOS NUNES - DONA MULATA</option>
+            <option value="EMEB LIMEIRA">EMEB LIMEIRA</option>
+            <option value="EMEB MARIANA DA PURIFICACAO SIMOES">EMEB MARIANA DA PURIFICACAO SIMOES</option>
+            <option value="EMEB PROFESSORA PATRICIA FERNANDES ROFFES">EMEB PROFESSORA PATRICIA FERNANDES ROFFES</option>
+            <option value="EMEB TIA MARLENE PETRI">EMEB TIA MARLENE PETRI</option>
+            <option value="EMEF IRMA TEREZINHA GODOY DE ALMEIDA">EMEF IRMA TEREZINHA GODOY DE ALMEIDA</option>
+            <option value="EMEF MANOEL DE PAULA SERRAO">EMEF MANOEL DE PAULA SERRAO</option>
+            <option value="EMEF OLIVÂNIA">EMEF OLIVÂNIA</option>
+            <option value="EMEF PROFESSOR TIO LILIU">EMEF PROFESSOR TIO LILIU</option>
+            <option value="EMEIEF ALIPIO PORTO DA SILVA">EMEIEF ALIPIO PORTO DA SILVA</option>
+            <option value="EMEIEF CORREGO DA PRATA">EMEIEF CORREGO DA PRATA</option>
+            <option value="EMEIEF ELSON GARCIA">EMEIEF ELSON GARCIA</option>
+            <option value="EMEIEF ESMERALDA MORACA">EMEIEF ESMERALDA MORACA</option>
+            <option value="EMEIEF ESTHER SOARES DA TRINDADE SANTANA">EMEIEF ESTHER SOARES DA TRINDADE SANTANA</option>
+            <option value="EMEIEF GOEMBE">EMEIEF GOEMBE</option>
+            <option value="EMEIEF ITAJOBAIA">EMEIEF ITAJOBAIA</option>
+            <option value="EMEIEF ITAPEROROMA BAIXA">EMEIEF ITAPEROROMA BAIXA</option>
+            <option value="EMEIEF LAUROMAR POMPERMAYER PORTO">EMEIEF LAUROMAR POMPERMAYER PORTO</option>
+            <option value="EMEIEF PROFESSORA ADY LYRIO MARCHEZI">EMEIEF PROFESSORA ADY LYRIO MARCHEZI</option>
+            <option value="EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI">EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI</option>
+            <option value="EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES">EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES</option>
+            <option value="EMEIEF PROFESSORA JOCELINA NOGUEIRA">EMEIEF PROFESSORA JOCELINA NOGUEIRA</option>
+            <option value="EMEIEF PROFESSORA MARIA LUIZA FLORES">EMEIEF PROFESSORA MARIA LUIZA FLORES</option>
+            <option value="EMEIEF ROSALINO SIMOES">EMEIEF ROSALINO SIMOES</option>
+            <option value="EMEIEF SAO MATEUS">EMEIEF SAO MATEUS</option>
+            <option value="EMEIEF SIMPATIA">EMEIEF SIMPATIA</option>
+            <option value="EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO">EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="editTurno">Turno</label>
+            <select id="editTurno" disabled><option value="">Selecione a escola primeiro</option></select>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="editSerie">Série / ano</label>
+          <select id="editSerie" disabled><option value="">Selecione o turno primeiro</option></select>
+        </div>
+        <div class="linha-dupla">
+          <div class="campo">
+            <label for="editRua">Nome da rua</label>
+            <input type="text" id="editRua">
+          </div>
+          <div class="campo">
+            <label for="editNumero">Número</label>
+            <input type="text" id="editNumero">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="editLocalidade">Localidade / bairro / distrito</label>
+          <input type="text" id="editLocalidade">
+        </div>
+        <div class="campo">
+          <label for="editReferencia">Ponto de referência</label>
+          <input type="text" id="editReferencia">
+        </div>
+        <div class="linha-dupla">
+          <div class="campo">
+            <label for="editNomeResp">Nome do responsável</label>
+            <input type="text" id="editNomeResp">
+          </div>
+          <div class="campo">
+            <label for="editTelResp">Telefone / WhatsApp</label>
+            <input type="tel" id="editTelResp">
+          </div>
+        </div>
+
+        <div class="barra-botoes">
+          <button class="secundario" id="cancelarEdicao" type="button">Cancelar</button>
+          <button class="principal" id="salvarEdicao" type="button">Salvar alterações</button>
+        </div>
+      </div>
+    </div>
 
   </main>
 </div>
@@ -1402,6 +1558,8 @@
   document.getElementById('btnAtualizar').addEventListener('click', carregarRegistros);
 
   var registrosCache = [];
+  var listaFiltradaCache = [];
+  var registroEmEdicao = null;
 
   function carregarRegistros(){
     if(URL_PLANILHA.indexOf('COLE_AQUI') === 0){
@@ -1419,7 +1577,8 @@
         return;
       }
       registrosCache = Array.isArray(lista) ? lista : [];
-      renderizarAdmin(registrosCache);
+      popularFiltros(registrosCache);
+      aplicarFiltros();
     }).catch(function(erro){
       console.error('Erro ao carregar registros:', erro);
       if(!registrosCache.length){
@@ -1490,116 +1649,287 @@
     return n === null ? '—' : n.toFixed(5);
   }
 
-  function renderizarListaRecentes(lista){
-    console.log('renderizarListaRecentes executando com', lista.length, 'registros');
-    var container = document.getElementById('listaRecentes');
-    if(!container){
-      console.error('Elemento #listaRecentes não encontrado no HTML.');
-      return;
-    }
+  // ---------- FILTROS ----------
+  function popularSelectFiltro(id, valores, manter, placeholder){
+    var sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">' + placeholder + '</option>' +
+      valores.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
+    if(valores.indexOf(manter) !== -1){ sel.value = manter; }
+  }
+
+  function popularFiltros(lista){
+    var manterEscola = document.getElementById('filtroEscola').value;
+    var manterTurno = document.getElementById('filtroTurno').value;
+    var manterLocalidade = document.getElementById('filtroLocalidade').value;
+    var escolas = Array.from(new Set(lista.map(function(r){ return r.escola; }).filter(Boolean))).sort();
+    var turnos = Array.from(new Set(lista.map(function(r){ return r.turno; }).filter(Boolean))).sort();
+    var localidades = Array.from(new Set(lista.map(function(r){ return r.localidade; }).filter(Boolean))).sort();
+    popularSelectFiltro('filtroEscola', escolas, manterEscola, 'Todas as escolas');
+    popularSelectFiltro('filtroTurno', turnos, manterTurno, 'Todos os turnos');
+    popularSelectFiltro('filtroLocalidade', localidades, manterLocalidade, 'Todas as localidades');
+  }
+
+  function obterListaFiltrada(){
+    var escola = document.getElementById('filtroEscola').value;
+    var turno = document.getElementById('filtroTurno').value;
+    var localidade = document.getElementById('filtroLocalidade').value;
+    return registrosCache.filter(function(r){
+      if(escola && r.escola !== escola){ return false; }
+      if(turno && r.turno !== turno){ return false; }
+      if(localidade && r.localidade !== localidade){ return false; }
+      return true;
+    });
+  }
+
+  function aplicarFiltros(){
+    var lista = obterListaFiltrada();
+    listaFiltradaCache = lista;
+    var total = registrosCache.length;
+
+    document.getElementById('mTotal').textContent = lista.length;
+    document.getElementById('mEscolas').textContent = new Set(lista.map(function(r){return r.escola;})).size;
+    document.getElementById('mLocalidades').textContent = new Set(lista.map(function(r){return r.localidade;})).size;
+
+    var contagemEl = document.getElementById('contagemFiltro');
+    contagemEl.textContent = (lista.length === total)
+      ? total + ' cadastro' + (total === 1 ? '' : 's') + ' no total.'
+      : 'Mostrando ' + lista.length + ' de ' + total + ' cadastros (filtro ativo).';
+    document.getElementById('rotuloQtdLista').textContent = '(' + lista.length + ')';
+
+    try { renderizarTabela(lista); } catch(erro){ console.error('Erro ao montar a tabela de cadastros:', erro); }
+    try { renderizarGraficos(lista); } catch(erro){ console.error('Erro ao montar os gráficos:', erro); }
+    try { renderizarListaRecentes(lista); } catch(erro){ console.error('Erro ao montar a lista de cadastros:', erro); }
+    try { renderizarMapa(lista); } catch(erro){ console.error('Erro ao montar o mapa:', erro); }
+  }
+
+  ['filtroEscola','filtroTurno','filtroLocalidade'].forEach(function(id){
+    document.getElementById(id).addEventListener('change', aplicarFiltros);
+  });
+  document.getElementById('btnLimparFiltros').addEventListener('click', function(){
+    document.getElementById('filtroEscola').value = '';
+    document.getElementById('filtroTurno').value = '';
+    document.getElementById('filtroLocalidade').value = '';
+    aplicarFiltros();
+  });
+
+  // ---------- TABELA ----------
+  function renderizarTabela(lista){
+    var corpo = document.getElementById('corpoTabela');
     if(!lista.length){
-      container.innerHTML = '<p class="sem-dados-grafico">Nenhum cadastro enviado ainda.</p>';
+      corpo.innerHTML = '<tr><td colspan="9">Nenhum cadastro encontrado.</td></tr>';
+    } else {
+      corpo.innerHTML = lista.map(function(r){
+        return '<tr><td>' + escapeHtml(r.nomeAluno) + '</td><td>' + escapeHtml(r.escola) + '</td><td>' + escapeHtml(r.turno) + '</td><td>' + escapeHtml(r.serie) + '</td><td>' + escapeHtml(r.rua) + '</td><td>' + escapeHtml(r.numero) + '</td><td>' + escapeHtml(r.localidade) + '</td><td>' + escapeHtml(r.nomeResp) + '</td><td>' + formatarCoord(r.lat) + ', ' + formatarCoord(r.lng) + '</td></tr>';
+      }).join('');
+    }
+  }
+
+  // ---------- LISTA DE CADASTROS (com ações) ----------
+  function renderizarListaRecentes(lista){
+    var container = document.getElementById('listaRecentes');
+    if(!lista.length){
+      container.innerHTML = '<p class="sem-dados-grafico">Nenhum cadastro encontrado.</p>';
       return;
     }
-    var recentes = lista.slice().sort(function(a, b){
+    var ordenados = lista.slice().sort(function(a, b){
       return new Date(b.dataEnvio || 0) - new Date(a.dataEnvio || 0);
-    }).slice(0, 15);
-    container.innerHTML = recentes.map(function(r){
+    });
+    container.innerHTML = ordenados.map(function(r){
       var endereco = escapeHtml(r.rua || '—') + (r.numero ? ', ' + escapeHtml(r.numero) : '') + ' — ' + escapeHtml(r.localidade || '—');
+      var idSeguro = escapeHtml(r.id);
       return '<div class="card-recente">' +
         '<div class="card-recente-topo"><strong>' + escapeHtml(r.nomeAluno) + '</strong><span>' + escapeHtml(r.turno) + '</span></div>' +
         '<div class="card-recente-linha"><span>Escola</span><span>' + escapeHtml(r.escola) + '</span></div>' +
         '<div class="card-recente-linha"><span>Série</span><span>' + escapeHtml(r.serie) + '</span></div>' +
         '<div class="card-recente-linha"><span>Endereço</span><span>' + endereco + '</span></div>' +
         '<div class="card-recente-linha"><span>Responsável</span><span>' + escapeHtml(r.nomeResp) + '</span></div>' +
+        '<div class="card-recente-acoes">' +
+          '<button class="btn-acao-cartao editar" data-id="' + idSeguro + '" type="button">Editar</button>' +
+          '<button class="btn-acao-cartao excluir" data-id="' + idSeguro + '" type="button">Excluir</button>' +
+        '</div>' +
         '</div>';
     }).join('');
   }
 
-  function renderizarAdmin(lista){
-    document.getElementById('mTotal').textContent = lista.length;
-    document.getElementById('mEscolas').textContent = new Set(lista.map(function(r){return r.escola;})).size;
-    document.getElementById('mLocalidades').textContent = new Set(lista.map(function(r){return r.localidade;})).size;
+  document.getElementById('listaRecentes').addEventListener('click', function(e){
+    var btnEditar = e.target.closest('.btn-acao-cartao.editar');
+    var btnExcluir = e.target.closest('.btn-acao-cartao.excluir');
+    if(btnEditar){
+      var r1 = registrosCache.find(function(r){ return String(r.id) === btnEditar.getAttribute('data-id'); });
+      if(r1){ abrirModalEdicao(r1); }
+    } else if(btnExcluir){
+      var r2 = registrosCache.find(function(r){ return String(r.id) === btnExcluir.getAttribute('data-id'); });
+      if(r2){ confirmarExclusao(r2); }
+    }
+  });
 
-    try {
-      var corpo = document.getElementById('corpoTabela');
-      if(!lista.length){
-        corpo.innerHTML = '<tr><td colspan="9">Nenhum cadastro enviado ainda.</td></tr>';
+  // ---------- MAPA ----------
+  function renderizarMapa(lista){
+    if(!mapaAdmin){
+      mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '© OpenStreetMap'
+      }).addTo(mapaAdmin);
+    } else {
+      mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
+    }
+
+    var grupos = {};
+    lista.forEach(function(r){
+      var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+      if(lat === null || lng === null){ return; }
+      var chave = lat.toFixed(5) + ',' + lng.toFixed(5);
+      if(!grupos[chave]){ grupos[chave] = { lat: lat, lng: lng, alunos: [] }; }
+      grupos[chave].alunos.push(r);
+    });
+
+    Object.keys(grupos).forEach(function(chave){
+      var grupo = grupos[chave];
+      var qtd = grupo.alunos.length;
+      var tamanho = qtd > 1 ? 28 : 16;
+      var iconeHtml = '<div class="pino-mapa-admin' + (qtd > 1 ? ' pino-mapa-admin-grupo' : '') + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
+      var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
+
+      var popupHtml;
+      if(qtd === 1){
+        var r0 = grupo.alunos[0];
+        popupHtml = '<b>' + escapeHtml(r0.nomeAluno) + '</b><br>' + escapeHtml(r0.escola) + ' — ' + escapeHtml(r0.turno) + '<br>' + escapeHtml(r0.serie) + '<br>' + escapeHtml(r0.localidade);
       } else {
-        corpo.innerHTML = lista.map(function(r){
-          return '<tr><td>' + escapeHtml(r.nomeAluno) + '</td><td>' + escapeHtml(r.escola) + '</td><td>' + escapeHtml(r.turno) + '</td><td>' + escapeHtml(r.serie) + '</td><td>' + escapeHtml(r.rua) + '</td><td>' + escapeHtml(r.numero) + '</td><td>' + escapeHtml(r.localidade) + '</td><td>' + escapeHtml(r.nomeResp) + '</td><td>' + formatarCoord(r.lat) + ', ' + formatarCoord(r.lng) + '</td></tr>';
-        }).join('');
-      }
-    } catch(erro){
-      console.error('Erro ao montar a tabela de cadastros:', erro);
-    }
-
-    try {
-      renderizarGraficos(lista);
-    } catch(erro){
-      console.error('Erro ao montar os gráficos:', erro);
-    }
-
-    try {
-      renderizarListaRecentes(lista);
-    } catch(erro){
-      console.error('Erro ao montar a lista de últimos cadastros:', erro);
-    }
-
-    try {
-      if(!mapaAdmin){
-        mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, attribution: '© OpenStreetMap'
-        }).addTo(mapaAdmin);
-      } else {
-        mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
+        popupHtml = '<b>' + qtd + ' alunos nesta localização</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
+          grupo.alunos.map(function(r){
+            return '<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.serie);
+          }).join('<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">');
       }
 
-      var grupos = {};
-      lista.forEach(function(r){
-        var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
-        if(lat === null || lng === null){ return; }
-        var chave = lat.toFixed(5) + ',' + lng.toFixed(5);
-        if(!grupos[chave]){ grupos[chave] = { lat: lat, lng: lng, alunos: [] }; }
-        grupos[chave].alunos.push(r);
-      });
+      L.marker([grupo.lat, grupo.lng], { icon: icone })
+        .addTo(mapaAdmin)
+        .bindPopup(popupHtml, { maxWidth: 260 });
+    });
 
-      Object.keys(grupos).forEach(function(chave){
-        var grupo = grupos[chave];
-        var qtd = grupo.alunos.length;
-        var tamanho = qtd > 1 ? 28 : 16;
-        var iconeHtml = '<div class="pino-mapa-admin' + (qtd > 1 ? ' pino-mapa-admin-grupo' : '') + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
-        var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
-
-        var popupHtml;
-        if(qtd === 1){
-          var r0 = grupo.alunos[0];
-          popupHtml = '<b>' + escapeHtml(r0.nomeAluno) + '</b><br>' + escapeHtml(r0.escola) + ' — ' + escapeHtml(r0.turno) + '<br>' + escapeHtml(r0.serie) + '<br>' + escapeHtml(r0.localidade);
-        } else {
-          popupHtml = '<b>' + qtd + ' alunos nesta localização</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
-            grupo.alunos.map(function(r){
-              return '<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.serie);
-            }).join('<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">');
-        }
-
-        L.marker([grupo.lat, grupo.lng], { icon: icone })
-          .addTo(mapaAdmin)
-          .bindPopup(popupHtml, { maxWidth: 260 });
-      });
-    } catch(erro){
-      console.error('Erro ao montar o mapa:', erro);
-    }
     if(document.getElementById('mapaAdmin').style.display !== 'none'){
       setTimeout(function(){ mapaAdmin.invalidateSize(); }, 150);
     }
   }
 
+  // ---------- EDITAR ----------
+  function abrirModalEdicao(registro){
+    registroEmEdicao = registro;
+    document.getElementById('erroEdicao').classList.remove('mostrar');
+    document.getElementById('editNomeAluno').value = registro.nomeAluno || '';
+    document.getElementById('editEscola').value = registro.escola || '';
+    atualizarTurnos('editEscola', 'editTurno', 'editSerie');
+    document.getElementById('editTurno').value = registro.turno || '';
+    atualizarSeries('editEscola', 'editTurno', 'editSerie');
+    document.getElementById('editSerie').value = registro.serie || '';
+    document.getElementById('editRua').value = registro.rua || '';
+    document.getElementById('editNumero').value = registro.numero || '';
+    document.getElementById('editLocalidade').value = registro.localidade || '';
+    document.getElementById('editReferencia').value = registro.referencia || '';
+    document.getElementById('editNomeResp').value = registro.nomeResp || '';
+    document.getElementById('editTelResp').value = registro.telResp || '';
+    document.getElementById('modalEditar').style.display = 'flex';
+  }
+
+  document.getElementById('cancelarEdicao').addEventListener('click', function(){
+    document.getElementById('modalEditar').style.display = 'none';
+    registroEmEdicao = null;
+  });
+
+  document.getElementById('modalEditar').addEventListener('click', function(e){
+    if(e.target === this){
+      this.style.display = 'none';
+      registroEmEdicao = null;
+    }
+  });
+
+  document.getElementById('salvarEdicao').addEventListener('click', function(){
+    var erro = document.getElementById('erroEdicao');
+    var nomeAluno = document.getElementById('editNomeAluno').value.trim();
+    var escola = document.getElementById('editEscola').value;
+    var turno = document.getElementById('editTurno').value;
+    var serie = document.getElementById('editSerie').value;
+    var rua = document.getElementById('editRua').value.trim();
+    var localidade = document.getElementById('editLocalidade').value.trim();
+    if(!nomeAluno || !escola || !turno || !serie || !rua || !localidade){
+      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua e localidade.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    erro.classList.remove('mostrar');
+
+    var btn = this;
+    btn.disabled = true;
+    var original = btn.textContent;
+    btn.textContent = 'Salvando...';
+
+    var registroAtualizado = {
+      id: registroEmEdicao.id,
+      dataEnvio: registroEmEdicao.dataEnvio,
+      nomeResp: document.getElementById('editNomeResp').value.trim(),
+      telResp: document.getElementById('editTelResp').value.trim(),
+      nomeAluno: nomeAluno,
+      escola: escola,
+      turno: turno,
+      serie: serie,
+      rua: rua,
+      numero: document.getElementById('editNumero').value.trim(),
+      localidade: localidade,
+      referencia: document.getElementById('editReferencia').value.trim(),
+      lat: registroEmEdicao.lat,
+      lng: registroEmEdicao.lng,
+      acao: 'editar',
+      chaveAdmin: SENHA_ADMIN
+    };
+
+    enviarAcaoAdmin(registroAtualizado, function(){
+      btn.disabled = false;
+      btn.textContent = original;
+      var idx = registrosCache.findIndex(function(r){ return String(r.id) === String(registroEmEdicao.id); });
+      if(idx !== -1){ registrosCache[idx] = registroAtualizado; }
+      document.getElementById('modalEditar').style.display = 'none';
+      registroEmEdicao = null;
+      popularFiltros(registrosCache);
+      aplicarFiltros();
+      mostrarAviso('Cadastro atualizado com sucesso.', 'sucesso');
+    }, function(){
+      btn.disabled = false;
+      btn.textContent = original;
+    });
+  });
+
+  // ---------- EXCLUIR ----------
+  function confirmarExclusao(registro){
+    var ok = window.confirm('Excluir o cadastro de "' + registro.nomeAluno + '"? Essa ação não pode ser desfeita.');
+    if(!ok){ return; }
+    enviarAcaoAdmin({ acao: 'excluir', id: registro.id, chaveAdmin: SENHA_ADMIN }, function(){
+      registrosCache = registrosCache.filter(function(r){ return String(r.id) !== String(registro.id); });
+      popularFiltros(registrosCache);
+      aplicarFiltros();
+      mostrarAviso('Cadastro excluído.', 'sucesso');
+    });
+  }
+
+  function enviarAcaoAdmin(payload, aoSucesso, aoFalhar){
+    fetch(URL_PLANILHA, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).then(function(){
+      aoSucesso();
+    }).catch(function(erro){
+      console.error('Erro ao enviar ação para a planilha:', erro);
+      mostrarAviso('Não foi possível concluir agora. Verifique sua conexão e tente novamente.');
+      if(aoFalhar){ aoFalhar(); }
+    });
+  }
+
+  // ---------- EXPORTAÇÕES (respeitam o filtro ativo) ----------
   document.getElementById('btnExportar').addEventListener('click', function(){
-    if(!registrosCache.length){ mostrarAviso('Não há registros para exportar.'); return; }
+    if(!listaFiltradaCache.length){ mostrarAviso('Não há registros para exportar.'); return; }
     var colunas = ['nomeAluno','escola','turno','serie','rua','numero','localidade','referencia','nomeResp','telResp','lat','lng','dataEnvio'];
     var linhas = [colunas.join(';')];
-    registrosCache.forEach(function(r){
+    listaFiltradaCache.forEach(function(r){
       linhas.push(colunas.map(function(c){
         var v = (r[c] === undefined || r[c] === null) ? '' : String(r[c]);
         return '"' + v.replace(/"/g,'""') + '"';
@@ -1611,6 +1941,26 @@
     var a = document.createElement('a');
     a.href = url;
     a.download = 'cadastros-transporte-escolar-anchieta.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btnExportarKml').addEventListener('click', function(){
+    var comCoordenadas = listaFiltradaCache.filter(function(r){ return paraNumero(r.lat) !== null && paraNumero(r.lng) !== null; });
+    if(!comCoordenadas.length){ mostrarAviso('Não há registros com coordenadas para exportar.'); return; }
+    var placemarks = comCoordenadas.map(function(r){
+      var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+      var descricao = '<b>Escola:</b> ' + (r.escola || '') + '<br/><b>Turno:</b> ' + (r.turno || '') + '<br/><b>Série:</b> ' + (r.serie || '') + '<br/><b>Endereço:</b> ' + (r.rua || '') + (r.numero ? ', ' + r.numero : '') + ' — ' + (r.localidade || '') + '<br/><b>Responsável:</b> ' + (r.nomeResp || '');
+      return '<Placemark><name>' + escapeHtml(r.nomeAluno) + '</name><description><![CDATA[' + descricao + ']]></description><Point><coordinates>' + lng + ',' + lat + ',0</coordinates></Point></Placemark>';
+    }).join('');
+    var kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Transporte Escolar - Anchieta</name>' + placemarks + '</Document></kml>';
+    var blob = new Blob([kml], {type:'application/vnd.google-earth.kml+xml'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'cadastros-transporte-escolar-anchieta.kml';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
