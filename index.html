@@ -416,6 +416,20 @@
     font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;
     color:var(--verde-escuro);margin:22px 0 10px;
   }
+
+  .pino-mapa-admin{
+    background:var(--dourado);
+    border:2px solid var(--verde-escuro);
+    border-radius:50%;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);
+  }
+  .pino-mapa-admin-grupo{
+    background:var(--verde-escuro);
+    border:2.5px solid #fff;
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;
+  }
   .lista-recentes{display:flex;flex-direction:column;gap:10px;}
   .card-recente{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
@@ -1541,12 +1555,37 @@
       } else {
         mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker) mapaAdmin.removeLayer(l); });
       }
+
+      var grupos = {};
       lista.forEach(function(r){
         var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
         if(lat === null || lng === null){ return; }
-        L.circleMarker([lat, lng], {radius:6, color:'#0C4A2E', fillColor:'#F0B429', fillOpacity:0.95, weight:2})
+        var chave = lat.toFixed(5) + ',' + lng.toFixed(5);
+        if(!grupos[chave]){ grupos[chave] = { lat: lat, lng: lng, alunos: [] }; }
+        grupos[chave].alunos.push(r);
+      });
+
+      Object.keys(grupos).forEach(function(chave){
+        var grupo = grupos[chave];
+        var qtd = grupo.alunos.length;
+        var tamanho = qtd > 1 ? 28 : 16;
+        var iconeHtml = '<div class="pino-mapa-admin' + (qtd > 1 ? ' pino-mapa-admin-grupo' : '') + '" style="width:' + tamanho + 'px;height:' + tamanho + 'px;">' + (qtd > 1 ? qtd : '') + '</div>';
+        var icone = L.divIcon({ html: iconeHtml, className: '', iconSize: [tamanho, tamanho], iconAnchor: [tamanho / 2, tamanho / 2] });
+
+        var popupHtml;
+        if(qtd === 1){
+          var r0 = grupo.alunos[0];
+          popupHtml = '<b>' + escapeHtml(r0.nomeAluno) + '</b><br>' + escapeHtml(r0.escola) + ' — ' + escapeHtml(r0.turno) + '<br>' + escapeHtml(r0.serie) + '<br>' + escapeHtml(r0.localidade);
+        } else {
+          popupHtml = '<b>' + qtd + ' alunos nesta localização</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
+            grupo.alunos.map(function(r){
+              return '<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.serie);
+            }).join('<hr style="margin:6px 0;border:none;border-top:1px solid #eee;">');
+        }
+
+        L.marker([grupo.lat, grupo.lng], { icon: icone })
           .addTo(mapaAdmin)
-          .bindPopup('<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.localidade));
+          .bindPopup(popupHtml, { maxWidth: 260 });
       });
     } catch(erro){
       console.error('Erro ao montar o mapa:', erro);
