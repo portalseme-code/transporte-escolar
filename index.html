@@ -281,6 +281,14 @@
   .btn-gps-principal svg{flex:0 0 auto;}
   .btn-gps-principal:hover{background:var(--verde-escuro);}
   .btn-gps-principal:active{transform:scale(.99);}
+  .btn-gps-principal.pulsando{
+    animation:pulsarGps 1.8s ease-out infinite;
+  }
+  @keyframes pulsarGps{
+    0%{box-shadow:0 4px 14px rgba(12,74,46,.22), 0 0 0 0 rgba(21,109,68,.55);}
+    70%{box-shadow:0 4px 14px rgba(12,74,46,.22), 0 0 0 16px rgba(21,109,68,0);}
+    100%{box-shadow:0 4px 14px rgba(12,74,46,.22), 0 0 0 0 rgba(21,109,68,0);}
+  }
   .texto-btn-gps{display:flex;flex-direction:column;gap:2px;}
   .titulo-btn-gps{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;}
   .selo-recomendado{font-size:11.5px;font-weight:500;color:var(--amarelo-pastel);opacity:.95;}
@@ -656,8 +664,8 @@
         <input type="text" id="nomeResp" placeholder="Nome completo">
       </div>
       <div class="campo">
-        <label for="telResp">Telefone / WhatsApp <span class="opcional">(opcional)</span></label>
-        <input type="tel" id="telResp" placeholder="(00) 00000-0000">
+        <label for="telResp">Telefone / WhatsApp (celular)</label>
+        <input type="tel" id="telResp" placeholder="(00) 90000-0000" inputmode="numeric" maxlength="16">
       </div>
 
       <div class="barra-botoes">
@@ -779,7 +787,7 @@
       <p class="rotulo-secao">Onde fica a casa do aluno?</p>
       <p class="ajuda-secao">Toque no mapa exatamente onde fica a residência, ou use as opções abaixo para facilitar.</p>
 
-      <button class="btn-gps-principal" id="btnGps" type="button">
+      <button class="btn-gps-principal pulsando" id="btnGps" type="button">
         <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
@@ -1259,9 +1267,13 @@
       return;
     }
     var btn = this;
+    btn.classList.remove('pulsando');
     var titulo = btn.querySelector('.titulo-btn-gps');
     var original = titulo.textContent;
     titulo.textContent = 'Localizando...';
+    setTimeout(function(){
+      document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
     navigator.geolocation.getCurrentPosition(function(pos){
       titulo.textContent = original;
       marcarPino(pos.coords.latitude, pos.coords.longitude);
@@ -1335,6 +1347,7 @@
     document.getElementById('linha3').classList.toggle('feita', passo > 3);
     passoAtual = passo;
     moverOnibus(passo);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     if(passo === 3){ iniciarMapa(); }
   }
 
@@ -1348,13 +1361,33 @@
     var centro = (bolinhaRect.left + bolinhaRect.width / 2) - trilhaRect.left;
     onibus.style.left = centro + 'px';
   }
+  function aplicarMascaraCelular(idCampo){
+    var campo = document.getElementById(idCampo);
+    campo.addEventListener('input', function(){
+      var digitos = campo.value.replace(/\D/g, '').slice(0, 11);
+      var formatado = '';
+      if(digitos.length > 0){ formatado = '(' + digitos.slice(0, 2); }
+      if(digitos.length >= 3){ formatado += ') ' + digitos.slice(2, 7); }
+      if(digitos.length >= 8){ formatado += '-' + digitos.slice(7, 11); }
+      campo.value = formatado;
+    });
+  }
+  aplicarMascaraCelular('telResp');
+  aplicarMascaraCelular('editTelResp');
+
   window.addEventListener('resize', function(){ moverOnibus(passoAtual); });
 
   document.getElementById('irPasso2').addEventListener('click', function(){
     var erro = document.getElementById('erroResponsavel');
     var nomeResp = document.getElementById('nomeResp').value.trim();
+    var telDigitos = document.getElementById('telResp').value.replace(/\D/g, '');
     if(!nomeResp){
       erro.textContent = 'Preencha o nome do responsável antes de continuar.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    if(telDigitos.length !== 11){
+      erro.textContent = 'Informe um número de celular válido, com DDD (11 dígitos).';
       erro.classList.add('mostrar');
       return;
     }
@@ -1491,12 +1524,14 @@
     atualizarTurnos('escolaExtra','turnoExtra','serieExtra');
     document.getElementById('erroAlunoExtra').classList.remove('mostrar');
     document.getElementById('passoAlunoExtra').classList.add('ativo');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   document.getElementById('semMaisFilhos').addEventListener('click', function(){
     document.getElementById('blocoResumo').style.display = 'none';
     document.getElementById('perguntaMaisFilhos').style.display = 'none';
     document.getElementById('blocoFinal').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   document.getElementById('salvarAlunoExtra').addEventListener('click', function(){
