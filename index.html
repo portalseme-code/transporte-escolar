@@ -109,6 +109,21 @@
   }
 
   /* trilha de progresso */
+  .trilha-wrapper{
+    position:relative;
+    padding-top:26px;
+  }
+  .onibus-progresso{
+    position:absolute;
+    top:-4px;
+    left:0;
+    transform:translateX(-50%);
+    font-size:22px;
+    line-height:1;
+    z-index:4;
+    transition:left .5s cubic-bezier(.4,0,.2,1);
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));
+  }
   .trilha{
     display:flex;
     align-items:flex-start;
@@ -173,6 +188,22 @@
   .campo select:disabled{background:#F0EFEA;color:var(--texto-suave);cursor:not-allowed;}
   .linha-dupla{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:480px){.linha-dupla{grid-template-columns:1fr;}}
+
+  .separador-endereco{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--dourado-suave);
+    border-left:4px solid var(--dourado);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:20px 0 16px;
+    font-size:13px;
+    color:#6B4E1B;
+    line-height:1.4;
+  }
+  .separador-endereco svg{flex:0 0 auto;color:var(--dourado-escuro);}
+  .separador-endereco strong{color:#4A3610;}
 
   .aviso-erro{
     background:var(--erro-bg);color:var(--erro);
@@ -284,6 +315,7 @@
   }
   button.principal:hover{background:var(--verde-escuro);}
   button.principal:active{transform:scale(.98);}
+  button.principal:disabled{background:var(--borda);color:var(--texto-suave);cursor:not-allowed;transform:none;}
   button.secundario{
     background:transparent;border:1.5px solid var(--borda);color:var(--texto-suave);
     font-weight:600;font-size:15px;padding:13px 18px;border-radius:var(--raio-sm);cursor:pointer;
@@ -380,6 +412,54 @@
   .metrica .lbl{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
   .rodape-admin{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
 
+  .abas-admin{
+    display:flex;gap:6px;margin:18px 0 14px;
+    border-bottom:1.5px solid var(--borda);
+  }
+  .aba-admin{
+    background:none;border:none;cursor:pointer;
+    padding:9px 4px;margin-right:14px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+    color:var(--texto-suave);
+    border-bottom:2.5px solid transparent;
+    margin-bottom:-1.5px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .aba-admin:hover{color:var(--verde-escuro);}
+  .aba-admin.ativa{color:var(--verde-escuro);border-bottom-color:var(--verde);}
+
+  .grade-graficos{
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    margin-bottom:18px;
+  }
+  @media(max-width:560px){.grade-graficos{grid-template-columns:1fr;}}
+  .grafico-card{
+    background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
+    padding:16px;box-shadow:var(--sombra);
+  }
+  .grafico-card h3{
+    font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;
+    color:var(--verde-escuro);margin:0 0 12px;
+    text-transform:uppercase;letter-spacing:.03em;
+  }
+  .lista-barras{display:flex;flex-direction:column;gap:9px;}
+  .item-barra{display:flex;flex-direction:column;gap:3px;}
+  .rotulo-barra{
+    display:flex;justify-content:space-between;gap:8px;
+    font-size:12px;color:var(--tinta);
+  }
+  .rotulo-barra span:first-child{
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:78%;
+  }
+  .rotulo-barra span:last-child{font-weight:700;color:var(--verde-escuro);flex:0 0 auto;}
+  .trilha-barra{height:8px;background:var(--fundo);border-radius:99px;overflow:hidden;}
+  .preenchimento-barra{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg, var(--verde) 0%, var(--dourado) 100%);
+  }
+  .item-barra-mais{font-size:11.5px;color:var(--texto-suave);padding-top:2px;font-style:italic;}
+  .sem-dados-grafico{font-size:12.5px;color:var(--texto-suave);margin:0;}
+
   .toast-aviso{
     position:fixed;
     top:16px;
@@ -422,14 +502,17 @@
   </header>
 
   <!-- TRILHA DE PROGRESSO -->
-  <div class="trilha" id="trilha" style="display:none;">
-    <div class="parada ativa" data-passo="1"><div class="bolinha">1</div><div class="rotulo">Responsável</div></div>
-    <div class="linha" id="linha1"></div>
-    <div class="parada" data-passo="2"><div class="bolinha">2</div><div class="rotulo">Aluno</div></div>
-    <div class="linha" id="linha2"></div>
-    <div class="parada" data-passo="3"><div class="bolinha">3</div><div class="rotulo">Localização</div></div>
-    <div class="linha" id="linha3"></div>
-    <div class="parada" data-passo="4"><div class="bolinha">4</div><div class="rotulo">Pronto</div></div>
+  <div class="trilha-wrapper" id="trilhaWrapper" style="display:none;">
+    <div class="onibus-progresso" id="onibusProgresso">🚌</div>
+    <div class="trilha" id="trilha">
+      <div class="parada ativa" data-passo="1"><div class="bolinha">1</div><div class="rotulo">Responsável</div></div>
+      <div class="linha" id="linha1"></div>
+      <div class="parada" data-passo="2"><div class="bolinha">2</div><div class="rotulo">Aluno</div></div>
+      <div class="linha" id="linha2"></div>
+      <div class="parada" data-passo="3"><div class="bolinha">3</div><div class="rotulo">Localização</div></div>
+      <div class="linha" id="linha3"></div>
+      <div class="parada" data-passo="4"><div class="bolinha">4</div><div class="rotulo">Pronto</div></div>
+    </div>
   </div>
 
   <main id="main">
@@ -557,6 +640,11 @@
         <select id="serie" disabled>
           <option value="">Selecione o turno primeiro</option>
         </select>
+      </div>
+
+      <div class="separador-endereco">
+        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"></path><path d="M5 10v10a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4h4v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V10"></path></svg>
+        <span>Endereço da <strong>residência do aluno</strong> — não é o endereço da escola</span>
       </div>
 
       <div class="linha-dupla">
@@ -761,7 +849,33 @@
           <div class="metrica"><div class="num" id="mLocalidades">0</div><div class="lbl">Localidades</div></div>
         </div>
 
-        <div id="mapaAdmin" style="width:100%;height:280px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);"></div>
+        <div class="abas-admin">
+          <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
+          <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
+        </div>
+
+        <div id="painelResumo">
+          <div class="grade-graficos">
+            <div class="grafico-card">
+              <h3>Cadastros por escola</h3>
+              <div class="lista-barras" id="graficoEscola"></div>
+            </div>
+            <div class="grafico-card">
+              <h3>Cadastros por turno</h3>
+              <div class="lista-barras" id="graficoTurno"></div>
+            </div>
+            <div class="grafico-card">
+              <h3>Cadastros por série/ano</h3>
+              <div class="lista-barras" id="graficoSerie"></div>
+            </div>
+            <div class="grafico-card">
+              <h3>Cadastros por localidade</h3>
+              <div class="lista-barras" id="graficoLocalidade"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="mapaAdmin" style="width:100%;height:320px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
 
         <div class="tabela-scroll">
           <table class="registros" id="tabelaRegistros">
@@ -973,7 +1087,7 @@
     }
     erro.classList.remove('mostrar');
     document.getElementById('passoIntro').classList.remove('ativo');
-    document.getElementById('trilha').style.display = 'flex';
+    document.getElementById('trilhaWrapper').style.display = 'block';
     irPara(1);
   });
 
@@ -992,8 +1106,21 @@
     document.getElementById('linha2').classList.toggle('feita', passo > 2);
     document.getElementById('linha3').classList.toggle('feita', passo > 3);
     passoAtual = passo;
+    moverOnibus(passo);
     if(passo === 3){ iniciarMapa(); }
   }
+
+  function moverOnibus(passo){
+    var bolinhaAtiva = document.querySelector('.parada[data-passo="' + passo + '"] .bolinha');
+    var trilhaEl = document.getElementById('trilha');
+    var onibus = document.getElementById('onibusProgresso');
+    if(!bolinhaAtiva || !trilhaEl || !onibus) return;
+    var trilhaRect = trilhaEl.getBoundingClientRect();
+    var bolinhaRect = bolinhaAtiva.getBoundingClientRect();
+    var centro = (bolinhaRect.left + bolinhaRect.width / 2) - trilhaRect.left;
+    onibus.style.left = centro + 'px';
+  }
+  window.addEventListener('resize', function(){ moverOnibus(passoAtual); });
 
   document.getElementById('irPasso2').addEventListener('click', function(){
     var erro = document.getElementById('erroResponsavel');
@@ -1033,6 +1160,11 @@
       mostrarAviso('Toque no mapa para marcar onde fica a residência antes de confirmar.');
       return;
     }
+    var btn = this;
+    if(btn.disabled){ return; }
+    btn.disabled = true;
+    var textoOriginal = btn.textContent;
+    btn.textContent = 'Enviando...';
     var registro = montarRegistro(
       document.getElementById('nomeAluno').value.trim(),
       document.getElementById('escola').value,
@@ -1040,9 +1172,14 @@
       document.getElementById('serie').value.trim()
     );
     salvarERegistro(registro, function(r){
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
       mostrarResumo(r);
       resetarBlocoConfirmacao();
       irPara(4);
+    }, function(){
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
     });
   });
 
@@ -1069,9 +1206,10 @@
     };
   }
 
-  function salvarERegistro(registro, aoSalvar){
+  function salvarERegistro(registro, aoSalvar, aoFalhar){
     if(URL_PLANILHA.indexOf('COLE_AQUI') === 0){
       mostrarAviso('O formulário ainda não foi conectado à planilha. Veja as instruções para configurar a URL_PLANILHA no arquivo.');
+      if(aoFalhar){ aoFalhar(); }
       return;
     }
     fetch(URL_PLANILHA, {
@@ -1086,6 +1224,7 @@
       .catch(function(erro){
         console.error('Erro ao salvar na planilha:', erro);
         mostrarAviso('Não foi possível salvar agora. Verifique sua conexão com a internet e tente novamente.');
+        if(aoFalhar){ aoFalhar(); }
       });
   }
 
@@ -1116,7 +1255,7 @@
 
   // pergunta: mais algum filho?
   document.getElementById('temMaisFilhos').addEventListener('click', function(){
-    document.getElementById('trilha').style.display = 'none';
+    document.getElementById('trilhaWrapper').style.display = 'none';
     document.getElementById('passo4').classList.remove('ativo');
     document.getElementById('nomeAlunoExtra').value = '';
     document.getElementById('escolaExtra').value = '';
@@ -1132,6 +1271,8 @@
   });
 
   document.getElementById('salvarAlunoExtra').addEventListener('click', function(){
+    var btn = this;
+    if(btn.disabled){ return; }
     var erro = document.getElementById('erroAlunoExtra');
     var nomeAlunoExtra = document.getElementById('nomeAlunoExtra').value.trim();
     var escolaExtra = document.getElementById('escolaExtra').value;
@@ -1143,19 +1284,27 @@
       return;
     }
     erro.classList.remove('mostrar');
+    btn.disabled = true;
+    var textoOriginal = btn.textContent;
+    btn.textContent = 'Enviando...';
     var registro = montarRegistro(nomeAlunoExtra, escolaExtra, turnoExtra, serieExtra);
     salvarERegistro(registro, function(r){
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
       mostrarResumo(r);
       resetarBlocoConfirmacao();
       document.getElementById('passoAlunoExtra').classList.remove('ativo');
-      document.getElementById('trilha').style.display = 'flex';
+      document.getElementById('trilhaWrapper').style.display = 'block';
       irPara(4);
+    }, function(){
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
     });
   });
 
   // ÁREA DA SECRETARIA
   document.getElementById('btnAdmin').addEventListener('click', function(){
-    document.getElementById('trilha').style.display = 'none';
+    document.getElementById('trilhaWrapper').style.display = 'none';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = 'none'; });
     document.getElementById('areaAdmin').style.display = 'block';
     document.getElementById('tituloTopo').textContent = 'Área da secretaria';
@@ -1202,10 +1351,10 @@
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
     if(document.getElementById('aceiteTermo').checked){
       document.getElementById('passoIntro').classList.remove('ativo');
-      document.getElementById('trilha').style.display = 'flex';
+      document.getElementById('trilhaWrapper').style.display = 'block';
       irPara(1);
     } else {
-      document.getElementById('trilha').style.display = 'none';
+      document.getElementById('trilhaWrapper').style.display = 'none';
       document.getElementById('passoIntro').classList.add('ativo');
     }
   });
@@ -1222,15 +1371,75 @@
     var url = URL_PLANILHA + '?action=listar&chave=' + encodeURIComponent(SENHA_ADMIN);
     fetch(url).then(function(resp){ return resp.json(); }).then(function(lista){
       if(lista && lista.erro){
-        document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="9">Não foi possível carregar: acesso não autorizado.</td></tr>';
+        if(!registrosCache.length){
+          document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="9">Não foi possível carregar: acesso não autorizado.</td></tr>';
+        } else {
+          mostrarAviso('Não foi possível atualizar agora: acesso não autorizado.');
+        }
         return;
       }
       registrosCache = Array.isArray(lista) ? lista : [];
       renderizarAdmin(registrosCache);
-    }).catch(function(){
-      document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="9">Ainda não há cadastros ou não foi possível carregar agora.</td></tr>';
+    }).catch(function(erro){
+      console.error('Erro ao carregar registros:', erro);
+      if(!registrosCache.length){
+        document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="9">Ainda não há cadastros ou não foi possível carregar agora.</td></tr>';
+      } else {
+        mostrarAviso('Não foi possível atualizar agora. Os dados exibidos são do último carregamento bem-sucedido.');
+      }
     });
   }
+
+  function contarPor(lista, campo){
+    var contagem = {};
+    lista.forEach(function(r){
+      var chave = (r[campo] || '—').toString().trim() || '—';
+      contagem[chave] = (contagem[chave] || 0) + 1;
+    });
+    return Object.keys(contagem)
+      .map(function(k){ return { rotulo: k, valor: contagem[k] }; })
+      .sort(function(a, b){ return b.valor - a.valor; });
+  }
+
+  function renderizarListaBarras(idContainer, dados, limite){
+    var container = document.getElementById(idContainer);
+    var itens = limite ? dados.slice(0, limite) : dados;
+    if(!itens.length){
+      container.innerHTML = '<p class="sem-dados-grafico">Sem dados ainda.</p>';
+      return;
+    }
+    var max = itens[0].valor;
+    var html = itens.map(function(d){
+      var pct = Math.max(4, Math.round((d.valor / max) * 100));
+      return '<div class="item-barra"><div class="rotulo-barra"><span>' + escapeHtml(d.rotulo) + '</span><span>' + d.valor + '</span></div>' +
+             '<div class="trilha-barra"><div class="preenchimento-barra" style="width:' + pct + '%"></div></div></div>';
+    }).join('');
+    var restantes = dados.length - itens.length;
+    if(restantes > 0){
+      html += '<div class="item-barra-mais">+ ' + restantes + ' outra' + (restantes > 1 ? 's' : '') + '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function renderizarGraficos(lista){
+    renderizarListaBarras('graficoEscola', contarPor(lista, 'escola'), 8);
+    renderizarListaBarras('graficoTurno', contarPor(lista, 'turno'), null);
+    renderizarListaBarras('graficoSerie', contarPor(lista, 'serie'), 10);
+    renderizarListaBarras('graficoLocalidade', contarPor(lista, 'localidade'), 8);
+  }
+
+  document.querySelectorAll('.aba-admin').forEach(function(botao){
+    botao.addEventListener('click', function(){
+      document.querySelectorAll('.aba-admin').forEach(function(b){ b.classList.remove('ativa'); });
+      botao.classList.add('ativa');
+      var aba = botao.getAttribute('data-aba');
+      document.getElementById('painelResumo').style.display = (aba === 'resumo') ? '' : 'none';
+      document.getElementById('mapaAdmin').style.display = (aba === 'mapa') ? '' : 'none';
+      if(aba === 'mapa' && mapaAdmin){
+        setTimeout(function(){ mapaAdmin.invalidateSize(); }, 100);
+      }
+    });
+  });
 
   function renderizarAdmin(lista){
     document.getElementById('mTotal').textContent = lista.length;
@@ -1246,6 +1455,8 @@
       }).join('');
     }
 
+    renderizarGraficos(lista);
+
     if(!mapaAdmin){
       mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1259,7 +1470,9 @@
         .addTo(mapaAdmin)
         .bindPopup('<b>' + escapeHtml(r.nomeAluno) + '</b><br>' + escapeHtml(r.escola) + ' — ' + escapeHtml(r.turno) + '<br>' + escapeHtml(r.localidade));
     });
-    setTimeout(function(){ mapaAdmin.invalidateSize(); }, 150);
+    if(document.getElementById('mapaAdmin').style.display !== 'none'){
+      setTimeout(function(){ mapaAdmin.invalidateSize(); }, 150);
+    }
   }
 
   document.getElementById('btnExportar').addEventListener('click', function(){
