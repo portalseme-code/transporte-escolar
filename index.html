@@ -1459,10 +1459,6 @@
       </td></tr>
     </thead>
 
-    <tbody id="tbodyMetricasImpressao">
-      <tr class="linha-evitar-quebra"><td><div id="metricasImpressao" class="metricas-impressao"></div></td></tr>
-    </tbody>
-
     <tbody id="tbodyMapaImpressao" style="display:none;">
       <tr class="linha-evitar-quebra"><td>
         <div id="mapaImpressaoContainer" class="mapa-impressao-container"></div>
@@ -2867,17 +2863,14 @@
 
   function preencherCabecalhoImpressao(tituloTipo, lista){
     document.getElementById('tituloRelatorioImpressao').textContent = 'Relatório ' + tituloTipo + ' — Transporte Escolar';
-    document.getElementById('metaImpressao').innerHTML =
-      'Gerado em ' + new Date().toLocaleString('pt-BR') + '<br>' +
-      'Filtro aplicado: ' + escapeHtml(obterDescricaoFiltro()) + '<br>' +
-      'Total de alunos no relatório: ' + lista.length;
 
     var totalEscolas = new Set(lista.map(function(r){ return r.escola; })).size;
     var totalLocalidades = new Set(lista.map(function(r){ return r.localidade; })).size;
-    document.getElementById('metricasImpressao').innerHTML =
-      '<div class="item-metrica-impressao"><strong>' + lista.length + '</strong>Cadastros</div>' +
-      '<div class="item-metrica-impressao"><strong>' + totalEscolas + '</strong>Escolas</div>' +
-      '<div class="item-metrica-impressao"><strong>' + totalLocalidades + '</strong>Localidades</div>';
+
+    document.getElementById('metaImpressao').innerHTML =
+      'Gerado em ' + new Date().toLocaleString('pt-BR') + '<br>' +
+      'Filtro aplicado: ' + escapeHtml(obterDescricaoFiltro()) + '<br>' +
+      'Cadastros: ' + lista.length + ' · Escolas: ' + totalEscolas + ' · Localidades: ' + totalLocalidades;
   }
 
   function preencherTabelaContagem(idTabela, lista, campo){
@@ -3031,7 +3024,7 @@
 
     montarMapaGrandeParaImpressao(function(){
       window.print();
-    }, 1120, 570);
+    }, 1140, 625);
   });
 
   document.getElementById('btnRelatorioResumo').addEventListener('click', function(){
