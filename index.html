@@ -485,7 +485,18 @@
   .metrica{background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);padding:14px;text-align:center;box-shadow:var(--sombra);}
   .metrica .num{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:600;color:var(--verde-escuro);}
   .metrica .lbl{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
-  .rodape-admin{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .rodape-admin{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;}
+  .separador-rodape-admin{
+    width:1px;align-self:stretch;background:var(--borda);margin:2px 4px;
+  }
+  .btn-icone-impressora{
+    flex:0 0 auto;
+    width:38px;height:38px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--verde-suave);border:1.5px solid var(--verde);border-radius:10px;
+    color:var(--verde-escuro);cursor:pointer;padding:0;
+  }
+  .btn-icone-impressora:hover{background:var(--verde);color:#fff;}
 
   .barra-filtros{
     display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
@@ -739,6 +750,7 @@
       print-color-adjust:exact !important;
       color-adjust:exact !important;
     }
+    body{ background:#fff !important; }
     body *{ visibility:hidden; }
     #areaImpressao, #areaImpressao *{ visibility:visible; }
     #areaImpressao{
@@ -747,6 +759,7 @@
       top:0; left:0;
       width:100%;
       padding:0;
+      background:#fff;
     }
     .app, header.topo, .trilha-wrapper, main{ display:none !important; }
   }
@@ -1276,10 +1289,6 @@
               <div class="lista-barras" id="graficoLocalidade"></div>
             </div>
           </div>
-
-          <div style="margin-top:14px;">
-            <button class="btn-mapa" id="btnRelatorioResumo" type="button">🖨️ Gerar relatório do resumo para impressão</button>
-          </div>
         </div>
 
         <div class="controle-cluster" id="controleCluster" style="display:none;">
@@ -1296,14 +1305,20 @@
 
         <div id="mapaAdmin" style="width:100%;height:320px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
 
-        <div id="acaoRelatorioMapa" style="display:none;margin-bottom:14px;">
-          <button class="btn-mapa" id="btnRelatorioMapa" type="button">🖨️ Gerar relatório do mapa para impressão</button>
-        </div>
-
         <div class="rodape-admin">
           <button class="btn-mapa" id="btnExportar" type="button">Exportar CSV</button>
           <button class="btn-mapa" id="btnExportarKml" type="button">Exportar KML</button>
           <button class="btn-mapa" id="btnAtualizar" type="button">Atualizar lista</button>
+          <span class="separador-rodape-admin" id="separadorRodapeAdmin"></span>
+          <button class="btn-icone-impressora" id="btnRelatorioResumo" type="button" title="Gerar relatório do resumo para impressão" aria-label="Gerar relatório do resumo para impressão">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+          </button>
+          <button class="btn-icone-impressora" id="btnRelatorioMapa" type="button" style="display:none;" title="Gerar relatório completo do mapa (com resumo e pontos)" aria-label="Gerar relatório completo do mapa">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+          </button>
+          <button class="btn-icone-impressora" id="btnRelatorioMapaGeral" type="button" style="display:none;" title="Gerar relatório do mapa geral (só o mapa)" aria-label="Gerar relatório do mapa geral">
+            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+          </button>
         </div>
 
         <div class="tabela-scroll">
@@ -1452,13 +1467,13 @@
       <tr class="linha-evitar-quebra"><td>
         <div id="mapaImpressaoContainer" class="mapa-impressao-container"></div>
       </td></tr>
-      <tr><td>
+      <tr id="linhaResumoLocalidadeImpressao"><td>
         <h2 class="titulo-secao-impressao">Resumo por localidade</h2>
         <table class="tabela-impressao" id="tabelaResumoLocalidadeImpressao">
           <thead><tr><th>Localidade</th><th>Qtd. de alunos</th></tr></thead>
           <tbody></tbody>
         </table>
-        <h2 class="titulo-secao-impressao">Pontos e agrupamentos no mapa</h2>
+        <h2 class="titulo-secao-impressao" id="tituloPontosImpressao">Pontos e agrupamentos no mapa</h2>
       </td></tr>
     </tbody>
 
@@ -2281,7 +2296,9 @@
       document.getElementById('painelResumo').style.display = (aba === 'resumo') ? '' : 'none';
       document.getElementById('mapaAdmin').style.display = (aba === 'mapa') ? '' : 'none';
       document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
-      document.getElementById('acaoRelatorioMapa').style.display = (aba === 'mapa') ? 'block' : 'none';
+      document.getElementById('btnRelatorioResumo').style.display = (aba === 'resumo') ? 'flex' : 'none';
+      document.getElementById('btnRelatorioMapa').style.display = (aba === 'mapa') ? 'flex' : 'none';
+      document.getElementById('btnRelatorioMapaGeral').style.display = (aba === 'mapa') ? 'flex' : 'none';
       if(aba === 'mapa' && mapaAdmin){
         setTimeout(function(){ mapaAdmin.invalidateSize(); }, 100);
       }
@@ -2876,9 +2893,9 @@
 
   var mapaImpressaoInstancia = null;
 
-  function montarMapaGrandeParaImpressao(aoFinalizar){
-    var LARGURA_IMPRESSAO = 760;
-    var ALTURA_IMPRESSAO = 460;
+  function montarMapaGrandeParaImpressao(aoFinalizar, larguraCustom, alturaCustom){
+    var LARGURA_IMPRESSAO = larguraCustom || 760;
+    var ALTURA_IMPRESSAO = alturaCustom || 460;
 
     var areaImp = document.getElementById('areaImpressao');
     var containerImpressao = document.getElementById('mapaImpressaoContainer');
@@ -2941,22 +2958,21 @@
     }, 150);
   }
 
-  document.getElementById('btnRelatorioMapa').addEventListener('click', function(){
-    if(!listaFiltradaCache.length){
-      mostrarAviso('Não há registros para gerar o relatório.');
-      return;
+  function definirOrientacaoImpressao(orientacao){
+    var estilo = document.getElementById('estiloOrientacaoImpressao');
+    if(!estilo){
+      estilo = document.createElement('style');
+      estilo.id = 'estiloOrientacaoImpressao';
+      document.head.appendChild(estilo);
     }
+    estilo.textContent = '@page { size: ' + orientacao + '; }';
+  }
 
-    document.getElementById('tbodyMapaImpressao').style.display = 'table-row-group';
-    document.getElementById('tbodyPontosImpressao').style.display = 'table-row-group';
-    document.getElementById('tbodyResumoImpressao').style.display = 'none';
-    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
-
-    // 2) Cabeçalho, métricas e resumo por localidade
-    preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
+  function montarDadosMapaImpressao(){
+    // Resumo por localidade
     preencherTabelaContagem('tabelaResumoLocalidadeImpressao', listaFiltradaCache, 'localidade');
 
-    // 3) Detalhamento dos pontos (agrupados por coordenada exata, igual ao mapa) — uma linha de tabela por ponto
+    // Detalhamento dos pontos (agrupados por coordenada exata, igual ao mapa) — uma linha de tabela por ponto
     var grupos = {};
     listaFiltradaCache.forEach(function(r){
       var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
@@ -2979,11 +2995,47 @@
         alunosHtml +
         '</div></td></tr>';
     }).join('');
+  }
 
-    // 4) Montar o mapa em tamanho grande e só então imprimir
+  document.getElementById('btnRelatorioMapa').addEventListener('click', function(){
+    if(!listaFiltradaCache.length){
+      mostrarAviso('Não há registros para gerar o relatório.');
+      return;
+    }
+
+    document.getElementById('tbodyMapaImpressao').style.display = 'table-row-group';
+    document.getElementById('linhaResumoLocalidadeImpressao').style.display = 'table-row';
+    document.getElementById('tbodyPontosImpressao').style.display = 'table-row-group';
+    document.getElementById('tbodyResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
+
+    preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
+    montarDadosMapaImpressao();
+    definirOrientacaoImpressao('portrait');
+
     montarMapaGrandeParaImpressao(function(){
       window.print();
     });
+  });
+
+  document.getElementById('btnRelatorioMapaGeral').addEventListener('click', function(){
+    if(!listaFiltradaCache.length){
+      mostrarAviso('Não há registros para gerar o relatório.');
+      return;
+    }
+
+    document.getElementById('tbodyMapaImpressao').style.display = 'table-row-group';
+    document.getElementById('linhaResumoLocalidadeImpressao').style.display = 'none';
+    document.getElementById('tbodyPontosImpressao').style.display = 'none';
+    document.getElementById('tbodyResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
+
+    preencherCabecalhoImpressao('Mapa Geral', listaFiltradaCache);
+    definirOrientacaoImpressao('landscape');
+
+    montarMapaGrandeParaImpressao(function(){
+      window.print();
+    }, 1000, 560);
   });
 
   document.getElementById('btnRelatorioResumo').addEventListener('click', function(){
@@ -2999,6 +3051,7 @@
 
     // 1) Cabeçalho e métricas
     preencherCabecalhoImpressao('Resumo', listaFiltradaCache);
+    definirOrientacaoImpressao('portrait');
 
     // 2) Tabelas de contagem (completas, sem limite de itens)
     preencherTabelaContagem('tabelaPorEscolaImpressao', listaFiltradaCache, 'escola');
