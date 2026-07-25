@@ -650,7 +650,12 @@
     height:100%;border-radius:99px;
     background:linear-gradient(90deg, var(--verde) 0%, var(--dourado) 100%);
   }
-  .item-barra-mais{font-size:11.5px;color:var(--texto-suave);padding-top:2px;font-style:italic;}
+  .item-barra-mais{
+    font-size:11.5px;color:var(--verde-escuro);padding:4px 0 0;font-style:normal;font-weight:600;
+    background:none;border:none;cursor:pointer;display:block;text-align:left;font-family:inherit;
+  }
+  .item-barra-mais:hover{text-decoration:underline;}
+  .itens-extra-barras{margin-top:2px;}
   .sem-dados-grafico{font-size:12.5px;color:var(--texto-suave);margin:0;}
 
   .toast-aviso{
@@ -2139,22 +2144,35 @@
 
   function renderizarListaBarras(idContainer, dados, limite){
     var container = document.getElementById(idContainer);
-    var itens = limite ? dados.slice(0, limite) : dados;
-    if(!itens.length){
+    if(!dados.length){
       container.innerHTML = '<p class="sem-dados-grafico">Sem dados ainda.</p>';
       return;
     }
-    var max = itens[0].valor;
-    var html = itens.map(function(d){
+    var max = dados[0].valor;
+    function itemHtml(d){
       var pct = Math.max(4, Math.round((d.valor / max) * 100));
       return '<div class="item-barra"><div class="rotulo-barra"><span>' + escapeHtml(d.rotulo) + '</span><span>' + d.valor + '</span></div>' +
              '<div class="trilha-barra"><div class="preenchimento-barra" style="width:' + pct + '%"></div></div></div>';
-    }).join('');
-    var restantes = dados.length - itens.length;
-    if(restantes > 0){
-      html += '<div class="item-barra-mais">+ ' + restantes + ' outra' + (restantes > 1 ? 's' : '') + '</div>';
+    }
+    var visiveis = limite ? dados.slice(0, limite) : dados;
+    var restantes = dados.slice(visiveis.length);
+    var html = visiveis.map(itemHtml).join('');
+    if(restantes.length){
+      html += '<div class="itens-extra-barras" style="display:none;">' + restantes.map(itemHtml).join('') + '</div>';
+      html += '<button type="button" class="item-barra-mais">+ ' + restantes.length + ' outra' + (restantes.length > 1 ? 's' : '') + '</button>';
     }
     container.innerHTML = html;
+
+    var botaoMais = container.querySelector('.item-barra-mais');
+    if(botaoMais){
+      var extra = container.querySelector('.itens-extra-barras');
+      var expandido = false;
+      botaoMais.addEventListener('click', function(){
+        expandido = !expandido;
+        extra.style.display = expandido ? 'block' : 'none';
+        botaoMais.textContent = expandido ? 'Ver menos' : ('+ ' + restantes.length + ' outra' + (restantes.length > 1 ? 's' : ''));
+      });
+    }
   }
 
   function renderizarGraficos(lista){
@@ -2671,6 +2689,60 @@
     }).join('');
   }
 
+  function montarMapaGrandeParaImpressao(aoFinalizar){
+    var LARGURA_IMPRESSAO = 760;
+    var ALTURA_IMPRESSAO = 460;
+
+    var containerImpressao = document.getElementById('mapaImpressaoContainer');
+    containerImpressao.innerHTML = '';
+    containerImpressao.style.width = LARGURA_IMPRESSAO + 'px';
+    containerImpressao.style.height = ALTURA_IMPRESSAO + 'px';
+    containerImpressao.style.maxWidth = '100%';
+    containerImpressao.style.margin = '0 auto 20px';
+
+    // mapa temporário, fora da tela, só para renderizar em tamanho grande
+    var temp = document.createElement('div');
+    temp.style.position = 'fixed';
+    temp.style.left = '-99999px';
+    temp.style.top = '0';
+    temp.style.width = LARGURA_IMPRESSAO + 'px';
+    temp.style.height = ALTURA_IMPRESSAO + 'px';
+    document.body.appendChild(temp);
+
+    var mapaTemp = L.map(temp, { zoomControl: false, attributionControl: true }).setView(mapaAdmin.getCenter(), mapaAdmin.getZoom());
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(mapaTemp);
+
+    // replicar exatamente os pontos/círculos que estão no mapa da tela
+    mapaAdmin.eachLayer(function(l){
+      if(l instanceof L.Circle){
+        L.circle(l.getLatLng(), {
+          radius: l.getRadius(), color: l.options.color, weight: l.options.weight,
+          fillColor: l.options.fillColor, fillOpacity: l.options.fillOpacity
+        }).addTo(mapaTemp);
+      } else if(l instanceof L.Marker){
+        var novoMarcador = L.marker(l.getLatLng(), { icon: l.options.icon }).addTo(mapaTemp);
+        if(l.getPopup()){ novoMarcador.bindPopup(l.getPopup().getContent()); }
+      }
+    });
+
+    setTimeout(function(){
+      mapaTemp.invalidateSize();
+      setTimeout(function(){
+        var clone = temp.cloneNode(true);
+        clone.style.position = 'static';
+        clone.style.left = '0';
+        clone.style.width = LARGURA_IMPRESSAO + 'px';
+        clone.style.height = ALTURA_IMPRESSAO + 'px';
+        containerImpressao.appendChild(clone);
+        mapaTemp.remove();
+        document.body.removeChild(temp);
+        aoFinalizar();
+      }, 700);
+    }, 150);
+  }
+
   document.getElementById('btnRelatorioMapa').addEventListener('click', function(){
     if(!listaFiltradaCache.length){
       mostrarAviso('Não há registros para gerar o relatório.');
@@ -2679,22 +2751,6 @@
 
     document.getElementById('blocoMapaImpressao').style.display = 'block';
     document.getElementById('blocoResumoImpressao').style.display = 'none';
-
-    // 1) Clonar o mapa exatamente como está sendo exibido na tela
-    var mapaOriginal = document.getElementById('mapaAdmin');
-    var containerImpressao = document.getElementById('mapaImpressaoContainer');
-    var largura = mapaOriginal.offsetWidth;
-    var altura = mapaOriginal.offsetHeight;
-    containerImpressao.innerHTML = '';
-    var clone = mapaOriginal.cloneNode(true);
-    var controleZoom = clone.querySelector('.leaflet-control-zoom');
-    if(controleZoom){ controleZoom.remove(); }
-    clone.style.width = largura + 'px';
-    clone.style.height = altura + 'px';
-    clone.style.display = 'block';
-    containerImpressao.style.width = largura + 'px';
-    containerImpressao.style.maxWidth = '100%';
-    containerImpressao.appendChild(clone);
 
     // 2) Cabeçalho, métricas e resumo por localidade
     preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
@@ -2724,8 +2780,10 @@
         '</div>';
     }).join('');
 
-    // 4) Imprimir
-    setTimeout(function(){ window.print(); }, 150);
+    // 4) Montar o mapa em tamanho grande e só então imprimir
+    montarMapaGrandeParaImpressao(function(){
+      window.print();
+    });
   });
 
   document.getElementById('btnRelatorioResumo').addEventListener('click', function(){
