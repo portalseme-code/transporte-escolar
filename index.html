@@ -725,6 +725,13 @@
   .tabela-relatorio-mestre > thead > tr > td,
   .tabela-relatorio-mestre > tbody > tr > td{ padding:0; }
   .tabela-relatorio-mestre > thead > tr > td{ padding-bottom:14px; }
+  .tabela-relatorio-mestre > tbody > tr{ page-break-inside:avoid; }
+  .linha-aluno-impressao{
+    padding:7px 0 !important;
+    border-bottom:1px solid var(--borda);
+    font-size:12.5px;
+    line-height:1.5;
+  }
 
   .cabecalho-impressao{
     display:flex;align-items:center;gap:16px;
@@ -1399,66 +1406,65 @@
         </div>
       </td></tr>
     </thead>
-    <tbody>
+
+    <tbody id="tbodyMetricasImpressao">
+      <tr><td><div id="metricasImpressao" class="metricas-impressao"></div></td></tr>
+    </tbody>
+
+    <tbody id="tbodyMapaImpressao" style="display:none;">
       <tr><td>
-  <div id="corpoImpressao">
-    <div id="metricasImpressao" class="metricas-impressao"></div>
-
-    <div id="blocoMapaImpressao">
-      <div id="mapaImpressaoContainer" class="mapa-impressao-container"></div>
-
-      <h2 class="titulo-secao-impressao">Resumo por localidade</h2>
-      <table class="tabela-impressao" id="tabelaResumoLocalidadeImpressao">
-        <thead><tr><th>Localidade</th><th>Qtd. de alunos</th></tr></thead>
-        <tbody></tbody>
-      </table>
-
-      <h2 class="titulo-secao-impressao">Pontos e agrupamentos no mapa</h2>
-      <div id="detalhamentoPontosImpressao"></div>
-    </div>
-
-    <div id="blocoResumoImpressao">
-      <div class="grade-impressao">
-        <div>
-          <h2 class="titulo-secao-impressao">Cadastros por escola</h2>
-          <table class="tabela-impressao" id="tabelaPorEscolaImpressao">
-            <thead><tr><th>Escola</th><th>Qtd.</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div>
-          <h2 class="titulo-secao-impressao">Cadastros por turno</h2>
-          <table class="tabela-impressao" id="tabelaPorTurnoImpressao">
-            <thead><tr><th>Turno</th><th>Qtd.</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div>
-          <h2 class="titulo-secao-impressao">Cadastros por série/ano</h2>
-          <table class="tabela-impressao" id="tabelaPorSerieImpressao">
-            <thead><tr><th>Série/ano</th><th>Qtd.</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div>
-          <h2 class="titulo-secao-impressao">Cadastros por localidade</h2>
-          <table class="tabela-impressao" id="tabelaPorLocalidadeResumoImpressao">
-            <thead><tr><th>Localidade</th><th>Qtd.</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
-      <h2 class="titulo-secao-impressao">Lista completa de alunos</h2>
-      <table class="tabela-impressao" id="tabelaCompletaImpressao">
-        <thead><tr><th>Aluno</th><th>Escola</th><th>Turno</th><th>Série</th><th>Endereço</th><th>Responsável</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <p class="rodape-impressao">Relatório gerado automaticamente pelo sistema de Mapeamento do Transporte Escolar — Prefeitura de Anchieta.</p>
-  </div>
+        <div id="mapaImpressaoContainer" class="mapa-impressao-container"></div>
+        <h2 class="titulo-secao-impressao">Resumo por localidade</h2>
+        <table class="tabela-impressao" id="tabelaResumoLocalidadeImpressao">
+          <thead><tr><th>Localidade</th><th>Qtd. de alunos</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <h2 class="titulo-secao-impressao">Pontos e agrupamentos no mapa</h2>
       </td></tr>
+    </tbody>
+
+    <tbody id="tbodyPontosImpressao" style="display:none;"></tbody>
+
+    <tbody id="tbodyResumoImpressao" style="display:none;">
+      <tr><td>
+        <div class="grade-impressao">
+          <div>
+            <h2 class="titulo-secao-impressao">Cadastros por escola</h2>
+            <table class="tabela-impressao" id="tabelaPorEscolaImpressao">
+              <thead><tr><th>Escola</th><th>Qtd.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h2 class="titulo-secao-impressao">Cadastros por turno</h2>
+            <table class="tabela-impressao" id="tabelaPorTurnoImpressao">
+              <thead><tr><th>Turno</th><th>Qtd.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h2 class="titulo-secao-impressao">Cadastros por série/ano</h2>
+            <table class="tabela-impressao" id="tabelaPorSerieImpressao">
+              <thead><tr><th>Série/ano</th><th>Qtd.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div>
+            <h2 class="titulo-secao-impressao">Cadastros por localidade</h2>
+            <table class="tabela-impressao" id="tabelaPorLocalidadeResumoImpressao">
+              <thead><tr><th>Localidade</th><th>Qtd.</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <h2 class="titulo-secao-impressao">Lista completa de alunos</h2>
+      </td></tr>
+    </tbody>
+
+    <tbody id="tbodyListaCompletaImpressao" style="display:none;"></tbody>
+
+    <tbody id="tbodyRodapeImpressao">
+      <tr><td><p class="rodape-impressao">Relatório gerado automaticamente pelo sistema de Mapeamento do Transporte Escolar — Prefeitura de Anchieta.</p></td></tr>
     </tbody>
   </table>
 </div>
@@ -2763,27 +2769,37 @@
     }).join('');
   }
 
+  var mapaImpressaoInstancia = null;
+
   function montarMapaGrandeParaImpressao(aoFinalizar){
     var LARGURA_IMPRESSAO = 760;
     var ALTURA_IMPRESSAO = 460;
 
+    var areaImp = document.getElementById('areaImpressao');
     var containerImpressao = document.getElementById('mapaImpressaoContainer');
+
+    if(mapaImpressaoInstancia){
+      mapaImpressaoInstancia.remove();
+      mapaImpressaoInstancia = null;
+    }
     containerImpressao.innerHTML = '';
     containerImpressao.style.width = LARGURA_IMPRESSAO + 'px';
     containerImpressao.style.height = ALTURA_IMPRESSAO + 'px';
     containerImpressao.style.maxWidth = '100%';
     containerImpressao.style.margin = '0 auto 20px';
 
-    // mapa temporário, fora da tela, só para renderizar em tamanho grande
-    var temp = document.createElement('div');
-    temp.style.position = 'fixed';
-    temp.style.left = '-99999px';
-    temp.style.top = '0';
-    temp.style.width = LARGURA_IMPRESSAO + 'px';
-    temp.style.height = ALTURA_IMPRESSAO + 'px';
-    document.body.appendChild(temp);
+    // tornar a área de impressão visível-porém-invisível (para o Leaflet conseguir medir e renderizar de verdade)
+    areaImp.style.display = 'block';
+    areaImp.style.visibility = 'hidden';
+    areaImp.style.position = 'fixed';
+    areaImp.style.top = '0';
+    areaImp.style.left = '0';
+    areaImp.style.zIndex = '-1';
 
-    var mapaTemp = L.map(temp, { zoomControl: false, attributionControl: true }).setView(mapaAdmin.getCenter(), mapaAdmin.getZoom());
+    var mapaTemp = L.map(containerImpressao, { zoomControl: false, attributionControl: true })
+      .setView(mapaAdmin.getCenter(), mapaAdmin.getZoom());
+    mapaImpressaoInstancia = mapaTemp;
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(mapaTemp);
@@ -2803,15 +2819,13 @@
     setTimeout(function(){
       mapaTemp.invalidateSize();
       setTimeout(function(){
-        var clone = temp.cloneNode(true);
-        clone.style.position = 'static';
-        clone.style.left = '0';
-        clone.style.width = LARGURA_IMPRESSAO + 'px';
-        clone.style.height = ALTURA_IMPRESSAO + 'px';
-        clone.querySelectorAll('.leaflet-popup-pane, .leaflet-tooltip-pane, .leaflet-popup, .leaflet-control-zoom').forEach(function(el){ el.remove(); });
-        containerImpressao.appendChild(clone);
-        mapaTemp.remove();
-        document.body.removeChild(temp);
+        // esconder de volta (a impressão real acontece via @media print, controlado pelo CSS)
+        areaImp.style.display = '';
+        areaImp.style.visibility = '';
+        areaImp.style.position = '';
+        areaImp.style.top = '';
+        areaImp.style.left = '';
+        areaImp.style.zIndex = '';
         aoFinalizar();
       }, 700);
     }, 150);
@@ -2823,14 +2837,16 @@
       return;
     }
 
-    document.getElementById('blocoMapaImpressao').style.display = 'block';
-    document.getElementById('blocoResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyMapaImpressao').style.display = 'table-row-group';
+    document.getElementById('tbodyPontosImpressao').style.display = 'table-row-group';
+    document.getElementById('tbodyResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
 
     // 2) Cabeçalho, métricas e resumo por localidade
     preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
     preencherTabelaContagem('tabelaResumoLocalidadeImpressao', listaFiltradaCache, 'localidade');
 
-    // 3) Detalhamento dos pontos (agrupados por coordenada exata, igual ao mapa)
+    // 3) Detalhamento dos pontos (agrupados por coordenada exata, igual ao mapa) — uma linha de tabela por ponto
     var grupos = {};
     listaFiltradaCache.forEach(function(r){
       var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
@@ -2842,16 +2858,16 @@
     var listaGrupos = Object.keys(grupos).map(function(k){ return grupos[k]; })
       .sort(function(a, b){ return b.alunos.length - a.alunos.length; });
 
-    document.getElementById('detalhamentoPontosImpressao').innerHTML = listaGrupos.map(function(grupo){
+    document.getElementById('tbodyPontosImpressao').innerHTML = listaGrupos.map(function(grupo){
       var r0 = grupo.alunos[0];
       var endereco = escapeHtml(r0.rua || '—') + (r0.numero ? ', ' + escapeHtml(r0.numero) : '') + ' — ' + escapeHtml(r0.localidade || '—');
       var alunosHtml = grupo.alunos.map(function(r){
         return '<div class="ponto-impressao-aluno">' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ', ' + escapeHtml(r.serie) + ')</div>';
       }).join('');
-      return '<div class="ponto-impressao">' +
+      return '<tr><td><div class="ponto-impressao">' +
         '<div class="ponto-impressao-topo"><span>' + endereco + '</span><span>' + grupo.alunos.length + ' aluno' + (grupo.alunos.length > 1 ? 's' : '') + '</span></div>' +
         alunosHtml +
-        '</div>';
+        '</div></td></tr>';
     }).join('');
 
     // 4) Montar o mapa em tamanho grande e só então imprimir
@@ -2866,8 +2882,10 @@
       return;
     }
 
-    document.getElementById('blocoMapaImpressao').style.display = 'none';
-    document.getElementById('blocoResumoImpressao').style.display = 'block';
+    document.getElementById('tbodyMapaImpressao').style.display = 'none';
+    document.getElementById('tbodyPontosImpressao').style.display = 'none';
+    document.getElementById('tbodyResumoImpressao').style.display = 'table-row-group';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'table-row-group';
 
     // 1) Cabeçalho e métricas
     preencherCabecalhoImpressao('Resumo', listaFiltradaCache);
@@ -2878,13 +2896,13 @@
     preencherTabelaContagem('tabelaPorSerieImpressao', listaFiltradaCache, 'serie');
     preencherTabelaContagem('tabelaPorLocalidadeResumoImpressao', listaFiltradaCache, 'localidade');
 
-    // 3) Lista completa de alunos
+    // 3) Lista completa de alunos — uma linha de tabela por aluno
     var ordenados = listaFiltradaCache.slice().sort(function(a, b){
       return (a.escola || '').localeCompare(b.escola || '') || (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
     });
-    document.querySelector('#tabelaCompletaImpressao tbody').innerHTML = ordenados.map(function(r){
+    document.getElementById('tbodyListaCompletaImpressao').innerHTML = ordenados.map(function(r){
       var endereco = escapeHtml(r.rua || '—') + (r.numero ? ', ' + escapeHtml(r.numero) : '') + ' — ' + escapeHtml(r.localidade || '—');
-      return '<tr><td>' + escapeHtml(r.nomeAluno) + '</td><td>' + escapeHtml(r.escola) + '</td><td>' + escapeHtml(r.turno) + '</td><td>' + escapeHtml(r.serie) + '</td><td>' + endereco + '</td><td>' + escapeHtml(r.nomeResp) + '</td></tr>';
+      return '<tr><td class="linha-aluno-impressao"><strong>' + escapeHtml(r.nomeAluno) + '</strong> — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ', ' + escapeHtml(r.serie) + ') · ' + endereco + ' · Responsável: ' + escapeHtml(r.nomeResp) + '</td></tr>';
     }).join('');
 
     // 4) Imprimir
