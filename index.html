@@ -183,7 +183,7 @@
   }
   .ajuda-secao{font-size:13.5px;color:var(--texto-suave);margin:0 0 20px;line-height:1.55;}
 
-  .campo{margin-bottom:16px;}
+  .campo{margin-bottom:16px;position:relative;}
   .campo label{
     display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--tinta);
   }
@@ -195,6 +195,38 @@
   }
   .campo input:focus, .campo select:focus{outline:none;border-color:var(--verde);background:#fff;}
   .campo select:disabled{background:#F0EFEA;color:var(--texto-suave);cursor:not-allowed;}
+
+  .select-oculto-publico{display:none !important;}
+  .seletor-campo-publico{
+    width:100%;padding:11px 13px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    font-size:15px;font-family:inherit;background:#FCFCFA;color:var(--texto-suave);
+    text-align:left;cursor:pointer;position:relative;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .seletor-campo-publico.tem-valor{color:var(--tinta);}
+  .seletor-campo-publico::after{
+    content:'▾';position:absolute;right:13px;top:50%;transform:translateY(-50%);
+    color:var(--texto-suave);font-size:12px;
+  }
+  .seletor-campo-publico:focus{outline:none;border-color:var(--verde);background:#fff;}
+
+  .painel-campo-publico{
+    position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:#fff;border:1.5px solid var(--verde);border-radius:var(--raio-sm);
+    box-shadow:0 8px 24px rgba(20,30,20,.18);z-index:80;
+    padding:8px;
+  }
+  .busca-campo-publico{
+    width:100%;padding:9px 12px;border:1.5px solid var(--borda);border-radius:8px;
+    font-size:14px;font-family:inherit;margin-bottom:6px;background:#FCFCFA;
+  }
+  .busca-campo-publico:focus{outline:none;border-color:var(--verde);background:#fff;}
+  .lista-opcoes-campo-publico{max-height:260px;overflow:auto;}
+  .opcao-campo-publico{
+    padding:10px 10px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--tinta);
+  }
+  .opcao-campo-publico:hover, .opcao-campo-publico.destacada{background:var(--verde-suave);color:var(--verde-escuro);}
+  .opcao-campo-publico-vazia{padding:10px;font-size:13px;color:var(--texto-suave);text-align:center;}
 
   .campo.preenchido label::after{
     content:'✓';
@@ -209,14 +241,16 @@
   }
   .campo.preenchido input[type=text]:not(:focus),
   .campo.preenchido input[type=tel]:not(:focus),
-  .campo.preenchido select:not(:focus){
+  .campo.preenchido select:not(:focus),
+  .campo.preenchido .seletor-campo-publico{
     border-color:var(--verde);
     background:var(--verde-suave);
   }
 
   .campo.pulsando-campo input[type=text],
   .campo.pulsando-campo input[type=tel],
-  .campo.pulsando-campo select{
+  .campo.pulsando-campo select,
+  .campo.pulsando-campo .seletor-campo-publico{
     animation:pulsarCampo 1.6s ease-out infinite;
     border-color:var(--verde);
   }
@@ -228,7 +262,8 @@
 
   .campo.erro-pulso input[type=text],
   .campo.erro-pulso input[type=tel],
-  .campo.erro-pulso select{
+  .campo.erro-pulso select,
+  .campo.erro-pulso .seletor-campo-publico{
     animation:pulsarErroCampo 1.3s ease-out infinite;
     border-color:var(--erro) !important;
   }
@@ -958,7 +993,7 @@
       <div class="linha-dupla">
         <div class="campo">
           <label for="escola">Escola</label>
-          <select id="escola">
+          <select id="escola" class="select-oculto-publico">
             <option value="">Selecione a escola</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
@@ -999,6 +1034,11 @@
             <option value="EMEIEF SIMPATIA">EMEIEF SIMPATIA</option>
             <option value="EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO">EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO</option>
           </select>
+          <button type="button" class="seletor-campo-publico" id="botaoEscola" data-alvo="escola">Selecione a escola</button>
+          <div class="painel-campo-publico" id="painelEscola" style="display:none;">
+            <input type="text" class="busca-campo-publico" placeholder="Buscar escola...">
+            <div class="lista-opcoes-campo-publico"></div>
+          </div>
         </div>
         <div class="campo">
           <label for="turno">Turno</label>
@@ -1136,7 +1176,7 @@
       <div class="linha-dupla">
         <div class="campo">
           <label for="escolaExtra">Escola</label>
-          <select id="escolaExtra">
+          <select id="escolaExtra" class="select-oculto-publico">
             <option value="">Selecione a escola</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
@@ -1177,6 +1217,11 @@
             <option value="EMEIEF SIMPATIA">EMEIEF SIMPATIA</option>
             <option value="EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO">EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO</option>
           </select>
+          <button type="button" class="seletor-campo-publico" id="botaoEscolaExtra" data-alvo="escolaExtra">Selecione a escola</button>
+          <div class="painel-campo-publico" id="painelEscolaExtra" style="display:none;">
+            <input type="text" class="busca-campo-publico" placeholder="Buscar escola...">
+            <div class="lista-opcoes-campo-publico"></div>
+          </div>
         </div>
         <div class="campo">
           <label for="turnoExtra">Turno</label>
@@ -1773,6 +1818,74 @@
   aplicarMascaraCelular('telResp');
   aplicarMascaraCelular('editTelResp');
 
+  // ---------- SELETOR DE ESCOLA CUSTOMIZADO (com busca), para não depender do menu nativo do navegador ----------
+  function configurarSeletorCampoPublico(idSelect, idBotao, idPainel){
+    var select = document.getElementById(idSelect);
+    var botao = document.getElementById(idBotao);
+    var painel = document.getElementById(idPainel);
+    var busca = painel.querySelector('.busca-campo-publico');
+    var lista = painel.querySelector('.lista-opcoes-campo-publico');
+
+    var opcoes = Array.from(select.options)
+      .filter(function(o){ return o.value !== ''; })
+      .map(function(o){ return { valor: o.value, rotulo: o.textContent }; });
+
+    function atualizarBotao(){
+      if(select.value){
+        botao.textContent = select.value;
+        botao.classList.add('tem-valor');
+      } else {
+        botao.textContent = 'Selecione a escola';
+        botao.classList.remove('tem-valor');
+      }
+    }
+    atualizarBotao();
+    select.addEventListener('change', atualizarBotao);
+
+    function renderizarLista(filtro){
+      var termo = (filtro || '').toLowerCase();
+      var filtradas = termo ? opcoes.filter(function(o){ return o.rotulo.toLowerCase().indexOf(termo) !== -1; }) : opcoes;
+      if(!filtradas.length){
+        lista.innerHTML = '<div class="opcao-campo-publico-vazia">Nenhuma escola encontrada.</div>';
+        return;
+      }
+      lista.innerHTML = filtradas.map(function(o){
+        return '<div class="opcao-campo-publico" data-valor="' + escapeHtml(o.valor) + '">' + escapeHtml(o.rotulo) + '</div>';
+      }).join('');
+    }
+
+    function abrirPainel(){
+      document.querySelectorAll('.painel-campo-publico').forEach(function(p){ p.style.display = 'none'; });
+      renderizarLista('');
+      busca.value = '';
+      painel.style.display = 'block';
+      setTimeout(function(){ busca.focus(); }, 30);
+    }
+    function fecharPainel(){ painel.style.display = 'none'; }
+
+    botao.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(painel.style.display === 'block'){ fecharPainel(); } else { abrirPainel(); }
+    });
+    busca.addEventListener('input', function(){ renderizarLista(busca.value); });
+    busca.addEventListener('click', function(e){ e.stopPropagation(); });
+    lista.addEventListener('click', function(e){
+      var item = e.target.closest('.opcao-campo-publico');
+      if(!item){ return; }
+      select.value = item.getAttribute('data-valor');
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      fecharPainel();
+    });
+    painel.addEventListener('click', function(e){ e.stopPropagation(); });
+  }
+
+  configurarSeletorCampoPublico('escola', 'botaoEscola', 'painelEscola');
+  configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
+
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.painel-campo-publico').forEach(function(p){ p.style.display = 'none'; });
+  });
+
   function configurarSemNumero(idNumero, idCheckbox){
     var numero = document.getElementById(idNumero);
     var checkbox = document.getElementById(idCheckbox);
@@ -2053,6 +2166,8 @@
     document.getElementById('passo4').classList.remove('ativo');
     document.getElementById('nomeAlunoExtra').value = '';
     document.getElementById('escolaExtra').value = '';
+    document.getElementById('botaoEscolaExtra').textContent = 'Selecione a escola';
+    document.getElementById('botaoEscolaExtra').classList.remove('tem-valor');
     atualizarTurnos('escolaExtra','turnoExtra','serieExtra');
     document.getElementById('erroAlunoExtra').classList.remove('mostrar');
     document.getElementById('passoAlunoExtra').classList.add('ativo');
