@@ -2958,14 +2958,14 @@
     }, 150);
   }
 
-  function definirOrientacaoImpressao(orientacao){
+  function definirOrientacaoImpressao(orientacao, margem){
     var estilo = document.getElementById('estiloOrientacaoImpressao');
     if(!estilo){
       estilo = document.createElement('style');
       estilo.id = 'estiloOrientacaoImpressao';
       document.head.appendChild(estilo);
     }
-    estilo.textContent = '@page { size: ' + orientacao + '; }';
+    estilo.textContent = '@page { size: ' + orientacao + (margem ? '; margin: ' + margem : '') + '; }';
   }
 
   function montarDadosMapaImpressao(){
@@ -3031,11 +3031,11 @@
     document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
 
     preencherCabecalhoImpressao('Mapa Geral', listaFiltradaCache);
-    definirOrientacaoImpressao('landscape');
+    definirOrientacaoImpressao('landscape', '10mm');
 
     montarMapaGrandeParaImpressao(function(){
       window.print();
-    }, 1000, 560);
+    }, 1050, 420);
   });
 
   document.getElementById('btnRelatorioResumo').addEventListener('click', function(){
