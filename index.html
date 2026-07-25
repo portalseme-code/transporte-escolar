@@ -518,6 +518,12 @@
     width:230px;max-width:80vw;z-index:60;
     padding:8px;
   }
+  /* isola as camadas internas do Leaflet (tiles, marcadores, popups chegam a z-index 700)
+     numa pilha própria, para não aparecerem por cima de menus/painéis da interface */
+  #mapaAdmin, #mapaImpressaoContainer, .leaflet-container{
+    position:relative;
+    z-index:1;
+  }
   .painel-multi-acoes{display:flex;justify-content:space-between;gap:8px;padding:2px 4px 8px;border-bottom:1px solid var(--borda);margin-bottom:6px;}
   .link-multi{background:none;border:none;color:var(--verde-escuro);font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 4px;}
   .link-multi:hover{text-decoration:underline;}
