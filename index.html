@@ -725,7 +725,7 @@
   .tabela-relatorio-mestre > thead > tr > td,
   .tabela-relatorio-mestre > tbody > tr > td{ padding:0; }
   .tabela-relatorio-mestre > thead > tr > td{ padding-bottom:14px; }
-  .tabela-relatorio-mestre > tbody > tr{ page-break-inside:avoid; }
+  .tabela-relatorio-mestre > tbody > tr.linha-evitar-quebra{ page-break-inside:avoid; }
   .linha-aluno-impressao{
     padding:7px 0 !important;
     border-bottom:1px solid var(--borda);
@@ -1408,12 +1408,14 @@
     </thead>
 
     <tbody id="tbodyMetricasImpressao">
-      <tr><td><div id="metricasImpressao" class="metricas-impressao"></div></td></tr>
+      <tr class="linha-evitar-quebra"><td><div id="metricasImpressao" class="metricas-impressao"></div></td></tr>
     </tbody>
 
     <tbody id="tbodyMapaImpressao" style="display:none;">
-      <tr><td>
+      <tr class="linha-evitar-quebra"><td>
         <div id="mapaImpressaoContainer" class="mapa-impressao-container"></div>
+      </td></tr>
+      <tr><td>
         <h2 class="titulo-secao-impressao">Resumo por localidade</h2>
         <table class="tabela-impressao" id="tabelaResumoLocalidadeImpressao">
           <thead><tr><th>Localidade</th><th>Qtd. de alunos</th></tr></thead>
@@ -2864,7 +2866,7 @@
       var alunosHtml = grupo.alunos.map(function(r){
         return '<div class="ponto-impressao-aluno">' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ', ' + escapeHtml(r.serie) + ')</div>';
       }).join('');
-      return '<tr><td><div class="ponto-impressao">' +
+      return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
         '<div class="ponto-impressao-topo"><span>' + endereco + '</span><span>' + grupo.alunos.length + ' aluno' + (grupo.alunos.length > 1 ? 's' : '') + '</span></div>' +
         alunosHtml +
         '</div></td></tr>';
@@ -2902,7 +2904,7 @@
     });
     document.getElementById('tbodyListaCompletaImpressao').innerHTML = ordenados.map(function(r){
       var endereco = escapeHtml(r.rua || '—') + (r.numero ? ', ' + escapeHtml(r.numero) : '') + ' — ' + escapeHtml(r.localidade || '—');
-      return '<tr><td class="linha-aluno-impressao"><strong>' + escapeHtml(r.nomeAluno) + '</strong> — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ', ' + escapeHtml(r.serie) + ') · ' + endereco + ' · Responsável: ' + escapeHtml(r.nomeResp) + '</td></tr>';
+      return '<tr class="linha-evitar-quebra"><td class="linha-aluno-impressao"><strong>' + escapeHtml(r.nomeAluno) + '</strong> — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ', ' + escapeHtml(r.serie) + ') · ' + endereco + ' · Responsável: ' + escapeHtml(r.nomeResp) + '</td></tr>';
     }).join('');
 
     // 4) Imprimir
