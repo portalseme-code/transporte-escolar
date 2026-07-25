@@ -45,6 +45,10 @@
     margin:0 auto;
     min-height:100vh;
     background:var(--fundo);
+    transition:max-width .2s ease;
+  }
+  .app.modo-admin{
+    max-width:1180px;
   }
   .faixa-institucional{
     height:5px;
@@ -626,6 +630,16 @@
     margin-bottom:18px;
   }
   @media(max-width:560px){.grade-graficos{grid-template-columns:1fr;}}
+  @media(min-width:900px){
+    .app.modo-admin .grade-graficos{grid-template-columns:repeat(4,1fr);}
+    .app.modo-admin #mapaAdmin{height:480px;}
+    .app.modo-admin .lista-recentes{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+      align-items:start;
+    }
+    .app.modo-admin .cartoes-extra-recentes.mostrar{display:contents;}
+    .app.modo-admin .btn-ver-mais-lista{grid-column:1 / -1;}
+  }
   .grafico-card{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
     padding:16px;box-shadow:var(--sombra);
@@ -664,7 +678,8 @@
     margin-top:4px;font-family:inherit;
   }
   .btn-ver-mais-lista:hover{background:var(--verde);color:#fff;}
-  .cartoes-extra-recentes{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+  .cartoes-extra-recentes{display:none;flex-direction:column;gap:10px;margin-bottom:10px;}
+  .cartoes-extra-recentes.mostrar{display:flex;}
   .sem-dados-grafico{font-size:12.5px;color:var(--texto-suave);margin:0;}
 
   .toast-aviso{
@@ -2044,6 +2059,7 @@
     document.getElementById('tituloTopo').textContent = 'Área da secretaria';
     document.getElementById('subtituloTopo').textContent = 'Consulte os cadastros enviados pelos responsáveis e exporte os dados para montar as rotas.';
     document.getElementById('btnAdmin').style.display = 'none';
+    document.getElementById('app').classList.add('modo-admin');
   });
 
   document.getElementById('btnMostrarSenha').addEventListener('click', function(){
@@ -2109,6 +2125,7 @@
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
     document.getElementById('subtituloTopo').textContent = '';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
+    document.getElementById('app').classList.remove('modo-admin');
     sessionStorage.removeItem('adminLogado');
     if(document.getElementById('aceiteTermo').checked){
       document.getElementById('passoIntro').classList.remove('ativo');
@@ -2416,7 +2433,7 @@
 
     var html = visiveis.map(cardHtml).join('');
     if(restantes.length){
-      html += '<div class="cartoes-extra-recentes" style="display:none;">' + restantes.map(cardHtml).join('') + '</div>';
+      html += '<div class="cartoes-extra-recentes">' + restantes.map(cardHtml).join('') + '</div>';
       html += '<button type="button" class="btn-ver-mais-lista" id="btnVerMaisRecentes">Ver mais (' + restantes.length + ')</button>';
     }
     container.innerHTML = html;
@@ -2427,7 +2444,7 @@
       var expandido = false;
       botaoMais.addEventListener('click', function(){
         expandido = !expandido;
-        extra.style.display = expandido ? 'block' : 'none';
+        extra.classList.toggle('mostrar', expandido);
         botaoMais.textContent = expandido ? 'Ver menos' : ('Ver mais (' + restantes.length + ')');
       });
     }
@@ -2906,6 +2923,7 @@
     document.getElementById('subtituloTopo').textContent = 'Consulte os cadastros enviados pelos responsáveis e exporte os dados para montar as rotas.';
     document.getElementById('btnAdmin').style.display = 'none';
     document.getElementById('sairAdmin').style.display = 'flex';
+    document.getElementById('app').classList.add('modo-admin');
     carregarRegistros();
   }
 
