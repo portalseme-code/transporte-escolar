@@ -797,12 +797,12 @@
     border:1.5px solid var(--borda);
     border-radius:8px;
     overflow:hidden;
-    margin-bottom:20px;
+    margin-bottom:10px;
   }
 
   .metricas-impressao{
     display:flex;gap:24px;
-    margin-bottom:18px;padding:10px 0;
+    margin-bottom:8px;padding:6px 0;
     border-bottom:1px solid var(--borda);
   }
   .metricas-impressao .item-metrica-impressao{font-size:13px;}
@@ -843,8 +843,8 @@
   .ponto-impressao-aluno:first-of-type{border-top:none;}
 
   .rodape-impressao{
-    margin-top:24px;font-size:11px;color:#888;text-align:center;
-    border-top:1px solid var(--borda);padding-top:10px;
+    margin-top:10px;font-size:11px;color:#888;text-align:center;
+    border-top:1px solid var(--borda);padding-top:6px;
   }
 </style>
 </head>
@@ -3031,11 +3031,11 @@
     document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
 
     preencherCabecalhoImpressao('Mapa Geral', listaFiltradaCache);
-    definirOrientacaoImpressao('landscape', '10mm');
+    definirOrientacaoImpressao('landscape', '8mm');
 
     montarMapaGrandeParaImpressao(function(){
       window.print();
-    }, 1050, 420);
+    }, 1080, 370);
   });
 
   document.getElementById('btnRelatorioResumo').addEventListener('click', function(){
