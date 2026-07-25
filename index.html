@@ -96,16 +96,14 @@
   }
   .btn-admin{
     flex:0 0 auto;
+    width:38px;height:38px;
+    display:flex;align-items:center;justify-content:center;
     background:var(--verde-suave);
     border:1px solid var(--verde);
     color:var(--verde-escuro);
-    font-size:12px;
-    padding:7px 12px;
-    border-radius:999px;
+    border-radius:10px;
     cursor:pointer;
-    font-family:'Inter',sans-serif;
-    font-weight:600;
-    white-space:nowrap;
+    padding:0;
   }
   .btn-admin:hover{background:var(--verde);color:#fff;}
 
@@ -656,7 +654,12 @@
         <p class="sub" id="subtituloTopo"></p>
       </div>
     </div>
-    <button class="btn-admin" id="btnAdmin" type="button">Área da secretaria</button>
+    <button class="btn-admin" id="btnAdmin" type="button" aria-label="Área da secretaria" title="Área da secretaria">
+      <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+      </svg>
+    </button>
   </header>
 
   <!-- TRILHA DE PROGRESSO -->
@@ -1820,7 +1823,7 @@
     document.getElementById('senhaAdmin').type = 'password';
     document.getElementById('iconeOlhoAberto').style.display = '';
     document.getElementById('iconeOlhoFechado').style.display = 'none';
-    document.getElementById('btnAdmin').style.display = 'block';
+    document.getElementById('btnAdmin').style.display = 'flex';
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
     document.getElementById('subtituloTopo').textContent = '';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
