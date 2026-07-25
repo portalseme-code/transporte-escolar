@@ -106,6 +106,12 @@
     padding:0;
   }
   .btn-admin:hover{background:var(--verde);color:#fff;}
+  .btn-sair-header{
+    background:var(--erro-bg);
+    border-color:var(--erro);
+    color:var(--erro);
+  }
+  .btn-sair-header:hover{background:var(--erro);color:#fff;}
 
   /* trilha de progresso */
   .trilha-wrapper{
@@ -660,6 +666,12 @@
         <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
       </svg>
     </button>
+    <button class="btn-admin btn-sair-header" id="sairAdmin" type="button" aria-label="Sair da área da secretaria" title="Sair da área da secretaria" style="display:none;">
+      <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path>
+        <path d="M3 12h13M12 8l4 4-4 4"></path>
+      </svg>
+    </button>
   </header>
 
   <!-- TRILHA DE PROGRESSO -->
@@ -1001,8 +1013,9 @@
           </button>
         </div>
         <div class="aviso-erro" id="erroSenha" style="max-width:260px;margin:0 auto;"></div>
-        <div style="margin-top:10px;">
-          <button class="principal" id="btnEntrarAdmin" type="button" style="width:auto;padding:11px 24px;">Entrar</button>
+        <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+          <button class="secundario" id="btnVoltarGate" type="button">Voltar</button>
+          <button class="principal" id="btnEntrarAdmin" type="button">Entrar</button>
         </div>
       </div>
 
@@ -1069,7 +1082,6 @@
           <button class="btn-mapa" id="btnExportar" type="button">Exportar CSV</button>
           <button class="btn-mapa" id="btnExportarKml" type="button">Exportar KML</button>
           <button class="btn-mapa" id="btnAtualizar" type="button">Atualizar lista</button>
-          <button class="secundario" id="sairAdmin" type="button">Sair da área da secretaria</button>
         </div>
 
         <div class="tabela-scroll">
@@ -1801,7 +1813,7 @@
     this.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
   });
 
-  document.getElementById('btnEntrarAdmin').addEventListener('click', function(){
+  function verificarSenhaAdmin(){
     var senha = document.getElementById('senhaAdmin').value;
     var erro = document.getElementById('erroSenha');
     if(senha !== SENHA_ADMIN){
@@ -1812,18 +1824,42 @@
     erro.classList.remove('mostrar');
     document.getElementById('gateAdmin').style.display = 'none';
     document.getElementById('painelAdmin').style.display = 'block';
+    document.getElementById('sairAdmin').style.display = 'flex';
     carregarRegistros();
+  }
+
+  document.getElementById('btnEntrarAdmin').addEventListener('click', verificarSenhaAdmin);
+  document.getElementById('senhaAdmin').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      verificarSenhaAdmin();
+    }
   });
 
-  document.getElementById('sairAdmin').addEventListener('click', function(){
+  // Sair (dentro do painel logado) volta para a tela de senha, sem sair da área da secretaria
+  function sairParaTelaSenha(){
+    document.getElementById('painelAdmin').style.display = 'none';
+    document.getElementById('gateAdmin').style.display = 'block';
+    document.getElementById('senhaAdmin').value = '';
+    document.getElementById('senhaAdmin').type = 'password';
+    document.getElementById('erroSenha').classList.remove('mostrar');
+    document.getElementById('iconeOlhoAberto').style.display = '';
+    document.getElementById('iconeOlhoFechado').style.display = 'none';
+    document.getElementById('sairAdmin').style.display = 'none';
+  }
+
+  // Voltar (na tela de senha) sai de vez da área da secretaria, retornando ao formulário público
+  function voltarAoFormularioPublico(){
     document.getElementById('areaAdmin').style.display = 'none';
     document.getElementById('gateAdmin').style.display = 'block';
     document.getElementById('painelAdmin').style.display = 'none';
     document.getElementById('senhaAdmin').value = '';
     document.getElementById('senhaAdmin').type = 'password';
+    document.getElementById('erroSenha').classList.remove('mostrar');
     document.getElementById('iconeOlhoAberto').style.display = '';
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('btnAdmin').style.display = 'flex';
+    document.getElementById('sairAdmin').style.display = 'none';
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
     document.getElementById('subtituloTopo').textContent = '';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
@@ -1835,7 +1871,10 @@
       document.getElementById('trilhaWrapper').style.display = 'none';
       document.getElementById('passoIntro').classList.add('ativo');
     }
-  });
+  }
+
+  document.getElementById('sairAdmin').addEventListener('click', sairParaTelaSenha);
+  document.getElementById('btnVoltarGate').addEventListener('click', voltarAoFormularioPublico);
 
   document.getElementById('btnAtualizar').addEventListener('click', carregarRegistros);
 
