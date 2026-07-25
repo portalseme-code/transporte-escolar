@@ -306,6 +306,13 @@
     flex:0 0 auto;
     cursor:pointer;
   }
+  .opcao-concordo.pulsando-atencao{
+    animation:pulsarCampo 1.6s ease-out infinite;
+    border-color:var(--verde);
+  }
+  button.principal.pulsando-atencao{
+    animation:pulsarGps 1.8s ease-out infinite;
+  }
   #erroTermo{margin-top:12px;}
 
   .acoes-mapa{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
@@ -490,6 +497,34 @@
   .campo-filtro select:focus{outline:none;border-color:var(--verde);background:#fff;}
   .contagem-filtro{font-size:12px;color:var(--texto-suave);margin:8px 2px 0;}
 
+  .campo-filtro-multi{position:relative;}
+  .seletor-multi{
+    padding:9px 10px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    font-size:13px;font-family:inherit;background:#FCFCFA;color:var(--tinta);
+    text-align:left;cursor:pointer;width:100%;
+    display:flex;justify-content:space-between;align-items:center;gap:6px;
+  }
+  .seletor-multi::after{content:'▾';font-size:11px;color:var(--texto-suave);}
+  .seletor-multi:hover{border-color:var(--verde);}
+  .seletor-multi.tem-selecao{border-color:var(--verde);color:var(--verde-escuro);font-weight:600;background:var(--verde-suave);}
+  .painel-multi{
+    position:absolute;top:calc(100% + 4px);left:0;
+    background:#fff;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    box-shadow:0 6px 20px rgba(20,30,20,.15);
+    width:230px;max-width:80vw;z-index:60;
+    padding:8px;
+  }
+  .painel-multi-acoes{display:flex;justify-content:space-between;gap:8px;padding:2px 4px 8px;border-bottom:1px solid var(--borda);margin-bottom:6px;}
+  .link-multi{background:none;border:none;color:var(--verde-escuro);font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 4px;}
+  .link-multi:hover{text-decoration:underline;}
+  .lista-opcoes-multi{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:2px;}
+  .opcao-multi{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;padding:6px 6px;border-radius:6px;cursor:pointer;
+  }
+  .opcao-multi:hover{background:var(--fundo);}
+  .opcao-multi input{width:14px;height:14px;accent-color:var(--verde);cursor:pointer;flex:0 0 auto;}
+
   .overlay-modal{
     position:fixed;inset:0;background:rgba(20,30,20,.45);
     display:flex;align-items:center;justify-content:center;
@@ -540,21 +575,17 @@
   }
 
   .controle-cluster{
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    display:flex;flex-direction:column;gap:8px;flex-wrap:wrap;
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
-    padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--tinta);
+    padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--tinta);
   }
   .controle-cluster label{font-weight:600;}
-  .controle-cluster input[type=number]{
-    width:80px;padding:7px 9px;border:1.5px solid var(--borda);border-radius:8px;
-    font-size:13px;font-family:inherit;background:#FCFCFA;
+  .controle-cluster label strong{color:var(--verde-escuro);font-family:'Space Grotesk',sans-serif;}
+  .controle-cluster input[type=range]{
+    width:100%;accent-color:var(--verde);cursor:pointer;height:20px;
   }
-  .controle-cluster input[type=number]:focus{outline:none;border-color:var(--verde);background:#fff;}
   .status-cluster{
-    margin-left:auto;font-size:12px;color:var(--texto-suave);font-style:italic;
-  }
-  @media(max-width:480px){
-    .status-cluster{margin-left:0;width:100%;}
+    font-size:12px;color:var(--texto-suave);font-style:italic;
   }
   .lista-recentes{display:flex;flex-direction:column;gap:10px;}
   .card-recente{
@@ -788,7 +819,7 @@
 
         <p class="texto-intro">O preenchimento das informações é de <strong>inteira responsabilidade do responsável pelo aluno</strong>. Confira se os dados e a localização marcada no mapa correspondem corretamente ao endereço da residência antes de enviar.</p>
 
-        <label class="opcao-concordo">
+        <label class="opcao-concordo pulsando-atencao" id="labelAceiteTermo">
           <input type="checkbox" id="aceiteTermo">
           <span>Li as informações acima, estou ciente de que sou responsável pelos dados informados e desejo continuar.</span>
         </label>
@@ -1111,17 +1142,38 @@
         </div>
 
         <div class="barra-filtros">
-          <div class="campo-filtro">
-            <label for="filtroEscola">Escola</label>
-            <select id="filtroEscola"><option value="">Todas as escolas</option></select>
+          <div class="campo-filtro campo-filtro-multi">
+            <label>Escola</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroEscola">Todas as escolas</button>
+            <div class="painel-multi" id="painelFiltroEscola" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="escola" data-acao="todos">Marcar todas</button>
+                <button type="button" class="link-multi" data-campo="escola" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroEscola"></div>
+            </div>
           </div>
-          <div class="campo-filtro">
-            <label for="filtroTurno">Turno</label>
-            <select id="filtroTurno"><option value="">Todos os turnos</option></select>
+          <div class="campo-filtro campo-filtro-multi">
+            <label>Turno</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroTurno">Todos os turnos</button>
+            <div class="painel-multi" id="painelFiltroTurno" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="turno" data-acao="todos">Marcar todas</button>
+                <button type="button" class="link-multi" data-campo="turno" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroTurno"></div>
+            </div>
           </div>
-          <div class="campo-filtro">
-            <label for="filtroLocalidade">Localidade</label>
-            <select id="filtroLocalidade"><option value="">Todas as localidades</option></select>
+          <div class="campo-filtro campo-filtro-multi">
+            <label>Localidade</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroLocalidade">Todas as localidades</button>
+            <div class="painel-multi" id="painelFiltroLocalidade" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="localidade" data-acao="todos">Marcar todas</button>
+                <button type="button" class="link-multi" data-campo="localidade" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroLocalidade"></div>
+            </div>
           </div>
           <button class="btn-mapa" id="btnLimparFiltros" type="button">Limpar filtros</button>
         </div>
@@ -1158,9 +1210,8 @@
         </div>
 
         <div class="controle-cluster" id="controleCluster" style="display:none;">
-          <label for="raioCluster">Agrupar alunos num raio de</label>
-          <input type="number" id="raioCluster" value="200" min="0" max="2000" step="50">
-          <span>metros</span>
+          <label for="raioCluster">Agrupar alunos num raio de <strong id="valorRaioCluster">200</strong> metros</label>
+          <input type="range" id="raioCluster" value="200" min="0" max="1000" step="25">
           <span class="status-cluster" id="statusCluster"></span>
         </div>
 
@@ -1559,6 +1610,8 @@
   // introdução / termo de responsabilidade
   document.getElementById('aceiteTermo').addEventListener('change', function(){
     document.getElementById('irPasso1').disabled = !this.checked;
+    document.getElementById('labelAceiteTermo').classList.toggle('pulsando-atencao', !this.checked);
+    document.getElementById('irPasso1').classList.toggle('pulsando-atencao', this.checked);
   });
 
   document.getElementById('irPasso1').addEventListener('click', function(){
@@ -2135,37 +2188,106 @@
     return n === null ? '—' : n.toFixed(5);
   }
 
-  // ---------- FILTROS ----------
-  function popularSelectFiltro(id, valores, manter, placeholder){
-    var sel = document.getElementById(id);
-    sel.innerHTML = '<option value="">' + placeholder + '</option>' +
-      valores.map(function(v){ return '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + '</option>'; }).join('');
-    if(valores.indexOf(manter) !== -1){ sel.value = manter; }
+  // ---------- FILTROS (múltipla seleção por categoria) ----------
+  var ROTULOS_FILTRO = { escola: 'Todas as escolas', turno: 'Todos os turnos', localidade: 'Todas as localidades' };
+  var filtrosSelecionados = { escola: new Set(), turno: new Set(), localidade: new Set() };
+
+  function capitalizar(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function atualizarRotuloBotaoFiltro(campo){
+    var botao = document.getElementById('botaoFiltro' + capitalizar(campo));
+    var qtd = filtrosSelecionados[campo].size;
+    botao.textContent = qtd === 0 ? ROTULOS_FILTRO[campo] : (qtd + ' selecionada' + (qtd > 1 ? 's' : ''));
+    botao.classList.toggle('tem-selecao', qtd > 0);
+  }
+
+  function popularOpcoesFiltro(campo, valores){
+    var selecionadosAtuais = filtrosSelecionados[campo];
+    var novosSelecionados = new Set();
+    valores.forEach(function(v){ if(selecionadosAtuais.has(v)){ novosSelecionados.add(v); } });
+    filtrosSelecionados[campo] = novosSelecionados;
+
+    var container = document.getElementById('opcoesFiltro' + capitalizar(campo));
+    if(!valores.length){
+      container.innerHTML = '<p class="sem-dados-grafico">Nenhuma opção disponível.</p>';
+    } else {
+      container.innerHTML = valores.map(function(v){
+        var marcado = novosSelecionados.has(v) ? 'checked' : '';
+        return '<label class="opcao-multi"><input type="checkbox" value="' + escapeHtml(v) + '" data-campo="' + campo + '" ' + marcado + '> ' + escapeHtml(v) + '</label>';
+      }).join('');
+    }
+    atualizarRotuloBotaoFiltro(campo);
   }
 
   function popularFiltros(lista){
-    var manterEscola = document.getElementById('filtroEscola').value;
-    var manterTurno = document.getElementById('filtroTurno').value;
-    var manterLocalidade = document.getElementById('filtroLocalidade').value;
     var escolas = Array.from(new Set(lista.map(function(r){ return r.escola; }).filter(Boolean))).sort();
     var turnos = Array.from(new Set(lista.map(function(r){ return r.turno; }).filter(Boolean))).sort();
     var localidades = Array.from(new Set(lista.map(function(r){ return r.localidade; }).filter(Boolean))).sort();
-    popularSelectFiltro('filtroEscola', escolas, manterEscola, 'Todas as escolas');
-    popularSelectFiltro('filtroTurno', turnos, manterTurno, 'Todos os turnos');
-    popularSelectFiltro('filtroLocalidade', localidades, manterLocalidade, 'Todas as localidades');
+    popularOpcoesFiltro('escola', escolas);
+    popularOpcoesFiltro('turno', turnos);
+    popularOpcoesFiltro('localidade', localidades);
   }
 
   function obterListaFiltrada(){
-    var escola = document.getElementById('filtroEscola').value;
-    var turno = document.getElementById('filtroTurno').value;
-    var localidade = document.getElementById('filtroLocalidade').value;
     return registrosCache.filter(function(r){
-      if(escola && r.escola !== escola){ return false; }
-      if(turno && r.turno !== turno){ return false; }
-      if(localidade && r.localidade !== localidade){ return false; }
+      if(filtrosSelecionados.escola.size && !filtrosSelecionados.escola.has(r.escola)){ return false; }
+      if(filtrosSelecionados.turno.size && !filtrosSelecionados.turno.has(r.turno)){ return false; }
+      if(filtrosSelecionados.localidade.size && !filtrosSelecionados.localidade.has(r.localidade)){ return false; }
       return true;
     });
   }
+
+  function obterDescricaoFiltro(){
+    var partes = [];
+    if(filtrosSelecionados.escola.size){ partes.push('Escola(s): ' + Array.from(filtrosSelecionados.escola).join(', ')); }
+    if(filtrosSelecionados.turno.size){ partes.push('Turno(s): ' + Array.from(filtrosSelecionados.turno).join(', ')); }
+    if(filtrosSelecionados.localidade.size){ partes.push('Localidade(s): ' + Array.from(filtrosSelecionados.localidade).join(', ')); }
+    return partes.length ? partes.join(' · ') : 'Todos os cadastros (sem filtro)';
+  }
+
+  // abrir/fechar os painéis suspensos
+  document.querySelectorAll('.seletor-multi').forEach(function(botao){
+    botao.addEventListener('click', function(e){
+      e.stopPropagation();
+      var painel = botao.nextElementSibling;
+      var jaAberto = painel.style.display === 'block';
+      document.querySelectorAll('.painel-multi').forEach(function(p){ p.style.display = 'none'; });
+      painel.style.display = jaAberto ? 'none' : 'block';
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.painel-multi').forEach(function(p){ p.style.display = 'none'; });
+  });
+  document.querySelectorAll('.painel-multi').forEach(function(painel){
+    painel.addEventListener('click', function(e){ e.stopPropagation(); });
+  });
+
+  // marcar/desmarcar um item
+  ['escola','turno','localidade'].forEach(function(campo){
+    document.getElementById('opcoesFiltro' + capitalizar(campo)).addEventListener('change', function(e){
+      if(e.target.type !== 'checkbox'){ return; }
+      if(e.target.checked){ filtrosSelecionados[campo].add(e.target.value); }
+      else { filtrosSelecionados[campo].delete(e.target.value); }
+      atualizarRotuloBotaoFiltro(campo);
+      aplicarFiltros();
+    });
+  });
+
+  // "Marcar todas" / "Limpar" de cada painel
+  document.querySelectorAll('.link-multi').forEach(function(botao){
+    botao.addEventListener('click', function(){
+      var campo = botao.getAttribute('data-campo');
+      var acao = botao.getAttribute('data-acao');
+      var caixas = document.querySelectorAll('#opcoesFiltro' + capitalizar(campo) + ' input[type=checkbox]');
+      caixas.forEach(function(cb){
+        cb.checked = (acao === 'todos');
+        if(acao === 'todos'){ filtrosSelecionados[campo].add(cb.value); }
+      });
+      if(acao === 'nenhum'){ filtrosSelecionados[campo].clear(); }
+      atualizarRotuloBotaoFiltro(campo);
+      aplicarFiltros();
+    });
+  });
 
   function aplicarFiltros(){
     var lista = obterListaFiltrada();
@@ -2188,13 +2310,12 @@
     try { renderizarMapa(lista); } catch(erro){ console.error('Erro ao montar o mapa:', erro); }
   }
 
-  ['filtroEscola','filtroTurno','filtroLocalidade'].forEach(function(id){
-    document.getElementById(id).addEventListener('change', aplicarFiltros);
-  });
   document.getElementById('btnLimparFiltros').addEventListener('click', function(){
-    document.getElementById('filtroEscola').value = '';
-    document.getElementById('filtroTurno').value = '';
-    document.getElementById('filtroLocalidade').value = '';
+    ['escola','turno','localidade'].forEach(function(campo){
+      filtrosSelecionados[campo].clear();
+      document.querySelectorAll('#opcoesFiltro' + capitalizar(campo) + ' input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
+      atualizarRotuloBotaoFiltro(campo);
+    });
     aplicarFiltros();
   });
 
@@ -2371,6 +2492,7 @@
   }
 
   document.getElementById('raioCluster').addEventListener('input', function(){
+    document.getElementById('valorRaioCluster').textContent = this.value;
     if(mapaAdmin){ renderizarMapa(listaFiltradaCache); }
   });
 
@@ -2526,17 +2648,6 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
-
-  function obterDescricaoFiltro(){
-    var escolaF = document.getElementById('filtroEscola').value;
-    var turnoF = document.getElementById('filtroTurno').value;
-    var localidadeF = document.getElementById('filtroLocalidade').value;
-    var partes = [];
-    if(escolaF){ partes.push('Escola: ' + escolaF); }
-    if(turnoF){ partes.push('Turno: ' + turnoF); }
-    if(localidadeF){ partes.push('Localidade: ' + localidadeF); }
-    return partes.length ? partes.join(' · ') : 'Todos os cadastros (sem filtro)';
-  }
 
   function preencherCabecalhoImpressao(tituloTipo, lista){
     document.getElementById('tituloRelatorioImpressao').textContent = 'Relatório ' + tituloTipo + ' — Transporte Escolar';
