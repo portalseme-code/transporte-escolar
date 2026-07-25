@@ -54,12 +54,17 @@
     background:var(--superficie);
     border-bottom:1px solid var(--borda);
     padding:18px 24px;
-    position:relative;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
   }
   .marca{
     display:flex;
     align-items:center;
     gap:14px;
+    flex:1 1 auto;
+    min-width:0;
   }
   .marca img{
     height:52px;
@@ -90,9 +95,7 @@
     line-height:1.4;
   }
   .btn-admin{
-    position:absolute;
-    top:18px;
-    right:20px;
+    flex:0 0 auto;
     background:var(--verde-suave);
     border:1px solid var(--verde);
     color:var(--verde-escuro);
@@ -102,11 +105,9 @@
     cursor:pointer;
     font-family:'Inter',sans-serif;
     font-weight:600;
+    white-space:nowrap;
   }
   .btn-admin:hover{background:var(--verde);color:#fff;}
-  @media(max-width:480px){
-    .btn-admin{position:static;margin-top:12px;display:inline-block;}
-  }
 
   /* trilha de progresso */
   .trilha-wrapper{
@@ -186,6 +187,57 @@
   }
   .campo input:focus, .campo select:focus{outline:none;border-color:var(--verde);background:#fff;}
   .campo select:disabled{background:#F0EFEA;color:var(--texto-suave);cursor:not-allowed;}
+
+  .campo.preenchido label::after{
+    content:'✓';
+    display:inline-block;
+    margin-left:7px;
+    color:#fff;
+    background:var(--verde);
+    width:16px;height:16px;line-height:16px;
+    text-align:center;border-radius:50%;
+    font-size:10.5px;font-weight:700;
+    vertical-align:middle;
+  }
+  .campo.preenchido input[type=text]:not(:focus),
+  .campo.preenchido input[type=tel]:not(:focus),
+  .campo.preenchido select:not(:focus){
+    border-color:var(--verde);
+    background:var(--verde-suave);
+  }
+
+  .campo.pulsando-campo input[type=text],
+  .campo.pulsando-campo input[type=tel],
+  .campo.pulsando-campo select{
+    animation:pulsarCampo 1.6s ease-out infinite;
+    border-color:var(--verde);
+  }
+  @keyframes pulsarCampo{
+    0%{box-shadow:0 0 0 0 rgba(21,109,68,.45);}
+    70%{box-shadow:0 0 0 10px rgba(21,109,68,0);}
+    100%{box-shadow:0 0 0 0 rgba(21,109,68,0);}
+  }
+
+  .campo.erro-pulso input[type=text],
+  .campo.erro-pulso input[type=tel],
+  .campo.erro-pulso select{
+    animation:pulsarErroCampo 1.3s ease-out infinite;
+    border-color:var(--erro) !important;
+  }
+  @keyframes pulsarErroCampo{
+    0%{box-shadow:0 0 0 0 rgba(194,75,51,.5);}
+    70%{box-shadow:0 0 0 10px rgba(194,75,51,0);}
+    100%{box-shadow:0 0 0 0 rgba(194,75,51,0);}
+  }
+
+  .opcao-sem-numero{
+    display:flex;align-items:center;gap:6px;
+    margin-top:8px;font-size:12.5px;color:var(--texto-suave);cursor:pointer;
+  }
+  .opcao-sem-numero input{
+    width:15px;height:15px;accent-color:var(--verde);cursor:pointer;
+  }
+
   .linha-dupla{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:480px){.linha-dupla{grid-template-columns:1fr;}}
 
@@ -602,7 +654,7 @@
       <div class="texto-marca">
         <p class="selo">Prefeitura de Anchieta · Secretaria de Educação</p>
         <h1 id="tituloTopo">Mapeamento do transporte escolar</h1>
-        <p class="sub" id="subtituloTopo">Informe onde o aluno mora para ajudarmos a montar as paradas de ônibus mais próximas de casa.</p>
+        <p class="sub" id="subtituloTopo"></p>
       </div>
     </div>
   </header>
@@ -646,7 +698,7 @@
 
         <div class="barra-botoes">
           <span></span>
-          <button class="principal" id="irPasso1" type="button">Concordar e continuar</button>
+          <button class="principal" id="irPasso1" type="button" disabled>Concordar e continuar</button>
         </div>
       </div>
     </section>
@@ -759,8 +811,11 @@
           <input type="text" id="rua" placeholder="Ex: Rua das Palmeiras">
         </div>
         <div class="campo">
-          <label for="numero">Número <span class="opcional">(opcional)</span></label>
+          <label for="numero">Número</label>
           <input type="text" id="numero" placeholder="Ex: 123">
+          <label class="opcao-sem-numero">
+            <input type="checkbox" id="semNumero"> S/N (Sem Número)
+          </label>
         </div>
       </div>
 
@@ -1102,6 +1157,9 @@
           <div class="campo">
             <label for="editNumero">Número</label>
             <input type="text" id="editNumero">
+            <label class="opcao-sem-numero">
+              <input type="checkbox" id="editSemNumero"> S/N (Sem Número)
+            </label>
           </div>
         </div>
         <div class="campo">
@@ -1171,15 +1229,18 @@
 
     popularSelect(serieSelect, [], 'Selecione o turno primeiro');
     serieSelect.disabled = true;
+    atualizarPreenchido(serieSelect);
 
     if(!escola){
       popularSelect(turnoSelect, [], 'Selecione a escola primeiro');
       turnoSelect.disabled = true;
+      atualizarPreenchido(turnoSelect);
       return;
     }
     var turnosDaEscola = MATRIZ_ESCOLAS[escola] ? Object.keys(MATRIZ_ESCOLAS[escola]) : TODOS_TURNOS;
     popularSelect(turnoSelect, turnosDaEscola, 'Selecione o turno');
     turnoSelect.disabled = false;
+    atualizarPreenchido(turnoSelect);
   }
 
   function atualizarSeries(idEscola, idTurno, idSerie){
@@ -1190,11 +1251,13 @@
     if(!turno){
       popularSelect(serieSelect, [], 'Selecione o turno primeiro');
       serieSelect.disabled = true;
+      atualizarPreenchido(serieSelect);
       return;
     }
     var series = (MATRIZ_ESCOLAS[escola] && MATRIZ_ESCOLAS[escola][turno]) ? MATRIZ_ESCOLAS[escola][turno] : TODAS_SERIES;
     popularSelect(serieSelect, series, 'Selecione a série/ano');
     serieSelect.disabled = false;
+    atualizarPreenchido(serieSelect);
   }
 
   document.getElementById('escola').addEventListener('change', function(){ atualizarTurnos('escola','turno','serie'); });
@@ -1319,6 +1382,10 @@
   }
 
   // introdução / termo de responsabilidade
+  document.getElementById('aceiteTermo').addEventListener('change', function(){
+    document.getElementById('irPasso1').disabled = !this.checked;
+  });
+
   document.getElementById('irPasso1').addEventListener('click', function(){
     var erro = document.getElementById('erroTermo');
     if(!document.getElementById('aceiteTermo').checked){
@@ -1348,6 +1415,8 @@
     passoAtual = passo;
     moverOnibus(passo);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if(passo === 1){ atualizarGuiaCampo('passo1', false); }
+    if(passo === 2){ atualizarGuiaCampo('passo2', false); }
     if(passo === 3){ iniciarMapa(); }
   }
 
@@ -1375,19 +1444,140 @@
   aplicarMascaraCelular('telResp');
   aplicarMascaraCelular('editTelResp');
 
+  function configurarSemNumero(idNumero, idCheckbox){
+    var numero = document.getElementById(idNumero);
+    var checkbox = document.getElementById(idCheckbox);
+    checkbox.addEventListener('change', function(){
+      if(checkbox.checked){
+        numero.value = 'S/N';
+        numero.disabled = true;
+      } else {
+        numero.value = '';
+        numero.disabled = false;
+      }
+      atualizarPreenchido(numero);
+      if(!checkbox.checked){ numero.focus(); }
+    });
+  }
+  configurarSemNumero('numero', 'semNumero');
+  configurarSemNumero('editNumero', 'editSemNumero');
+
+  // ---------- INDICADOR DE CAMPO PREENCHIDO (check + borda verde) ----------
+  function atualizarPreenchido(elemento){
+    var campo = elemento.closest('.campo');
+    if(!campo){ return; }
+    var preenchido = !!(elemento.value && elemento.value.trim() !== '');
+    campo.classList.toggle('preenchido', preenchido);
+    if(preenchido){ campo.classList.remove('erro-pulso'); }
+  }
+
+  function marcarCamposComErro(todosIds, idsInvalidos){
+    var primeiro = null;
+    todosIds.forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el){ return; }
+      var wrap = el.closest('.campo');
+      if(!wrap){ return; }
+      if(idsInvalidos.indexOf(id) !== -1){
+        wrap.classList.remove('pulsando-campo');
+        wrap.classList.add('erro-pulso');
+        if(!primeiro){ primeiro = el; }
+      } else {
+        wrap.classList.remove('erro-pulso');
+      }
+    });
+    if(primeiro){ primeiro.focus(); }
+  }
+
+  function atualizarPreenchidosEm(seletorContainer){
+    document.querySelectorAll(seletorContainer + ' input, ' + seletorContainer + ' select').forEach(function(el){
+      atualizarPreenchido(el);
+    });
+  }
+
+  ['#passo1', '#passo2', '#passoAlunoExtra', '#modalEditar'].forEach(function(seletor){
+    document.querySelectorAll(seletor + ' input, ' + seletor + ' select').forEach(function(campo){
+      campo.addEventListener('input', function(){ atualizarPreenchido(campo); });
+      campo.addEventListener('change', function(){ atualizarPreenchido(campo); });
+    });
+  });
+
+  // ---------- GUIA SEQUENCIAL: pulsa o campo atual e avança para o próximo ao preencher ----------
+  var SEQUENCIA_CAMPOS = {
+    passo1: ['nomeResp', 'telResp'],
+    passo2: ['nomeAluno', 'escola', 'turno', 'serie', 'rua', 'numero', 'localidade', 'referencia'],
+    passoAlunoExtra: ['nomeAlunoExtra', 'escolaExtra', 'turnoExtra', 'serieExtra']
+  };
+
+  function proximoCampoVazio(idsPasso){
+    for(var i = 0; i < idsPasso.length; i++){
+      var el = document.getElementById(idsPasso[i]);
+      if(!el || el.disabled){ continue; }
+      if(!el.value || el.value.trim() === ''){ return el; }
+    }
+    return null;
+  }
+
+  function limparPulsoCampos(idsPasso){
+    idsPasso.forEach(function(id){
+      var el = document.getElementById(id);
+      if(!el){ return; }
+      var wrap = el.closest('.campo');
+      if(wrap){ wrap.classList.remove('pulsando-campo'); }
+    });
+  }
+
+  function atualizarGuiaCampo(passoKey, focar){
+    var ids = SEQUENCIA_CAMPOS[passoKey];
+    if(!ids){ return; }
+    limparPulsoCampos(ids);
+    var proximo = proximoCampoVazio(ids);
+    if(proximo){
+      var wrap = proximo.closest('.campo');
+      if(wrap){ wrap.classList.add('pulsando-campo'); }
+      if(focar){
+        setTimeout(function(){ proximo.focus(); }, 80);
+      }
+    }
+  }
+
+  var MAPA_CONTAINER_PASSO = { '#passo1': 'passo1', '#passo2': 'passo2', '#passoAlunoExtra': 'passoAlunoExtra' };
+  Object.keys(MAPA_CONTAINER_PASSO).forEach(function(seletor){
+    var passoKey = MAPA_CONTAINER_PASSO[seletor];
+    document.querySelectorAll(seletor + ' input, ' + seletor + ' select').forEach(function(campo){
+      campo.addEventListener('change', function(){
+        atualizarGuiaCampo(passoKey, true);
+      });
+      campo.addEventListener('blur', function(){
+        if(campo.tagName === 'INPUT' && campo.value && campo.value.trim() !== ''){
+          atualizarGuiaCampo(passoKey, true);
+        }
+      });
+      campo.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' && campo.tagName === 'INPUT'){
+          e.preventDefault();
+          campo.blur();
+        }
+      });
+    });
+  });
+
   window.addEventListener('resize', function(){ moverOnibus(passoAtual); });
 
   document.getElementById('irPasso2').addEventListener('click', function(){
     var erro = document.getElementById('erroResponsavel');
     var nomeResp = document.getElementById('nomeResp').value.trim();
     var telDigitos = document.getElementById('telResp').value.replace(/\D/g, '');
-    if(!nomeResp){
-      erro.textContent = 'Preencha o nome do responsável antes de continuar.';
-      erro.classList.add('mostrar');
-      return;
-    }
-    if(telDigitos.length !== 11){
-      erro.textContent = 'Informe um número de celular válido, com DDD (11 dígitos).';
+    var invalidos = [];
+    if(!nomeResp){ invalidos.push('nomeResp'); }
+    if(telDigitos.length !== 11){ invalidos.push('telResp'); }
+    if(invalidos.length){
+      marcarCamposComErro(['nomeResp','telResp'], invalidos);
+      erro.textContent = (invalidos.indexOf('nomeResp') !== -1 && invalidos.indexOf('telResp') !== -1)
+        ? 'Preencha o nome do responsável e um celular válido com DDD (11 dígitos).'
+        : (invalidos.indexOf('nomeResp') !== -1
+          ? 'Preencha o nome do responsável antes de continuar.'
+          : 'Informe um número de celular válido, com DDD (11 dígitos).');
       erro.classList.add('mostrar');
       return;
     }
@@ -1404,9 +1594,22 @@
     var turno = document.getElementById('turno').value;
     var serie = document.getElementById('serie').value;
     var rua = document.getElementById('rua').value.trim();
+    var semNumero = document.getElementById('semNumero').checked;
+    var numero = document.getElementById('numero').value.trim();
     var localidade = document.getElementById('localidade').value.trim();
-    if(!nomeAluno || !escola || !turno || !serie || !rua || !localidade){
-      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua e localidade antes de continuar.';
+
+    var invalidos = [];
+    if(!nomeAluno){ invalidos.push('nomeAluno'); }
+    if(!escola){ invalidos.push('escola'); }
+    if(!turno){ invalidos.push('turno'); }
+    if(!serie){ invalidos.push('serie'); }
+    if(!rua){ invalidos.push('rua'); }
+    if(!semNumero && !numero){ invalidos.push('numero'); }
+    if(!localidade){ invalidos.push('localidade'); }
+
+    if(invalidos.length){
+      marcarCamposComErro(['nomeAluno','escola','turno','serie','rua','numero','localidade'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua, número (ou marque S/N) e localidade antes de continuar.';
       erro.classList.add('mostrar');
       return;
     }
@@ -1524,6 +1727,8 @@
     atualizarTurnos('escolaExtra','turnoExtra','serieExtra');
     document.getElementById('erroAlunoExtra').classList.remove('mostrar');
     document.getElementById('passoAlunoExtra').classList.add('ativo');
+    atualizarPreenchidosEm('#passoAlunoExtra');
+    atualizarGuiaCampo('passoAlunoExtra', false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
@@ -1542,7 +1747,13 @@
     var escolaExtra = document.getElementById('escolaExtra').value;
     var turnoExtra = document.getElementById('turnoExtra').value;
     var serieExtra = document.getElementById('serieExtra').value.trim();
-    if(!nomeAlunoExtra || !escolaExtra || !turnoExtra || !serieExtra){
+    var invalidos = [];
+    if(!nomeAlunoExtra){ invalidos.push('nomeAlunoExtra'); }
+    if(!escolaExtra){ invalidos.push('escolaExtra'); }
+    if(!turnoExtra){ invalidos.push('turnoExtra'); }
+    if(!serieExtra){ invalidos.push('serieExtra'); }
+    if(invalidos.length){
+      marcarCamposComErro(['nomeAlunoExtra','escolaExtra','turnoExtra','serieExtra'], invalidos);
       erro.textContent = 'Preencha nome do aluno, escola, turno e série antes de continuar.';
       erro.classList.add('mostrar');
       return;
@@ -1611,7 +1822,7 @@
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('btnAdmin').style.display = 'block';
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
-    document.getElementById('subtituloTopo').textContent = 'Informe onde o aluno mora para ajudarmos a montar as paradas de ônibus mais próximas de casa.';
+    document.getElementById('subtituloTopo').textContent = '';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
     if(document.getElementById('aceiteTermo').checked){
       document.getElementById('passoIntro').classList.remove('ativo');
@@ -1968,12 +2179,16 @@
     atualizarSeries('editEscola', 'editTurno', 'editSerie');
     document.getElementById('editSerie').value = registro.serie || '';
     document.getElementById('editRua').value = registro.rua || '';
-    document.getElementById('editNumero').value = registro.numero || '';
+    var ehSemNumero = (registro.numero || '').toString().trim().toUpperCase() === 'S/N';
+    document.getElementById('editSemNumero').checked = ehSemNumero;
+    document.getElementById('editNumero').disabled = ehSemNumero;
+    document.getElementById('editNumero').value = ehSemNumero ? 'S/N' : (registro.numero || '');
     document.getElementById('editLocalidade').value = registro.localidade || '';
     document.getElementById('editReferencia').value = registro.referencia || '';
     document.getElementById('editNomeResp').value = registro.nomeResp || '';
     document.getElementById('editTelResp').value = registro.telResp || '';
     document.getElementById('modalEditar').style.display = 'flex';
+    atualizarPreenchidosEm('#modalEditar');
   }
 
   document.getElementById('cancelarEdicao').addEventListener('click', function(){
@@ -1995,9 +2210,22 @@
     var turno = document.getElementById('editTurno').value;
     var serie = document.getElementById('editSerie').value;
     var rua = document.getElementById('editRua').value.trim();
+    var semNumero = document.getElementById('editSemNumero').checked;
+    var numero = document.getElementById('editNumero').value.trim();
     var localidade = document.getElementById('editLocalidade').value.trim();
-    if(!nomeAluno || !escola || !turno || !serie || !rua || !localidade){
-      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua e localidade.';
+
+    var invalidos = [];
+    if(!nomeAluno){ invalidos.push('editNomeAluno'); }
+    if(!escola){ invalidos.push('editEscola'); }
+    if(!turno){ invalidos.push('editTurno'); }
+    if(!serie){ invalidos.push('editSerie'); }
+    if(!rua){ invalidos.push('editRua'); }
+    if(!semNumero && !numero){ invalidos.push('editNumero'); }
+    if(!localidade){ invalidos.push('editLocalidade'); }
+
+    if(invalidos.length){
+      marcarCamposComErro(['editNomeAluno','editEscola','editTurno','editSerie','editRua','editNumero','editLocalidade'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua, número (ou marque S/N) e localidade.';
       erro.classList.add('mostrar');
       return;
     }
