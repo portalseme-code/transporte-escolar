@@ -1075,7 +1075,7 @@
       </div>
 
       <div class="campo">
-        <label for="localidade">Localidade / bairro / distrito</label>
+        <label for="localidade">Bairro</label>
         <input type="text" id="localidade" placeholder="Ex: Centro, Nova Anchieta, Recanto...">
       </div>
 
@@ -1459,7 +1459,7 @@
           </div>
         </div>
         <div class="campo">
-          <label for="editLocalidade">Localidade / bairro / distrito</label>
+          <label for="editLocalidade">Bairro</label>
           <input type="text" id="editLocalidade">
         </div>
         <div class="campo">
@@ -1880,6 +1880,20 @@
   }
 
   configurarSeletorCampoPublico('escola', 'botaoEscola', 'painelEscola');
+
+  // ---------- CONVERTER AUTOMATICAMENTE PARA MAIÚSCULAS (evita duplicidade por diferença de caixa) ----------
+  function aplicarMaiusculas(idCampo){
+    var campo = document.getElementById(idCampo);
+    if(!campo){ return; }
+    campo.addEventListener('input', function(){
+      var posicao = campo.selectionStart;
+      campo.value = campo.value.toUpperCase();
+      if(posicao !== null){ campo.setSelectionRange(posicao, posicao); }
+    });
+  }
+  ['nomeResp', 'nomeAluno', 'rua', 'numero', 'localidade', 'referencia', 'nomeAlunoExtra',
+   'editNomeAluno', 'editRua', 'editNumero', 'editLocalidade', 'editReferencia', 'editNomeResp'
+  ].forEach(aplicarMaiusculas);
   configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
 
   document.addEventListener('click', function(){
