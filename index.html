@@ -1350,6 +1350,17 @@
 
         <div class="barra-filtros">
           <div class="campo-filtro campo-filtro-multi">
+            <label>Aluno</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroAluno">Todos os alunos</button>
+            <div class="painel-multi" id="painelFiltroAluno" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="aluno" data-acao="todos">Marcar todos</button>
+                <button type="button" class="link-multi" data-campo="aluno" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroAluno"></div>
+            </div>
+          </div>
+          <div class="campo-filtro campo-filtro-multi">
             <label>Escola</label>
             <button type="button" class="seletor-multi" id="botaoFiltroEscola">Todas as escolas</button>
             <div class="painel-multi" id="painelFiltroEscola" style="display:none;">
@@ -1369,6 +1380,17 @@
                 <button type="button" class="link-multi" data-campo="turno" data-acao="nenhum">Limpar</button>
               </div>
               <div class="lista-opcoes-multi" id="opcoesFiltroTurno"></div>
+            </div>
+          </div>
+          <div class="campo-filtro campo-filtro-multi">
+            <label>Série</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroSerie">Todas as séries</button>
+            <div class="painel-multi" id="painelFiltroSerie" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="serie" data-acao="todos">Marcar todas</button>
+                <button type="button" class="link-multi" data-campo="serie" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroSerie"></div>
             </div>
           </div>
           <div class="campo-filtro campo-filtro-multi">
@@ -1618,6 +1640,8 @@
     </tbody>
 
     <tbody id="tbodyPontosImpressao" style="display:none;"></tbody>
+
+    <tbody id="tbodyRaioEscolaImpressao" style="display:none;"></tbody>
 
     <tbody id="tbodyResumoImpressao" style="display:none;">
       <tr><td>
@@ -2535,8 +2559,8 @@
   }
 
   // ---------- FILTROS (múltipla seleção por categoria) ----------
-  var ROTULOS_FILTRO = { escola: 'Todas as escolas', turno: 'Todos os turnos', localidade: 'Todas as localidades' };
-  var filtrosSelecionados = { escola: new Set(), turno: new Set(), localidade: new Set() };
+  var ROTULOS_FILTRO = { aluno: 'Todos os alunos', escola: 'Todas as escolas', turno: 'Todos os turnos', serie: 'Todas as séries', localidade: 'Todas as localidades' };
+  var filtrosSelecionados = { aluno: new Set(), escola: new Set(), turno: new Set(), serie: new Set(), localidade: new Set() };
 
   function capitalizar(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
@@ -2566,18 +2590,24 @@
   }
 
   function popularFiltros(lista){
+    var alunos = Array.from(new Set(lista.map(function(r){ return r.nomeAluno; }).filter(Boolean))).sort();
     var escolas = Array.from(new Set(lista.map(function(r){ return r.escola; }).filter(Boolean))).sort();
     var turnos = Array.from(new Set(lista.map(function(r){ return r.turno; }).filter(Boolean))).sort();
+    var series = Array.from(new Set(lista.map(function(r){ return r.serie; }).filter(Boolean))).sort();
     var localidades = Array.from(new Set(lista.map(function(r){ return r.localidade; }).filter(Boolean))).sort();
+    popularOpcoesFiltro('aluno', alunos);
     popularOpcoesFiltro('escola', escolas);
     popularOpcoesFiltro('turno', turnos);
+    popularOpcoesFiltro('serie', series);
     popularOpcoesFiltro('localidade', localidades);
   }
 
   function obterListaFiltrada(){
     return registrosCache.filter(function(r){
+      if(filtrosSelecionados.aluno.size && !filtrosSelecionados.aluno.has(r.nomeAluno)){ return false; }
       if(filtrosSelecionados.escola.size && !filtrosSelecionados.escola.has(r.escola)){ return false; }
       if(filtrosSelecionados.turno.size && !filtrosSelecionados.turno.has(r.turno)){ return false; }
+      if(filtrosSelecionados.serie.size && !filtrosSelecionados.serie.has(r.serie)){ return false; }
       if(filtrosSelecionados.localidade.size && !filtrosSelecionados.localidade.has(r.localidade)){ return false; }
       return true;
     });
@@ -2585,8 +2615,10 @@
 
   function obterDescricaoFiltro(){
     var partes = [];
+    if(filtrosSelecionados.aluno.size){ partes.push('Aluno(s): ' + Array.from(filtrosSelecionados.aluno).join(', ')); }
     if(filtrosSelecionados.escola.size){ partes.push('Escola(s): ' + Array.from(filtrosSelecionados.escola).join(', ')); }
     if(filtrosSelecionados.turno.size){ partes.push('Turno(s): ' + Array.from(filtrosSelecionados.turno).join(', ')); }
+    if(filtrosSelecionados.serie.size){ partes.push('Série(s): ' + Array.from(filtrosSelecionados.serie).join(', ')); }
     if(filtrosSelecionados.localidade.size){ partes.push('Localidade(s): ' + Array.from(filtrosSelecionados.localidade).join(', ')); }
     return partes.length ? partes.join(' · ') : 'Todos os cadastros (sem filtro)';
   }
@@ -2609,7 +2641,7 @@
   });
 
   // marcar/desmarcar um item
-  ['escola','turno','localidade'].forEach(function(campo){
+  ['aluno','escola','turno','serie','localidade'].forEach(function(campo){
     document.getElementById('opcoesFiltro' + capitalizar(campo)).addEventListener('change', function(e){
       if(e.target.type !== 'checkbox'){ return; }
       if(e.target.checked){ filtrosSelecionados[campo].add(e.target.value); }
@@ -2657,7 +2689,7 @@
   }
 
   document.getElementById('btnLimparFiltros').addEventListener('click', function(){
-    ['escola','turno','localidade'].forEach(function(campo){
+    ['aluno','escola','turno','serie','localidade'].forEach(function(campo){
       filtrosSelecionados[campo].clear();
       document.querySelectorAll('#opcoesFiltro' + capitalizar(campo) + ' input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
       atualizarRotuloBotaoFiltro(campo);
@@ -3307,6 +3339,53 @@
     }).join('');
   }
 
+  function montarDadosRaioEscolaImpressao(){
+    var tbody = document.getElementById('tbodyRaioEscolaImpressao');
+    if(!raioEscolaAtivo){
+      tbody.style.display = 'none';
+      tbody.innerHTML = '';
+      return;
+    }
+    var nomeEscola = raioEscolaAtivo.nome;
+    var coords = ESCOLAS_COORDENADAS[nomeEscola];
+    if(!coords){ tbody.style.display = 'none'; tbody.innerHTML = ''; return; }
+
+    var raioKm = parseFloat(document.getElementById('raioEscolaSlider').value) || 1;
+    var raioMetros = raioKm * 1000;
+
+    var alunosNoRaio = registrosCache
+      .map(function(r){
+        var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+        if(lat === null || lng === null){ return null; }
+        var distancia = distanciaMetros(coords.lat, coords.lng, lat, lng);
+        return distancia <= raioMetros ? { registro: r, distancia: distancia } : null;
+      })
+      .filter(Boolean)
+      .sort(function(a, b){ return a.distancia - b.distancia; });
+    var matriculadosAqui = alunosNoRaio.filter(function(item){ return item.registro.escola === nomeEscola; });
+    var matriculadosOutra = alunosNoRaio.length - matriculadosAqui.length;
+
+    var html = '<tr class="linha-evitar-quebra"><td>' +
+      '<h2 class="titulo-secao-impressao">Raio de alcance — ' + escapeHtml(nomeEscola) + ' (' + raioKm.toFixed(1).replace(/\.0$/, '') + ' km)</h2>' +
+      '<div class="metricas-impressao" style="margin-bottom:10px;">' +
+        '<div class="item-metrica-impressao"><strong>' + alunosNoRaio.length + '</strong>No raio</div>' +
+        '<div class="item-metrica-impressao"><strong>' + matriculadosAqui.length + '</strong>Matriculados aqui</div>' +
+        '<div class="item-metrica-impressao"><strong>' + matriculadosOutra + '</strong>Em outra escola</div>' +
+      '</div>' +
+    '</td></tr>';
+
+    html += alunosNoRaio.map(function(item){
+      var r = item.registro;
+      var matriculadoAqui = r.escola === nomeEscola;
+      return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
+        '<div class="ponto-impressao-topo"><span>' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + (matriculadoAqui ? ' (matriculado aqui)' : '') + '</span><span>' + Math.round(item.distancia) + 'm</span></div>' +
+        '</div></td></tr>';
+    }).join('');
+
+    tbody.innerHTML = html;
+    tbody.style.display = 'table-row-group';
+  }
+
   document.getElementById('btnRelatorioMapa').addEventListener('click', function(){
     if(!listaFiltradaCache.length){
       mostrarAviso('Não há registros para gerar o relatório.');
@@ -3321,6 +3400,7 @@
 
     preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
     montarDadosMapaImpressao();
+    montarDadosRaioEscolaImpressao();
     definirOrientacaoImpressao('portrait');
 
     montarMapaGrandeParaImpressao(function(){
@@ -3339,6 +3419,8 @@
     document.getElementById('tbodyPontosImpressao').style.display = 'none';
     document.getElementById('tbodyResumoImpressao').style.display = 'none';
     document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').innerHTML = '';
 
     preencherCabecalhoImpressao('Mapa Geral', listaFiltradaCache);
     definirOrientacaoImpressao('landscape', '8mm 8mm 0 8mm');
@@ -3358,6 +3440,8 @@
     document.getElementById('tbodyPontosImpressao').style.display = 'none';
     document.getElementById('tbodyResumoImpressao').style.display = 'table-row-group';
     document.getElementById('tbodyListaCompletaImpressao').style.display = 'table-row-group';
+    document.getElementById('tbodyRaioEscolaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').innerHTML = '';
 
     // 1) Cabeçalho e métricas
     preencherCabecalhoImpressao('Resumo', listaFiltradaCache);
