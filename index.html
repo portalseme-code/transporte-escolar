@@ -638,6 +638,48 @@
     color:#fff;
   }
 
+  /* formulário de raio dentro do popup da escola (Leaflet) */
+  .popup-raio-escola{margin-top:8px;padding-top:8px;border-top:1px solid #eee;}
+  .popup-raio-escola label{display:block;font-size:11px;color:#666;margin-bottom:4px;}
+  .popup-raio-linha{display:flex;gap:6px;}
+  .popup-raio-input{
+    width:70px;padding:5px 7px;border:1px solid #ccc;border-radius:6px;font-size:12px;
+  }
+  .popup-raio-botao{
+    flex:1;background:#2E6FDE;color:#fff;border:none;border-radius:6px;
+    font-size:12px;font-weight:600;cursor:pointer;padding:5px 8px;
+  }
+  .popup-raio-botao:hover{background:#1d54b3;}
+
+  /* painel de resultados do raio de alcance */
+  .painel-raio-escola{
+    background:var(--superficie);border:1.5px solid #2E6FDE;border-radius:var(--raio-sm);
+    padding:14px 16px;margin-bottom:14px;box-shadow:var(--sombra);
+  }
+  .painel-raio-escola-cabecalho{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+    margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--borda);
+  }
+  .titulo-raio-escola{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:#2E6FDE;margin:0 0 2px;}
+  .meta-raio-escola{font-size:12px;color:var(--texto-suave);margin:0;}
+  .btn-fechar-raio-escola{
+    flex:0 0 auto;width:26px;height:26px;border-radius:50%;
+    background:none;border:1px solid var(--borda);color:var(--texto-suave);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:13px;
+  }
+  .btn-fechar-raio-escola:hover{background:var(--erro-bg);border-color:var(--erro);color:var(--erro);}
+  .lista-raio-escola{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
+  .item-raio-escola{
+    background:#FCFCFA;border:1px solid var(--borda);border-radius:8px;padding:8px 10px;font-size:12.5px;
+  }
+  .item-raio-escola-topo{display:flex;justify-content:space-between;gap:8px;font-weight:600;}
+  .item-raio-escola-topo span{color:#2E6FDE;font-weight:700;}
+  .item-raio-escola-info{color:var(--texto-suave);margin-top:2px;}
+  .selo-matriculado-aqui{
+    background:var(--verde-suave);color:var(--verde-escuro);padding:1px 6px;border-radius:99px;
+    font-size:10.5px;font-weight:600;
+  }
+
   .toggle-escolas{
     flex:0 0 auto;
     width:38px;height:38px;
@@ -1363,6 +1405,17 @@
         </div>
 
         <div id="mapaAdmin" style="width:100%;height:320px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
+
+        <div class="painel-raio-escola" id="painelRaioEscola" style="display:none;">
+          <div class="painel-raio-escola-cabecalho">
+            <div>
+              <p class="titulo-raio-escola" id="tituloRaioEscola">Escola</p>
+              <p class="meta-raio-escola" id="metaRaioEscola"></p>
+            </div>
+            <button type="button" class="btn-fechar-raio-escola" id="fecharRaioEscola" title="Fechar" aria-label="Fechar">✕</button>
+          </div>
+          <div class="lista-raio-escola" id="listaRaioEscola"></div>
+        </div>
 
         <div class="rodape-admin">
           <button class="btn-mapa" id="btnExportar" type="button">Exportar CSV</button>
@@ -2795,7 +2848,7 @@
   var mostrarEscolasNoMapa = true;
   var camadaEscolasMapa = null;
 
-  function construirPopupEscola(nome){
+  function construirPopupEscola(nome, comRaio){
     var alunosDaEscola = registrosCache.filter(function(r){ return r.escola === nome; });
     var turnosOfertados = MATRIZ_ESCOLAS[nome] ? Object.keys(MATRIZ_ESCOLAS[nome]) : [];
     var turmasSet = {};
@@ -2805,10 +2858,20 @@
       });
     }
     var turmasOfertadas = Object.keys(turmasSet);
-    return '<b>' + escapeHtml(nome) + '</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
+    var html = '<b>' + escapeHtml(nome) + '</b><hr style="margin:6px 0;border:none;border-top:1px solid #ddd;">' +
       '<b>Turnos:</b> ' + (turnosOfertados.length ? escapeHtml(turnosOfertados.join(', ')) : '—') + '<br>' +
       '<b>Turmas/séries:</b> ' + (turmasOfertadas.length ? escapeHtml(turmasOfertadas.join(', ')) : '—') + '<br>' +
       '<b>Alunos matriculados (via formulário):</b> ' + alunosDaEscola.length;
+    if(comRaio){
+      html += '<div class="popup-raio-escola">' +
+        '<label>Raio de alcance (metros)</label>' +
+        '<div class="popup-raio-linha">' +
+          '<input type="number" class="popup-raio-input" value="500" min="50" step="50">' +
+          '<button type="button" class="popup-raio-botao" data-escola="' + escapeHtml(nome) + '">Calcular</button>' +
+        '</div>' +
+      '</div>';
+    }
+    return html;
   }
 
   function criarIconeEscola(){
@@ -2833,7 +2896,7 @@
       var coords = ESCOLAS_COORDENADAS[nome];
       if(!coords){ return; }
       L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() })
-        .bindPopup(construirPopupEscola(nome), { maxWidth: 260 })
+        .bindPopup(construirPopupEscola(nome, !alvoMapa), { maxWidth: 260 })
         .addTo(camada);
     });
     camada.addTo(mapa);
@@ -2841,6 +2904,65 @@
     if(!alvoMapa){ camadaEscolasMapa = camada; }
     return camada;
   }
+
+  // ---------- RAIO DE ALCANCE DE UMA ESCOLA ----------
+  var circuloRaioEscola = null;
+
+  function calcularRaioEscola(nomeEscola, raioMetros){
+    var coords = ESCOLAS_COORDENADAS[nomeEscola];
+    if(!coords){ return; }
+
+    if(circuloRaioEscola){ mapaAdmin.removeLayer(circuloRaioEscola); circuloRaioEscola = null; }
+    circuloRaioEscola = L.circle([coords.lat, coords.lng], {
+      radius: raioMetros, color: '#2E6FDE', weight: 2, fillColor: '#2E6FDE', fillOpacity: 0.12, dashArray: '6,4'
+    }).addTo(mapaAdmin);
+
+    var alunosNoRaio = registrosCache
+      .map(function(r){
+        var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+        if(lat === null || lng === null){ return null; }
+        var distancia = distanciaMetros(coords.lat, coords.lng, lat, lng);
+        return distancia <= raioMetros ? { registro: r, distancia: distancia } : null;
+      })
+      .filter(Boolean)
+      .sort(function(a, b){ return a.distancia - b.distancia; });
+
+    document.getElementById('tituloRaioEscola').textContent = nomeEscola;
+    document.getElementById('metaRaioEscola').textContent = alunosNoRaio.length + ' aluno' + (alunosNoRaio.length === 1 ? '' : 's') + ' dentro de ' + raioMetros + 'm';
+
+    var container = document.getElementById('listaRaioEscola');
+    if(!alunosNoRaio.length){
+      container.innerHTML = '<p class="sem-dados-grafico">Nenhum aluno cadastrado dentro desse raio.</p>';
+    } else {
+      container.innerHTML = alunosNoRaio.map(function(item){
+        var r = item.registro;
+        var matriculadoAqui = r.escola === nomeEscola;
+        return '<div class="item-raio-escola">' +
+          '<div class="item-raio-escola-topo"><strong>' + escapeHtml(r.nomeAluno) + '</strong><span>' + Math.round(item.distancia) + 'm</span></div>' +
+          '<div class="item-raio-escola-info">' + escapeHtml(r.escola) + (matriculadoAqui ? ' <span class="selo-matriculado-aqui">matriculado aqui</span>' : '') + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    document.getElementById('painelRaioEscola').style.display = 'block';
+    document.getElementById('painelRaioEscola').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if(mapaAdmin.closePopup){ mapaAdmin.closePopup(); }
+  }
+
+  document.getElementById('mapaAdmin').addEventListener('click', function(e){
+    var botao = e.target.closest('.popup-raio-botao');
+    if(!botao){ return; }
+    var nomeEscola = botao.getAttribute('data-escola');
+    var painelPopup = botao.closest('.popup-raio-escola');
+    var input = painelPopup ? painelPopup.querySelector('.popup-raio-input') : null;
+    var raio = input ? (parseInt(input.value, 10) || 500) : 500;
+    calcularRaioEscola(nomeEscola, raio);
+  });
+
+  document.getElementById('fecharRaioEscola').addEventListener('click', function(){
+    document.getElementById('painelRaioEscola').style.display = 'none';
+    if(circuloRaioEscola){ mapaAdmin.removeLayer(circuloRaioEscola); circuloRaioEscola = null; }
+  });
 
   document.getElementById('toggleEscolasMapa').addEventListener('click', function(){
     mostrarEscolasNoMapa = !mostrarEscolasNoMapa;
