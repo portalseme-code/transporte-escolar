@@ -745,6 +745,7 @@
     padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--tinta);
   }
   .controle-cluster-linha-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .grupo-toggles-mapa{display:flex;gap:8px;flex:0 0 auto;}
   .controle-cluster label{font-weight:600;}
   .controle-cluster label strong{color:var(--verde-escuro);font-family:'Space Grotesk',sans-serif;}
   .controle-cluster input[type=range]{
@@ -1470,10 +1471,16 @@
         <div class="controle-cluster" id="controleCluster" style="display:none;">
           <div class="controle-cluster-linha-topo">
             <label for="raioCluster">Agrupar alunos num raio de <strong id="valorRaioCluster">200</strong> metros</label>
-            <button type="button" class="toggle-escolas" id="toggleEscolasMapa" aria-pressed="true" title="Mostrar/ocultar escolas no mapa" aria-label="Mostrar/ocultar escolas no mapa">
-              <svg id="iconeOlhoEscolasAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-              <svg id="iconeOlhoEscolasFechado" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
-            </button>
+            <div class="grupo-toggles-mapa">
+              <button type="button" class="toggle-escolas" id="toggleLimiteMunicipio" aria-pressed="true" title="Mostrar/ocultar limite do município" aria-label="Mostrar/ocultar limite do município">
+                <svg id="iconeOlhoLimiteAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="iconeOlhoLimiteFechado" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
+              </button>
+              <button type="button" class="toggle-escolas" id="toggleEscolasMapa" aria-pressed="true" title="Mostrar/ocultar escolas no mapa" aria-label="Mostrar/ocultar escolas no mapa">
+                <svg id="iconeOlhoEscolasAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="iconeOlhoEscolasFechado" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
+              </button>
+            </div>
           </div>
           <input type="range" id="raioCluster" value="200" min="0" max="1000" step="25">
           <span class="status-cluster" id="statusCluster"></span>
@@ -1733,6 +1740,9 @@
 
   // coordenadas das escolas (para exibir a localização delas no mapa da secretaria)
   var ESCOLAS_COORDENADAS = {"EMEB DUAS BARRAS": {"lat": -20.625036, "lng": -40.660851}, "CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES": {"lat": -20.685147, "lng": -40.677275}, "CMEI ENIDE CORRÊA GUAITOLINI": {"lat": -20.764292, "lng": -40.576363}, "EMEB DULCINEA SILVA LYRIO RUPF": {"lat": -20.813604, "lng": -40.633385}, "CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES": {"lat": -20.821282, "lng": -40.684724}, "EMEF MANOEL DE PAULA SERRAO": {"lat": -20.829413, "lng": -40.694653}, "CMEI BELMIRO ALBERTO ALPOIM": {"lat": -20.831396, "lng": -40.695973}, "EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI": {"lat": -20.777838, "lng": -40.744031}, "EMEB JOSEFINA RAMOS NUNES - DONA MULATA": {"lat": -20.807476, "lng": -40.661967}, "EMEIEF ESTHER SOARES DA TRINDADE SANTANA": {"lat": -20.804348, "lng": -40.600508}, "EMEF PROFESSOR TIO LILIU": {"lat": -20.804605, "lng": -40.653385}, "EMEIEF PROFESSORA JOCELINA NOGUEIRA": {"lat": -20.80731, "lng": -40.639783}, "EMEB AMARILIS FERNANDES GARCIA": {"lat": -20.80834, "lng": -40.638795}, "EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO": {"lat": -20.685569, "lng": -40.676521}, "EMEB LIMEIRA": {"lat": -20.696347, "lng": -40.677312}, "EMEIEF PROFESSORA MARIA LUIZA FLORES": {"lat": -20.765468, "lng": -40.576135}, "EMEB PROFESSORA PATRICIA FERNANDES ROFFES": {"lat": -20.800235, "lng": -40.641916}, "CMEI PADRE JOSE DE ANCHIETA": {"lat": -20.793659, "lng": -40.637176}, "EMEIEF ESMERALDA MORACA": {"lat": -20.818409, "lng": -40.623955}, "EMEB ALCIDES CECCON": {"lat": -20.831045, "lng": -40.622149}, "EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES": {"lat": -20.795029, "lng": -40.60309}, "EMEIEF SIMPATIA": {"lat": -20.716057, "lng": -40.714962}, "EMEIEF ELSON GARCIA": {"lat": -20.801538, "lng": -40.588874}, "CEMEI SARA ALMEIDA LIMA": {"lat": -20.795072, "lng": -40.602341}, "EMEF IRMA TEREZINHA GODOY DE ALMEIDA": {"lat": -20.804289, "lng": -40.642123}, "EMEB TIA MARLENE PETRI": {"lat": -20.730289, "lng": -40.777609}, "EMEIEF CORREGO DA PRATA": {"lat": -20.740483, "lng": -40.787531}, "EMEIEF PROFESSORA ADY LYRIO MARCHEZI": {"lat": -20.707076, "lng": -40.75905}, "EMEIEF ITAPEROROMA BAIXA": {"lat": -20.765472, "lng": -40.759975}, "EMEIEF ALIPIO PORTO DA SILVA": {"lat": -20.74669, "lng": -40.710093}, "EMEIEF SAO MATEUS": {"lat": -20.764227, "lng": -40.727721}, "EMEIEF LAUROMAR POMPERMAYER PORTO": {"lat": -20.7775, "lng": -40.702093}, "EMEB MARIANA DA PURIFICACAO SIMOES": {"lat": -20.74179, "lng": -40.609538}, "EMEIEF GOEMBE": {"lat": -20.717595, "lng": -40.610847}, "EMEIEF ITAJOBAIA": {"lat": -20.683226, "lng": -40.628895}, "EMEF OLIVÂNIA": {"lat": -20.580983, "lng": -40.648441}, "EMEIEF ROSALINO SIMOES": {"lat": -20.768014, "lng": -40.630523}, "CMEI TIA IRENI AMARAL": {"lat": -20.803801, "lng": -40.641892}, "EFA OLIVÂNIA": {"lat": -20.582683333333332, "lng": -40.6463}};
+
+  // contorno oficial do município (IDAF/DTCAR, Lei Estadual 10.600/2016), simplificado para uso no mapa
+  var LIMITE_MUNICIPIO = [[-20.545995,-40.643557],[-20.546316,-40.648257],[-20.547859,-40.649482],[-20.553783,-40.658941],[-20.555429,-40.660079],[-20.557822,-40.666811],[-20.560938,-40.66859],[-20.561343,-40.670561],[-20.565917,-40.67528],[-20.566125,-40.67656],[-20.565033,-40.677651],[-20.558491,-40.677681],[-20.556738,-40.67862],[-20.556508,-40.679984],[-20.557155,-40.680486],[-20.55787,-40.678876],[-20.559136,-40.679057],[-20.5616,-40.681944],[-20.566018,-40.684336],[-20.574593,-40.684269],[-20.577794,-40.682481],[-20.578548,-40.680604],[-20.577787,-40.677663],[-20.575769,-40.675865],[-20.575631,-40.672754],[-20.582051,-40.670787],[-20.585192,-40.671751],[-20.590185,-40.671662],[-20.593315,-40.670874],[-20.594197,-40.669822],[-20.594632,-40.675904],[-20.596058,-40.679487],[-20.599324,-40.685302],[-20.602094,-40.686184],[-20.604083,-40.687877],[-20.60547,-40.691911],[-20.604861,-40.695086],[-20.608123,-40.697111],[-20.608849,-40.698679],[-20.611121,-40.700439],[-20.612511,-40.70337],[-20.61202,-40.707904],[-20.614255,-40.711242],[-20.616027,-40.711169],[-20.617317,-40.71311],[-20.61914,-40.713556],[-20.620187,-40.715854],[-20.62299,-40.714766],[-20.624654,-40.716576],[-20.626186,-40.716573],[-20.626551,-40.720718],[-20.632285,-40.727719],[-20.634724,-40.725823],[-20.638318,-40.725957],[-20.641093,-40.727984],[-20.645883,-40.726287],[-20.64695,-40.728879],[-20.645518,-40.73387],[-20.647386,-40.736032],[-20.647448,-40.73782],[-20.64481,-40.741322],[-20.646866,-40.743512],[-20.650291,-40.745147],[-20.651604,-40.747331],[-20.654545,-40.746522],[-20.657208,-40.744019],[-20.658151,-40.744292],[-20.658636,-40.749122],[-20.657293,-40.757271],[-20.658239,-40.759382],[-20.677577,-40.770397],[-20.687329,-40.771361],[-20.688074,-40.770317],[-20.691093,-40.770813],[-20.699948,-40.767954],[-20.704773,-40.769426],[-20.704718,-40.770604],[-20.705509,-40.770948],[-20.70485,-40.774276],[-20.703669,-40.778873],[-20.702133,-40.780722],[-20.703204,-40.782283],[-20.703,-40.784317],[-20.699378,-40.790176],[-20.698579,-40.794189],[-20.697874,-40.795124],[-20.696729,-40.795149],[-20.694548,-40.798182],[-20.695162,-40.799628],[-20.693908,-40.804858],[-20.692765,-40.806242],[-20.693319,-40.807906],[-20.687829,-40.817717],[-20.681323,-40.833516],[-20.678016,-40.838642],[-20.677897,-40.839706],[-20.679305,-40.840828],[-20.680112,-40.843599],[-20.682656,-40.842694],[-20.683662,-40.83964],[-20.685708,-40.838981],[-20.686838,-40.839421],[-20.68896,-40.837874],[-20.689218,-40.835193],[-20.690398,-40.834314],[-20.691193,-40.831455],[-20.6904,-40.827533],[-20.693051,-40.824569],[-20.706071,-40.814921],[-20.708205,-40.810745],[-20.712337,-40.807283],[-20.71516,-40.808736],[-20.7161,-40.807439],[-20.717476,-40.805414],[-20.717353,-40.803814],[-20.714022,-40.80171],[-20.712526,-40.796648],[-20.712729,-40.794516],[-20.714637,-40.793531],[-20.716219,-40.791307],[-20.717056,-40.79218],[-20.721042,-40.792287],[-20.721151,-40.793703],[-20.72214,-40.794219],[-20.725731,-40.794625],[-20.72553,-40.7976],[-20.728788,-40.797823],[-20.729349,-40.799268],[-20.730864,-40.799118],[-20.732923,-40.805187],[-20.737087,-40.805512],[-20.738096,-40.807275],[-20.739908,-40.807872],[-20.743086,-40.806411],[-20.745496,-40.809491],[-20.750553,-40.810368],[-20.75373,-40.807799],[-20.754314,-40.804013],[-20.755595,-40.801668],[-20.754826,-40.800207],[-20.752645,-40.799199],[-20.749614,-40.793025],[-20.749132,-40.791055],[-20.749993,-40.789432],[-20.748476,-40.786446],[-20.748386,-40.784438],[-20.750522,-40.783075],[-20.75153,-40.780393],[-20.75477,-40.776666],[-20.757267,-40.776289],[-20.760314,-40.779162],[-20.763924,-40.78081],[-20.766158,-40.778793],[-20.765499,-40.777354],[-20.766363,-40.774617],[-20.765782,-40.772599],[-20.767235,-40.771682],[-20.770381,-40.771719],[-20.771241,-40.773641],[-20.773358,-40.774906],[-20.775419,-40.773558],[-20.779814,-40.772499],[-20.785198,-40.772763],[-20.786981,-40.771319],[-20.788993,-40.767553],[-20.789049,-40.763456],[-20.786022,-40.75388],[-20.786494,-40.752285],[-20.789383,-40.749602],[-20.794891,-40.748548],[-20.797542,-40.748815],[-20.799314,-40.747697],[-20.807156,-40.736814],[-20.807038,-40.734239],[-20.805089,-40.731935],[-20.805717,-40.729874],[-20.808898,-40.726691],[-20.810564,-40.727269],[-20.811127,-40.726065],[-20.813775,-40.72545],[-20.816441,-40.722381],[-20.817275,-40.722849],[-20.819346,-40.717312],[-20.817457,-40.714696],[-20.818629,-40.71461],[-20.81888,-40.713296],[-20.820188,-40.712679],[-20.821336,-40.710563],[-20.829575,-40.709226],[-20.83109,-40.707503],[-20.832122,-40.707521],[-20.833133,-40.704947],[-20.832271,-40.702364],[-20.833576,-40.7007],[-20.83458,-40.701176],[-20.833225,-40.697324],[-20.833563,-40.695772],[-20.835175,-40.695628],[-20.834652,-40.693222],[-20.833035,-40.692242],[-20.83244,-40.693844],[-20.831233,-40.693758],[-20.830233,-40.692246],[-20.831138,-40.691862],[-20.831508,-40.690303],[-20.829879,-40.690205],[-20.829219,-40.691041],[-20.827901,-40.690394],[-20.82793,-40.688164],[-20.826286,-40.684546],[-20.826611,-40.682665],[-20.82475,-40.680562],[-20.824443,-40.682679],[-20.822861,-40.682402],[-20.823562,-40.680307],[-20.822583,-40.678509],[-20.822987,-40.676214],[-20.822257,-40.675255],[-20.820812,-40.67566],[-20.821588,-40.67413],[-20.821095,-40.671964],[-20.819641,-40.670928],[-20.818357,-40.67174],[-20.817404,-40.671062],[-20.817654,-40.667414],[-20.816777,-40.665921],[-20.813851,-40.666594],[-20.813094,-40.665476],[-20.812274,-40.665812],[-20.812002,-40.663386],[-20.810896,-40.662264],[-20.811248,-40.661528],[-20.810284,-40.660991],[-20.811071,-40.659012],[-20.810349,-40.657067],[-20.810767,-40.655662],[-20.809131,-40.655753],[-20.805881,-40.653273],[-20.809723,-40.642345],[-20.813984,-40.633867],[-20.81671,-40.63071],[-20.820049,-40.628383],[-20.823427,-40.63003],[-20.823974,-40.631477],[-20.823778,-40.630681],[-20.824791,-40.630447],[-20.825315,-40.6319],[-20.827023,-40.631866],[-20.829931,-40.633292],[-20.831597,-40.632557],[-20.835973,-40.632557],[-20.83933,-40.630679],[-20.841114,-40.630833],[-20.841244,-40.628704],[-20.839684,-40.627013],[-20.838254,-40.627231],[-20.836102,-40.625976],[-20.834045,-40.62163],[-20.83216,-40.620081],[-20.827838,-40.618296],[-20.824302,-40.61537],[-20.821315,-40.615297],[-20.815654,-40.613463],[-20.813259,-40.611739],[-20.808484,-40.610271],[-20.805992,-40.607817],[-20.804812,-40.60365],[-20.805818,-40.599437],[-20.804211,-40.598026],[-20.801881,-40.591116],[-20.802943,-40.587388],[-20.803924,-40.586949],[-20.804585,-40.587924],[-20.80659,-40.58791],[-20.806603,-40.586458],[-20.802722,-40.583307],[-20.802623,-40.581597],[-20.804075,-40.582476],[-20.802248,-40.58059],[-20.801738,-40.581086],[-20.80249,-40.581706],[-20.80142,-40.58274],[-20.798215,-40.582531],[-20.793878,-40.580654],[-20.791596,-40.578005],[-20.788305,-40.576997],[-20.788186,-40.569619],[-20.785145,-40.568304],[-20.787964,-40.569891],[-20.787775,-40.571289],[-20.785049,-40.570351],[-20.787837,-40.571747],[-20.787995,-40.574888],[-20.787122,-40.57545],[-20.78247,-40.576691],[-20.776058,-40.576502],[-20.77099,-40.574665],[-20.765154,-40.570894],[-20.627563,-40.647819],[-20.585946,-40.645241],[-20.584117,-40.644305],[-20.582222,-40.645039],[-20.578893,-40.644895],[-20.57429,-40.642468],[-20.562846,-40.642407],[-20.559958,-40.641202],[-20.559148,-40.642952],[-20.557962,-40.64307],[-20.558307,-40.641817],[-20.55661,-40.640853],[-20.554917,-40.641598],[-20.55555,-40.6403],[-20.554571,-40.638999],[-20.553389,-40.638786],[-20.553337,-40.637372],[-20.552171,-40.637573],[-20.552226,-40.638664],[-20.550828,-40.637838],[-20.547361,-40.638686],[-20.545995,-40.643557]];
 
   // usado como alternativa apenas para escolas que ainda não têm dados cadastrados na planilha
   var TODOS_TURNOS = ['Matutino','Vespertino','Integral','Noturno'];
@@ -2975,6 +2985,7 @@
     }
 
     renderizarEscolasNoMapa();
+    renderizarLimiteMunicipio();
     redesenharCirculoRaioAtivoSeExistir();
   }
 
@@ -3154,6 +3165,38 @@
     document.getElementById('iconeOlhoEscolasAberto').style.display = mostrarEscolasNoMapa ? '' : 'none';
     document.getElementById('iconeOlhoEscolasFechado').style.display = mostrarEscolasNoMapa ? 'none' : '';
     if(mapaAdmin){ renderizarEscolasNoMapa(); }
+  });
+
+  // ---------- LIMITE DO MUNICÍPIO ----------
+  var mostrarLimiteMunicipio = true;
+  var camadaLimiteMunicipio = null;
+
+  function renderizarLimiteMunicipio(alvoMapa){
+    var mapa = alvoMapa || mapaAdmin;
+    if(!mapa || !LIMITE_MUNICIPIO || !LIMITE_MUNICIPIO.length){ return; }
+
+    if(!alvoMapa){
+      if(camadaLimiteMunicipio){ mapaAdmin.removeLayer(camadaLimiteMunicipio); camadaLimiteMunicipio = null; }
+      if(!mostrarLimiteMunicipio){ return; }
+    }
+
+    var poligono = L.polygon(LIMITE_MUNICIPIO, {
+      color: '#7C3AED', weight: 2.5, opacity: 0.85, fill: false, dashArray: '9,6', interactive: false
+    }).addTo(mapa);
+
+    if(!alvoMapa){ camadaLimiteMunicipio = poligono; }
+    return poligono;
+  }
+
+  document.getElementById('toggleLimiteMunicipio').addEventListener('click', function(){
+    mostrarLimiteMunicipio = !mostrarLimiteMunicipio;
+    this.setAttribute('aria-pressed', mostrarLimiteMunicipio ? 'true' : 'false');
+    var titulo = mostrarLimiteMunicipio ? 'Ocultar limite do município' : 'Mostrar limite do município';
+    this.setAttribute('title', titulo);
+    this.setAttribute('aria-label', titulo);
+    document.getElementById('iconeOlhoLimiteAberto').style.display = mostrarLimiteMunicipio ? '' : 'none';
+    document.getElementById('iconeOlhoLimiteFechado').style.display = mostrarLimiteMunicipio ? 'none' : '';
+    if(mapaAdmin){ renderizarLimiteMunicipio(); }
   });
 
   document.getElementById('raioCluster').addEventListener('input', function(){
@@ -3383,6 +3426,9 @@
     // replicar também os pinos das escolas, se estiverem ativados na tela
     if(mostrarEscolasNoMapa){
       renderizarEscolasNoMapa(mapaTemp);
+    }
+    if(mostrarLimiteMunicipio){
+      renderizarLimiteMunicipio(mapaTemp);
     }
 
     setTimeout(function(){
