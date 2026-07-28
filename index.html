@@ -634,6 +634,14 @@
     font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;
     box-shadow:0 1px 6px rgba(0,0,0,.35);
   }
+  .mapa-redimensionavel{
+    resize:vertical;
+    overflow:hidden;
+  }
+  .dica-redimensionar-mapa{
+    font-size:11.5px;color:var(--texto-suave);text-align:right;margin:-10px 0 12px;
+  }
+
   .pino-escola{
     width:26px;height:26px;border-radius:50%;
     background:#2E6FDE;
@@ -1461,7 +1469,8 @@
           <span class="status-cluster" id="statusCluster"></span>
         </div>
 
-        <div id="mapaAdmin" style="width:100%;height:320px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
+        <div id="mapaAdmin" class="mapa-redimensionavel" style="width:100%;height:320px;min-height:220px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
+        <p class="dica-redimensionar-mapa" id="dicaRedimensionarMapa" style="display:none;">↕️ Arraste o cantinho inferior direito do mapa para ajustar a altura</p>
 
         <div class="painel-raio-escola" id="painelRaioEscola" style="display:none;">
           <div class="painel-raio-escola-cabecalho">
@@ -2554,6 +2563,7 @@
       var aba = botao.getAttribute('data-aba');
       document.getElementById('painelResumo').style.display = (aba === 'resumo') ? '' : 'none';
       document.getElementById('mapaAdmin').style.display = (aba === 'mapa') ? '' : 'none';
+      document.getElementById('dicaRedimensionarMapa').style.display = (aba === 'mapa') ? 'block' : 'none';
       document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
       document.getElementById('btnRelatorioResumo').style.display = (aba === 'resumo') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapa').style.display = (aba === 'mapa') ? 'flex' : 'none';
@@ -2882,6 +2892,15 @@
         maxZoom: 19, attribution: '© OpenStreetMap'
       }).addTo(mapaAdmin);
       mapaAdmin.on('zoomend', function(){ renderizarMapa(listaFiltradaCache); });
+
+      // reajusta os "quadradinhos" do mapa sempre que o usuário arrastar o cantinho para redimensionar
+      if(window.ResizeObserver){
+        var timeoutRedimensionar = null;
+        new ResizeObserver(function(){
+          clearTimeout(timeoutRedimensionar);
+          timeoutRedimensionar = setTimeout(function(){ mapaAdmin.invalidateSize(); }, 120);
+        }).observe(document.getElementById('mapaAdmin'));
+      }
     } else {
       mapaAdmin.eachLayer(function(l){ if(l instanceof L.Marker || l instanceof L.CircleMarker || l instanceof L.Circle) mapaAdmin.removeLayer(l); });
     }
