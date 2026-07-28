@@ -570,6 +570,11 @@
     position:relative;
     z-index:1;
   }
+  .busca-filtro-multi{
+    width:100%;padding:8px 10px;border:1px solid var(--borda);border-radius:8px;
+    font-size:13px;font-family:inherit;margin-bottom:6px;background:#FCFCFA;
+  }
+  .busca-filtro-multi:focus{outline:none;border-color:var(--verde);background:#fff;}
   .painel-multi-acoes{display:flex;justify-content:space-between;gap:8px;padding:2px 4px 8px;border-bottom:1px solid var(--borda);margin-bottom:6px;}
   .link-multi{background:none;border:none;color:var(--verde-escuro);font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 4px;}
   .link-multi:hover{text-decoration:underline;}
@@ -698,6 +703,11 @@
   .selo-matriculado-aqui{
     background:var(--verde-suave);color:var(--verde-escuro);padding:1px 6px;border-radius:99px;
     font-size:10.5px;font-weight:600;
+  }
+  .badge-contagem-raio{
+    background:#2E6FDE;color:#fff;border:2px solid #fff;border-radius:99px;
+    padding:2px 9px;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;
+    box-shadow:0 1px 5px rgba(0,0,0,.4);white-space:nowrap;
   }
 
   .toggle-escolas{
@@ -1353,6 +1363,7 @@
             <label>Aluno</label>
             <button type="button" class="seletor-multi" id="botaoFiltroAluno">Todos os alunos</button>
             <div class="painel-multi" id="painelFiltroAluno" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar...">
               <div class="painel-multi-acoes">
                 <button type="button" class="link-multi" data-campo="aluno" data-acao="todos">Marcar todos</button>
                 <button type="button" class="link-multi" data-campo="aluno" data-acao="nenhum">Limpar</button>
@@ -1364,6 +1375,7 @@
             <label>Escola</label>
             <button type="button" class="seletor-multi" id="botaoFiltroEscola">Todas as escolas</button>
             <div class="painel-multi" id="painelFiltroEscola" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar...">
               <div class="painel-multi-acoes">
                 <button type="button" class="link-multi" data-campo="escola" data-acao="todos">Marcar todas</button>
                 <button type="button" class="link-multi" data-campo="escola" data-acao="nenhum">Limpar</button>
@@ -1375,6 +1387,7 @@
             <label>Turno</label>
             <button type="button" class="seletor-multi" id="botaoFiltroTurno">Todos os turnos</button>
             <div class="painel-multi" id="painelFiltroTurno" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar...">
               <div class="painel-multi-acoes">
                 <button type="button" class="link-multi" data-campo="turno" data-acao="todos">Marcar todas</button>
                 <button type="button" class="link-multi" data-campo="turno" data-acao="nenhum">Limpar</button>
@@ -1386,6 +1399,7 @@
             <label>Série</label>
             <button type="button" class="seletor-multi" id="botaoFiltroSerie">Todas as séries</button>
             <div class="painel-multi" id="painelFiltroSerie" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar...">
               <div class="painel-multi-acoes">
                 <button type="button" class="link-multi" data-campo="serie" data-acao="todos">Marcar todas</button>
                 <button type="button" class="link-multi" data-campo="serie" data-acao="nenhum">Limpar</button>
@@ -1397,6 +1411,7 @@
             <label>Localidade</label>
             <button type="button" class="seletor-multi" id="botaoFiltroLocalidade">Todas as localidades</button>
             <div class="painel-multi" id="painelFiltroLocalidade" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar...">
               <div class="painel-multi-acoes">
                 <button type="button" class="link-multi" data-campo="localidade" data-acao="todos">Marcar todas</button>
                 <button type="button" class="link-multi" data-campo="localidade" data-acao="nenhum">Limpar</button>
@@ -2469,7 +2484,7 @@
         return;
       }
       registrosCache = Array.isArray(lista) ? lista : [];
-      popularFiltros(registrosCache);
+      popularFiltros();
       aplicarFiltros();
     }).catch(function(erro){
       console.error('Erro ao carregar registros:', erro);
@@ -2589,17 +2604,22 @@
     atualizarRotuloBotaoFiltro(campo);
   }
 
-  function popularFiltros(lista){
-    var alunos = Array.from(new Set(lista.map(function(r){ return r.nomeAluno; }).filter(Boolean))).sort();
-    var escolas = Array.from(new Set(lista.map(function(r){ return r.escola; }).filter(Boolean))).sort();
-    var turnos = Array.from(new Set(lista.map(function(r){ return r.turno; }).filter(Boolean))).sort();
-    var series = Array.from(new Set(lista.map(function(r){ return r.serie; }).filter(Boolean))).sort();
-    var localidades = Array.from(new Set(lista.map(function(r){ return r.localidade; }).filter(Boolean))).sort();
-    popularOpcoesFiltro('aluno', alunos);
-    popularOpcoesFiltro('escola', escolas);
-    popularOpcoesFiltro('turno', turnos);
-    popularOpcoesFiltro('serie', series);
-    popularOpcoesFiltro('localidade', localidades);
+  var CAMPO_PARA_CHAVE_DADO = { aluno: 'nomeAluno', escola: 'escola', turno: 'turno', serie: 'serie', localidade: 'localidade' };
+  var ORDEM_CAMPOS_FILTRO = ['aluno', 'escola', 'turno', 'serie', 'localidade'];
+
+  function popularFiltros(){
+    ORDEM_CAMPOS_FILTRO.forEach(function(campoAtual){
+      // considera os OUTROS filtros já selecionados, para restringir as opções deste campo
+      var subconjunto = registrosCache.filter(function(r){
+        return ORDEM_CAMPOS_FILTRO.every(function(campo){
+          if(campo === campoAtual){ return true; }
+          if(!filtrosSelecionados[campo].size){ return true; }
+          return filtrosSelecionados[campo].has(r[CAMPO_PARA_CHAVE_DADO[campo]]);
+        });
+      });
+      var valores = Array.from(new Set(subconjunto.map(function(r){ return r[CAMPO_PARA_CHAVE_DADO[campoAtual]]; }).filter(Boolean))).sort();
+      popularOpcoesFiltro(campoAtual, valores);
+    });
   }
 
   function obterListaFiltrada(){
@@ -2631,6 +2651,14 @@
       var jaAberto = painel.style.display === 'block';
       document.querySelectorAll('.painel-multi').forEach(function(p){ p.style.display = 'none'; });
       painel.style.display = jaAberto ? 'none' : 'block';
+      if(!jaAberto){
+        var busca = painel.querySelector('.busca-filtro-multi');
+        if(busca){
+          busca.value = '';
+          painel.querySelectorAll('.opcao-multi').forEach(function(l){ l.style.display = ''; });
+          setTimeout(function(){ busca.focus(); }, 30);
+        }
+      }
     });
   });
   document.addEventListener('click', function(){
@@ -2638,6 +2666,18 @@
   });
   document.querySelectorAll('.painel-multi').forEach(function(painel){
     painel.addEventListener('click', function(e){ e.stopPropagation(); });
+  });
+
+  // busca por digitação dentro de cada painel de filtro
+  document.querySelectorAll('.busca-filtro-multi').forEach(function(busca){
+    busca.addEventListener('input', function(){
+      var termo = busca.value.toLowerCase();
+      var painel = busca.closest('.painel-multi');
+      painel.querySelectorAll('.opcao-multi').forEach(function(label){
+        var texto = label.textContent.toLowerCase();
+        label.style.display = texto.indexOf(termo) !== -1 ? '' : 'none';
+      });
+    });
   });
 
   // marcar/desmarcar um item
@@ -2668,6 +2708,7 @@
   });
 
   function aplicarFiltros(){
+    popularFiltros();
     var lista = obterListaFiltrada();
     listaFiltradaCache = lista;
     var total = registrosCache.length;
@@ -2961,8 +3002,21 @@
 
   // ---------- RAIO DE ALCANCE DE UMA ESCOLA ----------
   var circuloRaioEscola = null;
+  var marcadorContagemRaio = null;
   var raioEscolaAtivo = null; // { nome: string }
   var somenteMatriculadosRaio = false;
+
+  // calcula um ponto geográfico a uma certa distância (metros) e ângulo (graus, 0 = norte) a partir de um ponto de origem
+  function pontoNaCircunferencia(lat, lng, distanciaM, anguloGraus){
+    var R = 6371000;
+    var d = distanciaM / R;
+    var brng = anguloGraus * Math.PI / 180;
+    var lat1 = lat * Math.PI / 180;
+    var lng1 = lng * Math.PI / 180;
+    var lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brng));
+    var lng2 = lng1 + Math.atan2(Math.sin(brng) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+    return [lat2 * 180 / Math.PI, lng2 * 180 / Math.PI];
+  }
 
   function recalcularRaioEscola(){
     if(!raioEscolaAtivo){ return; }
@@ -2988,6 +3042,15 @@
       })
       .filter(Boolean)
       .sort(function(a, b){ return a.distancia - b.distancia; });
+
+    // rótulo com o número de alunos, posicionado na borda (topo) da circunferência
+    if(marcadorContagemRaio){ mapaAdmin.removeLayer(marcadorContagemRaio); marcadorContagemRaio = null; }
+    var pontoBorda = pontoNaCircunferencia(coords.lat, coords.lng, raioMetros, 0);
+    var iconeContagem = L.divIcon({
+      html: '<div class="badge-contagem-raio">' + alunosNoRaio.length + '</div>',
+      className: '', iconSize: [30, 24], iconAnchor: [15, 12]
+    });
+    marcadorContagemRaio = L.marker(pontoBorda, { icon: iconeContagem, interactive: false }).addTo(mapaAdmin);
 
     var matriculadosAqui = alunosNoRaio.filter(function(item){ return item.registro.escola === nomeEscola; });
     var matriculadosOutra = alunosNoRaio.length - matriculadosAqui.length;
@@ -3043,6 +3106,7 @@
     document.getElementById('painelRaioEscola').style.display = 'none';
     raioEscolaAtivo = null;
     if(circuloRaioEscola){ mapaAdmin.removeLayer(circuloRaioEscola); circuloRaioEscola = null; }
+    if(marcadorContagemRaio){ mapaAdmin.removeLayer(marcadorContagemRaio); marcadorContagemRaio = null; }
   });
 
   document.getElementById('toggleEscolasMapa').addEventListener('click', function(){
@@ -3155,7 +3219,7 @@
       if(idx !== -1){ registrosCache[idx] = registroAtualizado; }
       document.getElementById('modalEditar').style.display = 'none';
       registroEmEdicao = null;
-      popularFiltros(registrosCache);
+      popularFiltros();
       aplicarFiltros();
       mostrarAviso('Cadastro atualizado com sucesso.', 'sucesso');
     }, function(){
@@ -3170,7 +3234,7 @@
     if(!ok){ return; }
     enviarAcaoAdmin({ acao: 'excluir', id: registro.id, chaveAdmin: SENHA_ADMIN }, function(){
       registrosCache = registrosCache.filter(function(r){ return String(r.id) !== String(registro.id); });
-      popularFiltros(registrosCache);
+      popularFiltros();
       aplicarFiltros();
       mostrarAviso('Cadastro excluído.', 'sucesso');
     });
