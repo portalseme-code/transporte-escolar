@@ -1470,7 +1470,7 @@
           </div>
 
           <label for="raioEscolaSlider" class="rotulo-raio-escola-slider">Raio de alcance: <strong id="valorRaioEscola">1</strong> km</label>
-          <input type="range" id="raioEscolaSlider" min="0.1" max="5" step="0.1" value="1">
+          <input type="range" id="raioEscolaSlider" min="0.1" max="10" step="0.1" value="1">
 
           <div class="metricas-raio-escola" id="metricasRaioEscola"></div>
 
@@ -3043,14 +3043,16 @@
       .filter(Boolean)
       .sort(function(a, b){ return a.distancia - b.distancia; });
 
-    // rótulo com o número de alunos, posicionado na borda (topo) da circunferência
+    // rótulo com o número de alunos e o valor do raio, posicionado na borda (topo) da circunferência
     if(marcadorContagemRaio){ mapaAdmin.removeLayer(marcadorContagemRaio); marcadorContagemRaio = null; }
     var pontoBorda = pontoNaCircunferencia(coords.lat, coords.lng, raioMetros, 0);
+    var textoRaioBadge = raioKm.toFixed(1).replace(/\.0$/, '') + 'km';
     var iconeContagem = L.divIcon({
-      html: '<div class="badge-contagem-raio">' + alunosNoRaio.length + '</div>',
-      className: '', iconSize: [30, 24], iconAnchor: [15, 12]
+      html: '<div class="badge-contagem-raio">' + alunosNoRaio.length + ' aluno' + (alunosNoRaio.length === 1 ? '' : 's') + ' · ' + textoRaioBadge + '</div>',
+      className: '', iconSize: [110, 24], iconAnchor: [55, 12]
     });
     marcadorContagemRaio = L.marker(pontoBorda, { icon: iconeContagem, interactive: false }).addTo(mapaAdmin);
+
 
     var matriculadosAqui = alunosNoRaio.filter(function(item){ return item.registro.escola === nomeEscola; });
     var matriculadosOutra = alunosNoRaio.length - matriculadosAqui.length;
