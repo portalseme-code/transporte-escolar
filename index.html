@@ -1814,8 +1814,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
-<script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
 <script>
 (function(){
   var CENTRO_ANCHIETA = [-20.8028, -40.6444];
@@ -3324,8 +3322,10 @@
 
   // ---------- ABA ROTAS (traçado seguindo as ruas, via OSRM) ----------
   var mapaRotas = null;
-  var controleRotas = null;
-  var resumoRotaAtual = null; // { distanciaKm, tempoMin, coordenadas: [[lat,lng], ...] }
+  var pontosRotaAtual = [];        // [{lat, lng}]
+  var marcadoresRotaAtual = [];    // L.Marker[]
+  var linhaRotaAtual = null;       // L.Polyline (caminho real, seguindo ruas)
+  var resumoRotaAtual = null;      // { distanciaKm, tempoMin, coordenadas: [[lat,lng], ...] }
   var CHAVE_ROTAS_SALVAS = 'rotasTransporteEscolarAnchieta';
 
   function obterRotasSalvas(){
@@ -3334,11 +3334,6 @@
   }
   function gravarRotasSalvas(lista){
     try { localStorage.setItem(CHAVE_ROTAS_SALVAS, JSON.stringify(lista)); } catch(e){}
-  }
-
-  function pontosValidosRota(){
-    if(!controleRotas){ return []; }
-    return controleRotas.getWaypoints().filter(function(wp){ return wp.latLng; });
   }
 
   function criarIconeParadaRota(indice){
@@ -3355,37 +3350,10 @@
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(mapaRotas);
 
-    controleRotas = L.Routing.control({
-      waypoints: [],
-      routeWhileDragging: true,
-      addWaypoints: false,
-      show: false,
-      fitSelectedRoutes: false,
-      lineOptions: { styles: [{ color: '#EA580C', weight: 5, opacity: 0.85 }] },
-      router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
-      createMarker: function(i, wp){
-        return L.marker(wp.latLng, { draggable: true, icon: criarIconeParadaRota(i) });
-      }
-    }).addTo(mapaRotas);
-
-    controleRotas.on('routesfound', function(e){
-      var rota = e.routes[0];
-      resumoRotaAtual = {
-        distanciaKm: rota.summary.totalDistance / 1000,
-        tempoMin: rota.summary.totalTime / 60,
-        coordenadas: rota.coordinates.map(function(c){ return [c.lat, c.lng]; })
-      };
-      atualizarResumoRota();
-    });
-    controleRotas.on('routingerror', function(){
-      resumoRotaAtual = null;
-      document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular o caminho pelas ruas entre esses pontos.';
-    });
-    controleRotas.on('waypointschanged', atualizarResumoRota);
-
     mapaRotas.on('click', function(e){
-      var pontos = pontosValidosRota();
-      controleRotas.spliceWaypoints(pontos.length, 0, e.latlng);
+      pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng });
+      redesenharPontosRota();
+      calcularRotaOSRM();
     });
 
     if(window.ResizeObserver){
@@ -3400,18 +3368,33 @@
     document.getElementById('mapaRotas').appendChild(indicadorRedimensionarRotas);
   }
 
-  function atualizarResumoRota(){
-    var pontos = pontosValidosRota();
+  function redesenharPontosRota(){
+    marcadoresRotaAtual.forEach(function(m){ mapaRotas.removeLayer(m); });
+    marcadoresRotaAtual = [];
+    pontosRotaAtual.forEach(function(p, i){
+      var marcador = L.marker([p.lat, p.lng], { draggable: true, icon: criarIconeParadaRota(i) }).addTo(mapaRotas);
+      marcador.on('dragend', function(){
+        var novaPos = marcador.getLatLng();
+        pontosRotaAtual[i] = { lat: novaPos.lat, lng: novaPos.lng };
+        calcularRotaOSRM();
+      });
+      marcadoresRotaAtual.push(marcador);
+    });
+    atualizarListaPontosRota();
+  }
 
+  function atualizarListaPontosRota(){
     var lista = document.getElementById('listaParadasRota');
-    lista.innerHTML = pontos.map(function(wp, i){
+    lista.innerHTML = pontosRotaAtual.map(function(p, i){
       return '<div class="item-parada-rota"><span>' + (i + 1) + '. Ponto ' + (i + 1) + '</span>' +
         '<button type="button" class="btn-remover-parada" data-indice="' + i + '" title="Remover este ponto">✕</button></div>';
     }).join('');
+  }
 
+  function atualizarMetaRota(){
     var metaEl = document.getElementById('metaRotaMapa');
-    if(pontos.length < 2){
-      metaEl.textContent = pontos.length === 1
+    if(pontosRotaAtual.length < 2){
+      metaEl.textContent = pontosRotaAtual.length === 1
         ? '1 ponto marcado — clique em mais um lugar para traçar o caminho.'
         : 'Nenhum ponto ainda. Clique no mapa para começar.';
       return;
@@ -3420,25 +3403,63 @@
       var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
       var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
       var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
-      metaEl.textContent = pontos.length + ' pontos · ' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km · aprox. ' + tempoTexto + ' de percurso';
-    } else {
-      metaEl.textContent = 'Calculando o caminho pelas ruas...';
+      metaEl.textContent = pontosRotaAtual.length + ' pontos · ' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km · aprox. ' + tempoTexto + ' de percurso';
     }
+  }
+
+  function calcularRotaOSRM(){
+    if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
+    resumoRotaAtual = null;
+
+    if(pontosRotaAtual.length < 2){
+      atualizarMetaRota();
+      return;
+    }
+
+    document.getElementById('metaRotaMapa').textContent = 'Calculando o caminho pelas ruas...';
+
+    var coordsStr = pontosRotaAtual.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+    var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson';
+
+    fetch(url)
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        if(dados.code !== 'Ok' || !dados.routes || !dados.routes.length){
+          throw new Error('OSRM não retornou uma rota válida');
+        }
+        var rota = dados.routes[0];
+        var coordenadas = rota.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+        resumoRotaAtual = {
+          distanciaKm: rota.distance / 1000,
+          tempoMin: rota.duration / 60,
+          coordenadas: coordenadas
+        };
+        linhaRotaAtual = L.polyline(coordenadas, { color: '#EA580C', weight: 5, opacity: 0.85 }).addTo(mapaRotas);
+        atualizarMetaRota();
+      })
+      .catch(function(erro){
+        console.error('Erro ao calcular rota via OSRM:', erro);
+        document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular o caminho pelas ruas agora. Tente novamente em instantes.';
+      });
   }
 
   document.getElementById('listaParadasRota').addEventListener('click', function(e){
     var botao = e.target.closest('.btn-remover-parada');
-    if(!botao || !controleRotas){ return; }
-    controleRotas.spliceWaypoints(parseInt(botao.getAttribute('data-indice'), 10), 1);
+    if(!botao){ return; }
+    pontosRotaAtual.splice(parseInt(botao.getAttribute('data-indice'), 10), 1);
+    redesenharPontosRota();
+    calcularRotaOSRM();
   });
 
   document.getElementById('btnLimparRota').addEventListener('click', function(){
-    if(!controleRotas || !pontosValidosRota().length){ return; }
+    if(!pontosRotaAtual.length){ return; }
     if(!confirm('Limpar todos os pontos da rota atual?')){ return; }
-    controleRotas.setWaypoints([]);
+    pontosRotaAtual = [];
+    if(linhaRotaAtual && mapaRotas){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     resumoRotaAtual = null;
     document.getElementById('nomeRotaAtual').value = '';
-    atualizarResumoRota();
+    redesenharPontosRota();
+    atualizarMetaRota();
   });
 
   function atualizarSeletorRotasSalvas(){
@@ -3452,8 +3473,7 @@
   atualizarSeletorRotasSalvas();
 
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
-    var pontos = pontosValidosRota();
-    if(pontos.length < 2 || !resumoRotaAtual){
+    if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de salvar.');
       return;
     }
@@ -3461,7 +3481,7 @@
     var rotas = obterRotasSalvas();
     rotas.push({
       nome: nome,
-      pontos: pontos.map(function(wp){ return { lat: wp.latLng.lat, lng: wp.latLng.lng }; }),
+      pontos: pontosRotaAtual.slice(),
       distanciaKm: resumoRotaAtual.distanciaKm,
       tempoMin: resumoRotaAtual.tempoMin,
       criadoEm: new Date().toISOString()
@@ -3473,12 +3493,14 @@
 
   document.getElementById('btnCarregarRotaSalva').addEventListener('click', function(){
     var select = document.getElementById('seletorRotasSalvas');
-    if(!select.value || !controleRotas){ return; }
+    if(!select.value){ return; }
     var rotas = obterRotasSalvas();
     var rota = rotas[parseInt(select.value, 10)];
     if(!rota){ return; }
-    controleRotas.setWaypoints(rota.pontos.map(function(p){ return L.latLng(p.lat, p.lng); }));
+    pontosRotaAtual = rota.pontos.slice();
     document.getElementById('nomeRotaAtual').value = rota.nome;
+    redesenharPontosRota();
+    calcularRotaOSRM();
   });
 
   document.getElementById('btnExcluirRotaSalva').addEventListener('click', function(){
@@ -3514,8 +3536,8 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaTemp);
 
     var linhaRota = L.polyline(resumoRotaAtual.coordenadas, { color: '#EA580C', weight: 5, opacity: 0.9 }).addTo(mapaTemp);
-    pontosValidosRota().forEach(function(wp, i){
-      L.marker(wp.latLng, { icon: criarIconeParadaRota(i) }).addTo(mapaTemp);
+    pontosRotaAtual.forEach(function(p, i){
+      L.marker([p.lat, p.lng], { icon: criarIconeParadaRota(i) }).addTo(mapaTemp);
     });
     mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
 
@@ -3531,7 +3553,6 @@
 
   function montarDadosRotaImpressao(){
     var nomeRota = document.getElementById('nomeRotaAtual').value.trim() || 'Rota sem nome';
-    var pontos = pontosValidosRota();
     var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
     var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
     var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
@@ -3539,15 +3560,15 @@
     var html = '<tr class="linha-evitar-quebra"><td>' +
       '<h2 class="titulo-secao-impressao">Detalhamento da rota — ' + escapeHtml(nomeRota) + '</h2>' +
       '<div class="metricas-impressao" style="margin-bottom:10px;">' +
-        '<div class="item-metrica-impressao"><strong>' + pontos.length + '</strong>Pontos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + pontosRotaAtual.length + '</strong>Pontos</div>' +
         '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância (pelas ruas)</div>' +
         '<div class="item-metrica-impressao"><strong>' + tempoTexto + '</strong>Tempo estimado</div>' +
       '</div>' +
     '</td></tr>';
 
-    html += pontos.map(function(wp, i){
+    html += pontosRotaAtual.map(function(p, i){
       return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
-        '<div class="ponto-impressao-topo"><span>Ponto ' + (i + 1) + '</span><span>' + wp.latLng.lat.toFixed(5) + ', ' + wp.latLng.lng.toFixed(5) + '</span></div>' +
+        '<div class="ponto-impressao-topo"><span>Ponto ' + (i + 1) + '</span><span>' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</span></div>' +
         '</div></td></tr>';
     }).join('');
 
@@ -3556,8 +3577,7 @@
   }
 
   document.getElementById('btnImprimirRota').addEventListener('click', function(){
-    var pontos = pontosValidosRota();
-    if(pontos.length < 2 || !resumoRotaAtual){
+    if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de imprimir.');
       return;
     }
