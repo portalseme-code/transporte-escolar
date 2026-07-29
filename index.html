@@ -1629,6 +1629,32 @@
             </div>
           </div>
 
+          <div class="campo-filtro campo-filtro-multi" style="margin-bottom:14px;">
+            <label>Escolas atendidas por esta rota</label>
+            <button type="button" class="seletor-multi" id="botaoEscolasRota">Nenhuma escola selecionada</button>
+            <div class="painel-multi" id="painelEscolasRota" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar escola...">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi-rota" data-acao="todos-escolas">Marcar todas</button>
+                <button type="button" class="link-multi-rota" data-acao="nenhum-escolas">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesEscolasRota"></div>
+            </div>
+          </div>
+
+          <div class="campo-filtro campo-filtro-multi" style="margin-bottom:14px;">
+            <label>Alunos atendidos por esta rota</label>
+            <button type="button" class="seletor-multi" id="botaoAlunosRota">Nenhum aluno vinculado</button>
+            <div class="painel-multi" id="painelAlunosRota" style="display:none;">
+              <input type="text" class="busca-filtro-multi" placeholder="Buscar aluno...">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi-rota" data-acao="sugerir-alunos">📍 Sugerir alunos próximos às paradas</button>
+                <button type="button" class="link-multi-rota" data-acao="nenhum-alunos">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesAlunosRota"></div>
+            </div>
+          </div>
+
           <div class="controle-cluster-linha-topo" style="margin-bottom:8px;">
             <label>Mapa da rota</label>
             <div class="grupo-toggles-mapa">
@@ -3521,6 +3547,8 @@
     document.getElementById('mapaRotas').appendChild(indicadorRedimensionarRotas);
 
     renderizarEscolasNoMapaRotas();
+    popularOpcoesEscolasRota();
+    popularOpcoesAlunosRota();
   }
 
   function renderizarEscolasNoMapaRotas(){
@@ -3714,6 +3742,10 @@
     if(linhaRotaAtual && mapaRotas){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     resumoRotaAtual = null;
     document.getElementById('nomeRotaAtual').value = '';
+    escolasVinculadasRota.clear();
+    alunosVinculadosRota.clear();
+    popularOpcoesEscolasRota();
+    popularOpcoesAlunosRota();
     redesenharPontosRota();
     atualizarMetaRota();
   });
@@ -3748,6 +3780,86 @@
     document.getElementById('horarioFimRota').value = dados.horarioFim || '';
   }
 
+  // ---------- ESCOLAS E ALUNOS VINCULADOS À ROTA ----------
+  var escolasVinculadasRota = new Set();
+  var alunosVinculadosRota = new Set(); // guarda os "id" dos registros
+
+  function popularOpcoesEscolasRota(){
+    var nomes = Object.keys(ESCOLAS_COORDENADAS).sort();
+    var container = document.getElementById('opcoesEscolasRota');
+    container.innerHTML = nomes.map(function(nome){
+      var marcado = escolasVinculadasRota.has(nome) ? ' checked' : '';
+      return '<label class="opcao-multi"><input type="checkbox" class="check-escola-rota" value="' + escapeHtml(nome) + '"' + marcado + '> ' + escapeHtml(nome) + '</label>';
+    }).join('');
+    atualizarRotuloEscolasRota();
+  }
+
+  function popularOpcoesAlunosRota(){
+    var ordenados = registrosCache.slice().sort(function(a, b){ return (a.nomeAluno || '').localeCompare(b.nomeAluno || ''); });
+    var container = document.getElementById('opcoesAlunosRota');
+    container.innerHTML = ordenados.map(function(r){
+      var marcado = alunosVinculadosRota.has(r.id) ? ' checked' : '';
+      return '<label class="opcao-multi"><input type="checkbox" class="check-aluno-rota" value="' + escapeHtml(r.id) + '"' + marcado + '> ' + escapeHtml(r.nomeAluno) + ' <span style="color:var(--texto-suave);font-size:11px;">— ' + escapeHtml(r.escola) + '</span></label>';
+    }).join('');
+    atualizarRotuloAlunosRota();
+  }
+
+  function atualizarRotuloEscolasRota(){
+    var botao = document.getElementById('botaoEscolasRota');
+    var n = escolasVinculadasRota.size;
+    botao.textContent = n === 0 ? 'Nenhuma escola selecionada' : (n === 1 ? Array.from(escolasVinculadasRota)[0] : n + ' escolas selecionadas');
+    botao.classList.toggle('tem-selecao', n > 0);
+  }
+  function atualizarRotuloAlunosRota(){
+    var botao = document.getElementById('botaoAlunosRota');
+    var n = alunosVinculadosRota.size;
+    botao.textContent = n === 0 ? 'Nenhum aluno vinculado' : n + ' aluno' + (n === 1 ? '' : 's') + ' vinculado' + (n === 1 ? '' : 's');
+    botao.classList.toggle('tem-selecao', n > 0);
+  }
+
+  document.getElementById('opcoesEscolasRota').addEventListener('change', function(e){
+    if(!e.target.classList.contains('check-escola-rota')){ return; }
+    if(e.target.checked){ escolasVinculadasRota.add(e.target.value); } else { escolasVinculadasRota.delete(e.target.value); }
+    atualizarRotuloEscolasRota();
+  });
+  document.getElementById('opcoesAlunosRota').addEventListener('change', function(e){
+    if(!e.target.classList.contains('check-aluno-rota')){ return; }
+    if(e.target.checked){ alunosVinculadosRota.add(e.target.value); } else { alunosVinculadosRota.delete(e.target.value); }
+    atualizarRotuloAlunosRota();
+  });
+
+  document.querySelectorAll('.link-multi-rota').forEach(function(botao){
+    botao.addEventListener('click', function(){
+      var acao = botao.getAttribute('data-acao');
+      if(acao === 'todos-escolas'){
+        Object.keys(ESCOLAS_COORDENADAS).forEach(function(nome){ escolasVinculadasRota.add(nome); });
+        popularOpcoesEscolasRota();
+      } else if(acao === 'nenhum-escolas'){
+        escolasVinculadasRota.clear();
+        popularOpcoesEscolasRota();
+      } else if(acao === 'nenhum-alunos'){
+        alunosVinculadosRota.clear();
+        popularOpcoesAlunosRota();
+      } else if(acao === 'sugerir-alunos'){
+        var paradas = pontosRotaAtual.filter(function(p){ return p.parada; });
+        if(!paradas.length){
+          mostrarAviso('Marque pelo menos uma parada na rota (caixinha "É um ponto de parada") antes de sugerir alunos.');
+          return;
+        }
+        var RAIO_SUGESTAO_METROS = 300;
+        var sugeridos = 0;
+        registrosCache.forEach(function(r){
+          var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+          if(lat === null || lng === null || alunosVinculadosRota.has(r.id)){ return; }
+          var pertoDeAlguma = paradas.some(function(p){ return distanciaMetros(p.lat, p.lng, lat, lng) <= RAIO_SUGESTAO_METROS; });
+          if(pertoDeAlguma){ alunosVinculadosRota.add(r.id); sugeridos++; }
+        });
+        popularOpcoesAlunosRota();
+        mostrarAviso(sugeridos + ' aluno' + (sugeridos === 1 ? '' : 's') + ' sugerido' + (sugeridos === 1 ? '' : 's') + ' (dentro de ' + RAIO_SUGESTAO_METROS + 'm de alguma parada).', 'sucesso');
+      }
+    });
+  });
+
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
     if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de salvar.');
@@ -3761,6 +3873,8 @@
       distanciaKm: resumoRotaAtual.distanciaKm,
       tempoMin: resumoRotaAtual.tempoMin,
       cadastro: coletarDadosCadastroRota(),
+      escolas: Array.from(escolasVinculadasRota),
+      alunos: Array.from(alunosVinculadosRota),
       criadoEm: new Date().toISOString()
     });
     gravarRotasSalvas(rotas);
@@ -3778,6 +3892,10 @@
     pontosRotaAtual = rota.pontos.slice();
     document.getElementById('nomeRotaAtual').value = rota.nome;
     preencherDadosCadastroRota(rota.cadastro);
+    escolasVinculadasRota = new Set(rota.escolas || []);
+    alunosVinculadosRota = new Set(rota.alunos || []);
+    popularOpcoesEscolasRota();
+    popularOpcoesAlunosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
   });
@@ -3864,6 +3982,27 @@
         '<div class="ponto-impressao-topo"><span>' + escapeHtml(rotulo) + '</span><span>' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</span></div>' +
         '</div></td></tr>';
     }).join('');
+
+    if(escolasVinculadasRota.size){
+      html += '<tr class="linha-evitar-quebra"><td>' +
+        '<h2 class="titulo-secao-impressao">Escolas atendidas por esta rota</h2>' +
+        '<p style="font-size:13px;">' + escapeHtml(Array.from(escolasVinculadasRota).join(' · ')) + '</p>' +
+      '</td></tr>';
+    }
+
+    if(alunosVinculadosRota.size){
+      var alunosOrdenados = registrosCache
+        .filter(function(r){ return alunosVinculadosRota.has(r.id); })
+        .sort(function(a, b){ return (a.nomeAluno || '').localeCompare(b.nomeAluno || ''); });
+      html += '<tr class="linha-evitar-quebra"><td>' +
+        '<h2 class="titulo-secao-impressao">Alunos vinculados a esta rota (' + alunosOrdenados.length + ')</h2>' +
+      '</td></tr>';
+      html += alunosOrdenados.map(function(r){
+        return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
+          '<div class="ponto-impressao-topo"><span>' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + '</span><span>' + escapeHtml(r.turno) + '</span></div>' +
+          '</div></td></tr>';
+      }).join('');
+    }
 
     document.getElementById('tbodyRotaImpressao').innerHTML = html;
     document.getElementById('tbodyRotaImpressao').style.display = 'table-row-group';
