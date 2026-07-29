@@ -3590,6 +3590,54 @@
     }
   }
 
+  // ----- editar o traçado arrastando qualquer trecho da linha (insere um novo ponto ali) -----
+  function distanciaPontoSegmento(p, a, b){
+    var A = p.lat - a.lat, B = p.lng - a.lng;
+    var C = b.lat - a.lat, D = b.lng - a.lng;
+    var lenSq = C * C + D * D;
+    var t = lenSq !== 0 ? Math.max(0, Math.min(1, (A * C + B * D) / lenSq)) : 0;
+    var dx = p.lat - (a.lat + t * C), dy = p.lng - (a.lng + t * D);
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function encontrarIndiceInsercao(latlng){
+    var menorDist = Infinity, indiceInsercao = pontosRotaAtual.length;
+    for(var i = 0; i < pontosRotaAtual.length - 1; i++){
+      var d = distanciaPontoSegmento(latlng, pontosRotaAtual[i], pontosRotaAtual[i + 1]);
+      if(d < menorDist){ menorDist = d; indiceInsercao = i + 1; }
+    }
+    return indiceInsercao;
+  }
+
+  function habilitarEdicaoDaLinha(){
+    if(!linhaRotaAtual){ return; }
+    linhaRotaAtual.on('mousedown', function(e){
+      L.DomEvent.stopPropagation(e);
+      mapaRotas.dragging.disable();
+
+      var marcadorTemp = L.circleMarker(e.latlng, {
+        radius: 7, color: '#EA580C', weight: 3, fillColor: '#fff', fillOpacity: 1
+      }).addTo(mapaRotas);
+
+      function aoMover(ev){ marcadorTemp.setLatLng(ev.latlng); }
+      function aoSoltar(ev){
+        mapaRotas.off('mousemove', aoMover);
+        mapaRotas.off('mouseup', aoSoltar);
+        mapaRotas.dragging.enable();
+        mapaRotas.removeLayer(marcadorTemp);
+
+        salvarEstadoRotaParaUndo();
+        var indice = encontrarIndiceInsercao(ev.latlng);
+        pontosRotaAtual.splice(indice, 0, { lat: ev.latlng.lat, lng: ev.latlng.lng, parada: false, nomeParada: '' });
+        redesenharPontosRota();
+        calcularRotaOSRM();
+      }
+
+      mapaRotas.on('mousemove', aoMover);
+      mapaRotas.on('mouseup', aoSoltar);
+    });
+  }
+
   function calcularRotaOSRM(){
     if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     resumoRotaAtual = null;
@@ -3618,6 +3666,7 @@
           coordenadas: coordenadas
         };
         linhaRotaAtual = L.polyline(coordenadas, { color: '#EA580C', weight: 5, opacity: 0.85 }).addTo(mapaRotas);
+        habilitarEdicaoDaLinha();
         atualizarMetaRota();
       })
       .catch(function(erro){
