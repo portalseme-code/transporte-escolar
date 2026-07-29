@@ -739,6 +739,26 @@
     display:flex;align-items:center;justify-content:center;
     color:#fff;font-size:11.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;
   }
+  .pino-inicio-rota{background:var(--verde-escuro);font-size:12px;}
+  .pino-fim-rota{background:#1a1a1a;font-size:13px;}
+  .pino-parada-onibus{background:#2E6FDE;font-size:13px;}
+  .pino-ponto-passagem{
+    width:10px;height:10px;border-radius:50%;
+    background:#EA580C;border:1.5px solid #fff;opacity:.75;
+    box-shadow:0 1px 3px rgba(0,0,0,.35);
+  }
+
+  .grade-cadastro-rota{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:10px;
+    margin-bottom:14px;
+  }
+  .item-parada-rota-expandido{flex-direction:column;align-items:stretch;gap:6px;}
+  .item-parada-rota-topo{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:600;}
+  .opcao-parada-checkbox{
+    display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texto-suave);cursor:pointer;font-weight:400;
+  }
+  .opcao-parada-checkbox input{accent-color:#EA580C;cursor:pointer;}
+  .input-nome-parada{margin-top:2px;}
 
   .aviso-rotas{
     display:flex;gap:10px;align-items:flex-start;
@@ -1562,10 +1582,68 @@
         <div id="painelRotas" style="display:none;">
           <div class="aviso-rotas">
             <span>🧭</span>
-            <div><strong>Como usar:</strong> clique no mapa para marcar os pontos da rota, em ordem. O caminho entre eles é traçado automaticamente seguindo as ruas de verdade (igual ao Google Maps). Arraste um pino pra ajustar sua posição.</div>
+            <div><strong>Como usar:</strong> clique no mapa para marcar os pontos da rota, em ordem — o caminho é traçado automaticamente seguindo as ruas de verdade. Depois, marque quais desses pontos são <strong>paradas reais</strong> (onde os alunos embarcam). Arraste um pino pra ajustar sua posição. Use <strong>Ctrl+Z</strong> para desfazer e <strong>Ctrl+Y</strong> para refazer.</div>
           </div>
 
           <input type="text" class="busca-filtro-multi" id="nomeRotaAtual" placeholder="Nome da rota (ex: Rota 1 — Manhã, Ônibus 02)">
+
+          <div class="grade-cadastro-rota">
+            <div class="campo-filtro">
+              <label>Tipo de veículo</label>
+              <select id="tipoVeiculoRota">
+                <option value="">Selecione</option>
+                <option value="ÔNIBUS">Ônibus</option>
+                <option value="MICRO-ÔNIBUS">Micro-ônibus</option>
+                <option value="VAN">Van</option>
+              </select>
+            </div>
+            <div class="campo-filtro">
+              <label>Vagas (quantidade)</label>
+              <input type="number" id="vagasVeiculoRota" min="1" step="1" placeholder="Ex: 40">
+            </div>
+            <div class="campo-filtro">
+              <label>Veículo é</label>
+              <select id="propriedadeVeiculoRota">
+                <option value="">Selecione</option>
+                <option value="PRÓPRIO">Próprio</option>
+                <option value="TERCEIRIZADO">Terceirizado</option>
+              </select>
+            </div>
+            <div class="campo-filtro">
+              <label>Turno da rota</label>
+              <select id="turnoRota">
+                <option value="">Selecione</option>
+                <option value="MATUTINO">Matutino</option>
+                <option value="VESPERTINO">Vespertino</option>
+                <option value="NOTURNO">Noturno</option>
+                <option value="INTEGRAL">Integral</option>
+              </select>
+            </div>
+            <div class="campo-filtro">
+              <label>Horário de início</label>
+              <input type="time" id="horarioInicioRota">
+            </div>
+            <div class="campo-filtro">
+              <label>Horário de término</label>
+              <input type="time" id="horarioFimRota">
+            </div>
+          </div>
+
+          <div class="controle-cluster-linha-topo" style="margin-bottom:8px;">
+            <label>Mapa da rota</label>
+            <div class="grupo-toggles-mapa">
+              <button type="button" class="toggle-escolas" id="toggleEscolasRotas" aria-pressed="true" title="Mostrar/ocultar escolas no mapa" aria-label="Mostrar/ocultar escolas no mapa">
+                <svg id="iconeOlhoEscolasRotasAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="iconeOlhoEscolasRotasFechado" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
+              </button>
+              <button type="button" class="toggle-escolas" id="btnDesfazerRota" title="Desfazer (Ctrl+Z)" aria-label="Desfazer">
+                <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg>
+              </button>
+              <button type="button" class="toggle-escolas" id="btnRefazerRota" title="Refazer (Ctrl+Y)" aria-label="Refazer">
+                <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14 20 9l-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg>
+              </button>
+            </div>
+          </div>
 
           <div id="mapaRotas" class="mapa-redimensionavel" style="width:100%;height:420px;min-height:280px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);"></div>
 
@@ -2148,7 +2226,8 @@
     });
   }
   ['nomeResp', 'nomeAluno', 'rua', 'numero', 'localidade', 'referencia', 'nomeAlunoExtra',
-   'editNomeAluno', 'editRua', 'editNumero', 'editLocalidade', 'editReferencia', 'editNomeResp'
+   'editNomeAluno', 'editRua', 'editNumero', 'editLocalidade', 'editReferencia', 'editNomeResp',
+   'nomeRotaAtual'
   ].forEach(aplicarMaiusculas);
   configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
 
@@ -3002,12 +3081,29 @@
     return html;
   }
 
+  // ---------- CAMADAS BASE DO MAPA (OpenStreetMap / Esri) ----------
+  function adicionarControleCamadaBase(mapa, camadaInicial){
+    var esriSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19, attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+    });
+    var esriRuas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19, attribution: 'Tiles &copy; Esri'
+    });
+    var camadasBase = {
+      'Mapa (OpenStreetMap)': camadaInicial,
+      'Satélite (Esri)': esriSatelite,
+      'Ruas (Esri)': esriRuas
+    };
+    L.control.layers(camadasBase, null, { position: 'topright', collapsed: true }).addTo(mapa);
+  }
+
   function renderizarMapa(lista){
     if(!mapaAdmin){
       mapaAdmin = L.map('mapaAdmin').setView(CENTRO_ANCHIETA, 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      var camadaOsmAdmin = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19, attribution: '© OpenStreetMap'
       }).addTo(mapaAdmin);
+      adicionarControleCamadaBase(mapaAdmin, camadaOsmAdmin);
       mapaAdmin.on('zoomend', function(){ renderizarMapa(listaFiltradaCache); });
 
       // reajusta os "quadradinhos" do mapa sempre que o usuário arrastar o cantinho para redimensionar
@@ -3322,11 +3418,15 @@
 
   // ---------- ABA ROTAS (traçado seguindo as ruas, via OSRM) ----------
   var mapaRotas = null;
-  var pontosRotaAtual = [];        // [{lat, lng}]
+  var pontosRotaAtual = [];        // [{lat, lng, parada:false, nomeParada:''}]
   var marcadoresRotaAtual = [];    // L.Marker[]
   var linhaRotaAtual = null;       // L.Polyline (caminho real, seguindo ruas)
   var resumoRotaAtual = null;      // { distanciaKm, tempoMin, coordenadas: [[lat,lng], ...] }
   var CHAVE_ROTAS_SALVAS = 'rotasTransporteEscolarAnchieta';
+  var historicoRotaUndo = [];
+  var historicoRotaRedo = [];
+  var mostrarEscolasNoMapaRotas = true;
+  var camadaEscolasRotas = null;
 
   function obterRotasSalvas(){
     try { return JSON.parse(localStorage.getItem(CHAVE_ROTAS_SALVAS) || '[]'); }
@@ -3336,22 +3436,75 @@
     try { localStorage.setItem(CHAVE_ROTAS_SALVAS, JSON.stringify(lista)); } catch(e){}
   }
 
-  function criarIconeParadaRota(indice){
-    return L.divIcon({
-      html: '<div class="pino-parada-rota">' + (indice + 1) + '</div>',
-      className: '', iconSize: [24, 24], iconAnchor: [12, 12]
-    });
+  // ----- desfazer / refazer -----
+  function clonarPontosRota(){ return JSON.parse(JSON.stringify(pontosRotaAtual)); }
+  function salvarEstadoRotaParaUndo(){
+    historicoRotaUndo.push(clonarPontosRota());
+    if(historicoRotaUndo.length > 50){ historicoRotaUndo.shift(); }
+    historicoRotaRedo = [];
+  }
+  function desfazerRota(){
+    if(!historicoRotaUndo.length){ return; }
+    historicoRotaRedo.push(clonarPontosRota());
+    pontosRotaAtual = historicoRotaUndo.pop();
+    redesenharPontosRota();
+    calcularRotaOSRM();
+  }
+  function refazerRota(){
+    if(!historicoRotaRedo.length){ return; }
+    historicoRotaUndo.push(clonarPontosRota());
+    pontosRotaAtual = historicoRotaRedo.pop();
+    redesenharPontosRota();
+    calcularRotaOSRM();
+  }
+  document.addEventListener('keydown', function(e){
+    if(document.getElementById('painelRotas').style.display === 'none'){ return; }
+    var ctrl = e.ctrlKey || e.metaKey;
+    if(!ctrl){ return; }
+    var tecla = e.key.toLowerCase();
+    if(tecla === 'z'){ e.preventDefault(); desfazerRota(); }
+    else if(tecla === 'y'){ e.preventDefault(); refazerRota(); }
+  });
+
+  // ----- papel de cada ponto: início / fim / parada / passagem -----
+  function papelDoPonto(indice, total){
+    if(indice === 0){ return 'inicio'; }
+    if(total > 1 && indice === total - 1){ return 'fim'; }
+    return 'meio';
+  }
+
+  function criarIconePonto(indice, total, parada){
+    var papel = papelDoPonto(indice, total);
+    if(papel === 'inicio'){
+      return L.divIcon({ html: '<div class="pino-parada-rota pino-inicio-rota" title="Início da rota">▶</div>', className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+    }
+    if(papel === 'fim'){
+      return L.divIcon({ html: '<div class="pino-parada-rota pino-fim-rota" title="Fim da rota">🏁</div>', className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+    }
+    if(parada){
+      return L.divIcon({ html: '<div class="pino-parada-rota pino-parada-onibus" title="Ponto de parada">🚌</div>', className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
+    }
+    return L.divIcon({ html: '<div class="pino-ponto-passagem" title="Ponto do trajeto (apenas para desenhar o caminho)"></div>', className: '', iconSize: [12, 12], iconAnchor: [6, 6] });
+  }
+
+  function rotuloPapelPonto(indice, total, parada){
+    var papel = papelDoPonto(indice, total);
+    if(papel === 'inicio'){ return '▶ Início da rota'; }
+    if(papel === 'fim'){ return '🏁 Fim da rota'; }
+    return parada ? '🚌 Ponto de parada' : 'Ponto do trajeto';
   }
 
   function inicializarMapaRotas(){
     if(mapaRotas){ return; }
     mapaRotas = L.map('mapaRotas').setView(CENTRO_ANCHIETA, 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    var camadaOsmRotas = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19, attribution: '© OpenStreetMap'
     }).addTo(mapaRotas);
+    adicionarControleCamadaBase(mapaRotas, camadaOsmRotas);
 
     mapaRotas.on('click', function(e){
-      pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng });
+      salvarEstadoRotaParaUndo();
+      pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, parada: false, nomeParada: '' });
       redesenharPontosRota();
       calcularRotaOSRM();
     });
@@ -3366,16 +3519,38 @@
     var indicadorRedimensionarRotas = document.createElement('div');
     indicadorRedimensionarRotas.className = 'indicador-redimensionar-mapa';
     document.getElementById('mapaRotas').appendChild(indicadorRedimensionarRotas);
+
+    renderizarEscolasNoMapaRotas();
   }
+
+  function renderizarEscolasNoMapaRotas(){
+    if(!mapaRotas){ return; }
+    if(camadaEscolasRotas){ mapaRotas.removeLayer(camadaEscolasRotas); camadaEscolasRotas = null; }
+    if(!mostrarEscolasNoMapaRotas){ return; }
+    camadaEscolasRotas = renderizarEscolasNoMapa(mapaRotas);
+  }
+
+  document.getElementById('toggleEscolasRotas').addEventListener('click', function(){
+    mostrarEscolasNoMapaRotas = !mostrarEscolasNoMapaRotas;
+    this.setAttribute('aria-pressed', mostrarEscolasNoMapaRotas ? 'true' : 'false');
+    var titulo = mostrarEscolasNoMapaRotas ? 'Ocultar escolas no mapa' : 'Mostrar escolas no mapa';
+    this.setAttribute('title', titulo);
+    this.setAttribute('aria-label', titulo);
+    document.getElementById('iconeOlhoEscolasRotasAberto').style.display = mostrarEscolasNoMapaRotas ? '' : 'none';
+    document.getElementById('iconeOlhoEscolasRotasFechado').style.display = mostrarEscolasNoMapaRotas ? 'none' : '';
+    renderizarEscolasNoMapaRotas();
+  });
 
   function redesenharPontosRota(){
     marcadoresRotaAtual.forEach(function(m){ mapaRotas.removeLayer(m); });
     marcadoresRotaAtual = [];
+    var total = pontosRotaAtual.length;
     pontosRotaAtual.forEach(function(p, i){
-      var marcador = L.marker([p.lat, p.lng], { draggable: true, icon: criarIconeParadaRota(i) }).addTo(mapaRotas);
+      var marcador = L.marker([p.lat, p.lng], { draggable: true, icon: criarIconePonto(i, total, p.parada) }).addTo(mapaRotas);
+      marcador.on('dragstart', function(){ salvarEstadoRotaParaUndo(); });
       marcador.on('dragend', function(){
         var novaPos = marcador.getLatLng();
-        pontosRotaAtual[i] = { lat: novaPos.lat, lng: novaPos.lng };
+        pontosRotaAtual[i] = { lat: novaPos.lat, lng: novaPos.lng, parada: p.parada, nomeParada: p.nomeParada };
         calcularRotaOSRM();
       });
       marcadoresRotaAtual.push(marcador);
@@ -3385,10 +3560,17 @@
 
   function atualizarListaPontosRota(){
     var lista = document.getElementById('listaParadasRota');
+    var total = pontosRotaAtual.length;
     lista.innerHTML = pontosRotaAtual.map(function(p, i){
-      return '<div class="item-parada-rota"><span>' + (i + 1) + '. Ponto ' + (i + 1) + '</span>' +
-        '<button type="button" class="btn-remover-parada" data-indice="' + i + '" title="Remover este ponto">✕</button></div>';
-    }).join('');
+      return '<div class="item-parada-rota item-parada-rota-expandido">' +
+        '<div class="item-parada-rota-topo">' +
+          '<span>' + rotuloPapelPonto(i, total, p.parada) + '</span>' +
+          '<button type="button" class="btn-remover-parada" data-indice="' + i + '" title="Remover este ponto">✕</button>' +
+        '</div>' +
+        '<label class="opcao-parada-checkbox"><input type="checkbox" class="check-marcar-parada" data-indice="' + i + '"' + (p.parada ? ' checked' : '') + '> É um ponto de parada (embarque/desembarque de alunos)</label>' +
+        (p.parada ? '<input type="text" class="input-nome-parada busca-filtro-multi" data-indice="' + i + '" placeholder="Nome do ponto (ex: Rua X, em frente ao mercado)" value="' + escapeHtml(p.nomeParada || '') + '">' : '') +
+      '</div>';
+    }).join('') || '<p class="sem-dados-grafico">Clique no mapa para adicionar pontos.</p>';
   }
 
   function atualizarMetaRota(){
@@ -3403,7 +3585,8 @@
       var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
       var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
       var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
-      metaEl.textContent = pontosRotaAtual.length + ' pontos · ' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km · aprox. ' + tempoTexto + ' de percurso';
+      var qtdParadas = pontosRotaAtual.filter(function(p){ return p.parada; }).length;
+      metaEl.textContent = pontosRotaAtual.length + ' pontos (' + qtdParadas + ' parada' + (qtdParadas === 1 ? '' : 's') + ') · ' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km · aprox. ' + tempoTexto + ' de percurso';
     }
   }
 
@@ -3446,14 +3629,38 @@
   document.getElementById('listaParadasRota').addEventListener('click', function(e){
     var botao = e.target.closest('.btn-remover-parada');
     if(!botao){ return; }
+    salvarEstadoRotaParaUndo();
     pontosRotaAtual.splice(parseInt(botao.getAttribute('data-indice'), 10), 1);
     redesenharPontosRota();
     calcularRotaOSRM();
   });
 
+  document.getElementById('listaParadasRota').addEventListener('change', function(e){
+    if(!e.target.classList.contains('check-marcar-parada')){ return; }
+    salvarEstadoRotaParaUndo();
+    var i = parseInt(e.target.getAttribute('data-indice'), 10);
+    pontosRotaAtual[i].parada = e.target.checked;
+    atualizarListaPontosRota();
+    marcadoresRotaAtual[i].setIcon(criarIconePonto(i, pontosRotaAtual.length, pontosRotaAtual[i].parada));
+    atualizarMetaRota();
+  });
+
+  document.getElementById('listaParadasRota').addEventListener('input', function(e){
+    if(!e.target.classList.contains('input-nome-parada')){ return; }
+    var posicao = e.target.selectionStart;
+    e.target.value = e.target.value.toUpperCase();
+    if(posicao !== null){ e.target.setSelectionRange(posicao, posicao); }
+    var i = parseInt(e.target.getAttribute('data-indice'), 10);
+    pontosRotaAtual[i].nomeParada = e.target.value;
+  });
+
+  document.getElementById('btnDesfazerRota').addEventListener('click', desfazerRota);
+  document.getElementById('btnRefazerRota').addEventListener('click', refazerRota);
+
   document.getElementById('btnLimparRota').addEventListener('click', function(){
     if(!pontosRotaAtual.length){ return; }
     if(!confirm('Limpar todos os pontos da rota atual?')){ return; }
+    salvarEstadoRotaParaUndo();
     pontosRotaAtual = [];
     if(linhaRotaAtual && mapaRotas){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     resumoRotaAtual = null;
@@ -3472,18 +3679,39 @@
   }
   atualizarSeletorRotasSalvas();
 
+  function coletarDadosCadastroRota(){
+    return {
+      tipoVeiculo: document.getElementById('tipoVeiculoRota').value,
+      vagas: document.getElementById('vagasVeiculoRota').value,
+      propriedade: document.getElementById('propriedadeVeiculoRota').value,
+      turno: document.getElementById('turnoRota').value,
+      horarioInicio: document.getElementById('horarioInicioRota').value,
+      horarioFim: document.getElementById('horarioFimRota').value
+    };
+  }
+  function preencherDadosCadastroRota(dados){
+    dados = dados || {};
+    document.getElementById('tipoVeiculoRota').value = dados.tipoVeiculo || '';
+    document.getElementById('vagasVeiculoRota').value = dados.vagas || '';
+    document.getElementById('propriedadeVeiculoRota').value = dados.propriedade || '';
+    document.getElementById('turnoRota').value = dados.turno || '';
+    document.getElementById('horarioInicioRota').value = dados.horarioInicio || '';
+    document.getElementById('horarioFimRota').value = dados.horarioFim || '';
+  }
+
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
     if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de salvar.');
       return;
     }
-    var nome = document.getElementById('nomeRotaAtual').value.trim() || ('Rota sem nome — ' + new Date().toLocaleDateString('pt-BR'));
+    var nome = document.getElementById('nomeRotaAtual').value.trim() || ('ROTA SEM NOME — ' + new Date().toLocaleDateString('pt-BR'));
     var rotas = obterRotasSalvas();
     rotas.push({
       nome: nome,
       pontos: pontosRotaAtual.slice(),
       distanciaKm: resumoRotaAtual.distanciaKm,
       tempoMin: resumoRotaAtual.tempoMin,
+      cadastro: coletarDadosCadastroRota(),
       criadoEm: new Date().toISOString()
     });
     gravarRotasSalvas(rotas);
@@ -3497,8 +3725,10 @@
     var rotas = obterRotasSalvas();
     var rota = rotas[parseInt(select.value, 10)];
     if(!rota){ return; }
+    salvarEstadoRotaParaUndo();
     pontosRotaAtual = rota.pontos.slice();
     document.getElementById('nomeRotaAtual').value = rota.nome;
+    preencherDadosCadastroRota(rota.cadastro);
     redesenharPontosRota();
     calcularRotaOSRM();
   });
@@ -3536,9 +3766,11 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaTemp);
 
     var linhaRota = L.polyline(resumoRotaAtual.coordenadas, { color: '#EA580C', weight: 5, opacity: 0.9 }).addTo(mapaTemp);
+    var total = pontosRotaAtual.length;
     pontosRotaAtual.forEach(function(p, i){
-      L.marker([p.lat, p.lng], { icon: criarIconeParadaRota(i) }).addTo(mapaTemp);
+      L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p.parada) }).addTo(mapaTemp);
     });
+    if(mostrarEscolasNoMapaRotas){ renderizarEscolasNoMapa(mapaTemp); }
     mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
 
     setTimeout(function(){
@@ -3552,23 +3784,35 @@
   }
 
   function montarDadosRotaImpressao(){
-    var nomeRota = document.getElementById('nomeRotaAtual').value.trim() || 'Rota sem nome';
+    var nomeRota = document.getElementById('nomeRotaAtual').value.trim() || 'ROTA SEM NOME';
+    var cadastro = coletarDadosCadastroRota();
     var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
     var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
     var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
+    var total = pontosRotaAtual.length;
+    var qtdParadas = pontosRotaAtual.filter(function(p){ return p.parada; }).length;
+
+    var linhaCadastro = [];
+    if(cadastro.tipoVeiculo){ linhaCadastro.push('Veículo: ' + cadastro.tipoVeiculo + (cadastro.propriedade ? ' (' + cadastro.propriedade + ')' : '')); }
+    if(cadastro.vagas){ linhaCadastro.push('Vagas: ' + cadastro.vagas); }
+    if(cadastro.turno){ linhaCadastro.push('Turno: ' + cadastro.turno); }
+    if(cadastro.horarioInicio || cadastro.horarioFim){ linhaCadastro.push('Horário: ' + (cadastro.horarioInicio || '—') + ' às ' + (cadastro.horarioFim || '—')); }
 
     var html = '<tr class="linha-evitar-quebra"><td>' +
       '<h2 class="titulo-secao-impressao">Detalhamento da rota — ' + escapeHtml(nomeRota) + '</h2>' +
+      (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
       '<div class="metricas-impressao" style="margin-bottom:10px;">' +
-        '<div class="item-metrica-impressao"><strong>' + pontosRotaAtual.length + '</strong>Pontos</div>' +
-        '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância (pelas ruas)</div>' +
+        '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
+        '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
         '<div class="item-metrica-impressao"><strong>' + tempoTexto + '</strong>Tempo estimado</div>' +
       '</div>' +
     '</td></tr>';
 
     html += pontosRotaAtual.map(function(p, i){
+      var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' — ' + p.nomeParada : '');
       return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
-        '<div class="ponto-impressao-topo"><span>Ponto ' + (i + 1) + '</span><span>' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</span></div>' +
+        '<div class="ponto-impressao-topo"><span>' + escapeHtml(rotulo) + '</span><span>' + p.lat.toFixed(5) + ', ' + p.lng.toFixed(5) + '</span></div>' +
         '</div></td></tr>';
     }).join('');
 
