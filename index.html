@@ -745,7 +745,7 @@
     padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--tinta);
   }
   .controle-cluster-linha-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-  .grupo-toggles-mapa{display:flex;gap:8px;flex:0 0 auto;}
+  .grupo-toggles-mapa{display:flex;gap:8px;flex:0 0 auto;margin-left:auto;}
   .controle-cluster label{font-weight:600;}
   .controle-cluster label strong{color:var(--verde-escuro);font-family:'Space Grotesk',sans-serif;}
   .controle-cluster input[type=range]{
@@ -3450,6 +3450,28 @@
         L.marker(l.getLatLng(), { icon: l.options.icon }).addTo(mapaTemp);
       }
     });
+
+    // replicar o mapa de calor, se estiver ativo na tela (não é um Marker/Circle, por isso é tratado à parte)
+    if(modoMapaCalor && window.L && L.heatLayer){
+      var gruposCalorImpressao = {};
+      listaFiltradaCache.forEach(function(r){
+        var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+        if(lat === null || lng === null){ return; }
+        var chave = lat.toFixed(5) + ',' + lng.toFixed(5);
+        if(!gruposCalorImpressao[chave]){ gruposCalorImpressao[chave] = { lat: lat, lng: lng, qtd: 0 }; }
+        gruposCalorImpressao[chave].qtd++;
+      });
+      var pontosCalorImpressao = Object.keys(gruposCalorImpressao).map(function(k){
+        var g = gruposCalorImpressao[k];
+        return [g.lat, g.lng, Math.min(3, g.qtd)];
+      });
+      if(pontosCalorImpressao.length){
+        L.heatLayer(pontosCalorImpressao, {
+          radius: 32, blur: 24, maxZoom: 17,
+          gradient: { 0.2: '#2E7D32', 0.5: '#F0B429', 0.8: '#E0631E', 1: '#C2331A' }
+        }).addTo(mapaTemp);
+      }
+    }
 
     // replicar também os pinos das escolas, se estiverem ativados na tela
     if(mostrarEscolasNoMapa){
