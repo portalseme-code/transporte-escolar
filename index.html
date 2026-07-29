@@ -740,6 +740,13 @@
     color:#fff;font-size:11.5px;font-weight:700;font-family:'Space Grotesk',sans-serif;
   }
 
+  .aviso-rotas{
+    display:flex;gap:10px;align-items:flex-start;
+    background:#FFF1E9;border:1px solid #EA580C;border-radius:var(--raio-sm);
+    padding:12px 14px;margin-bottom:14px;font-size:13px;color:#7C2D12;line-height:1.5;
+  }
+  .aviso-rotas span{font-size:18px;flex:0 0 auto;}
+
   .painel-rota-mapa{
     background:var(--superficie);border:1.5px solid #EA580C;border-radius:var(--raio-sm);
     padding:14px 16px;margin-bottom:14px;box-shadow:var(--sombra);
@@ -1488,6 +1495,7 @@
         <div class="abas-admin">
           <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
           <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
+          <button class="aba-admin" id="abaRotas" type="button" data-aba="rotas">Rotas</button>
         </div>
 
         <div id="painelResumo">
@@ -1526,40 +1534,10 @@
               <button type="button" class="toggle-escolas" id="toggleMapaCalor" aria-pressed="false" title="Ativar mapa de calor (densidade de alunos)" aria-label="Ativar mapa de calor">
                 <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.2 3-2.4 4.2-2.4 7.2a2.4 2.4 0 0 0 4.8 0c0-.8-.6-1.6-.6-2.4.8.8 2.4 2.6 2.4 5.2a4.2 4.2 0 0 1-8.4 0c0-4 3-5.6 4.2-10z"></path></svg>
               </button>
-              <button type="button" class="toggle-escolas btn-rota-toggle" id="toggleTracarRota" aria-pressed="false" title="Traçar rota do ônibus (clique no mapa para marcar paradas)" aria-label="Traçar rota do ônibus">
-                <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.2"></circle><circle cx="18" cy="5" r="2.2"></circle><path d="M8 19h5a4 4 0 0 0 4-4V9a4 4 0 0 1 4-4"></path></svg>
-              </button>
             </div>
           </div>
           <input type="range" id="raioCluster" value="200" min="0" max="1000" step="25">
           <span class="status-cluster" id="statusCluster"></span>
-        </div>
-
-        <div class="painel-rota-mapa" id="painelRotaMapa" style="display:none;">
-          <div class="painel-rota-cabecalho">
-            <p class="titulo-raio-escola">✏️ Traçando rota — clique no mapa para marcar paradas em ordem</p>
-            <button type="button" class="btn-fechar-raio-escola" id="fecharModoRota" title="Sair do modo de traçar rota" aria-label="Sair do modo de traçar rota">✕</button>
-          </div>
-          <input type="text" class="busca-filtro-multi" id="nomeRotaAtual" placeholder="Nome da rota (ex: Rota 1 — Manhã, Ônibus 02)">
-          <p class="meta-rota-mapa" id="metaRotaMapa">Nenhuma parada ainda.</p>
-          <div class="lista-raio-escola" id="listaParadasRota"></div>
-          <div class="acoes-rota-mapa">
-            <button type="button" class="btn-mapa" id="btnDesfazerParadaRota">Desfazer última</button>
-            <button type="button" class="btn-mapa" id="btnLimparRota">Limpar rota</button>
-            <button type="button" class="btn-icone-impressora" id="btnSalvarRota" title="Salvar esta rota" aria-label="Salvar esta rota">
-              <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            </button>
-            <button type="button" class="btn-icone-impressora" id="btnImprimirRota" title="Gerar relatório desta rota para impressão" aria-label="Gerar relatório desta rota">
-              <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
-            </button>
-          </div>
-          <div class="selecao-rotas-salvas">
-            <select id="seletorRotasSalvas">
-              <option value="">Rotas salvas neste navegador...</option>
-            </select>
-            <button type="button" class="btn-mapa" id="btnCarregarRotaSalva">Carregar</button>
-            <button type="button" class="btn-mapa btn-excluir-rota" id="btnExcluirRotaSalva">Excluir</button>
-          </div>
         </div>
 
         <div id="mapaAdmin" class="mapa-redimensionavel" style="width:100%;height:320px;min-height:220px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);display:none;"></div>
@@ -1579,6 +1557,38 @@
           <button type="button" class="btn-toggle-matriculados-raio" id="toggleMatriculadosRaio" aria-pressed="false">Mostrar somente matriculados nesta escola</button>
 
           <div class="lista-raio-escola" id="listaRaioEscola"></div>
+        </div>
+
+        <div id="painelRotas" style="display:none;">
+          <div class="aviso-rotas">
+            <span>🧭</span>
+            <div><strong>Como usar:</strong> clique no mapa para marcar os pontos da rota, em ordem. O caminho entre eles é traçado automaticamente seguindo as ruas de verdade (igual ao Google Maps). Arraste um pino pra ajustar sua posição.</div>
+          </div>
+
+          <input type="text" class="busca-filtro-multi" id="nomeRotaAtual" placeholder="Nome da rota (ex: Rota 1 — Manhã, Ônibus 02)">
+
+          <div id="mapaRotas" class="mapa-redimensionavel" style="width:100%;height:420px;min-height:280px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);"></div>
+
+          <div class="painel-rota-mapa">
+            <p class="meta-rota-mapa" id="metaRotaMapa">Nenhum ponto ainda. Clique no mapa para começar.</p>
+            <div class="lista-raio-escola" id="listaParadasRota"></div>
+            <div class="acoes-rota-mapa">
+              <button type="button" class="btn-mapa" id="btnLimparRota">Limpar rota</button>
+              <button type="button" class="btn-icone-impressora" id="btnSalvarRota" title="Salvar esta rota" aria-label="Salvar esta rota">
+                <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              </button>
+              <button type="button" class="btn-icone-impressora" id="btnImprimirRota" title="Gerar relatório desta rota para impressão" aria-label="Gerar relatório desta rota">
+                <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+              </button>
+            </div>
+            <div class="selecao-rotas-salvas">
+              <select id="seletorRotasSalvas">
+                <option value="">Rotas salvas neste navegador...</option>
+              </select>
+              <button type="button" class="btn-mapa" id="btnCarregarRotaSalva">Carregar</button>
+              <button type="button" class="btn-mapa btn-excluir-rota" id="btnExcluirRotaSalva">Excluir</button>
+            </div>
+          </div>
         </div>
 
         <div class="rodape-admin">
@@ -1804,6 +1814,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
 <script>
 (function(){
   var CENTRO_ANCHIETA = [-20.8028, -40.6444];
@@ -2664,11 +2676,19 @@
       document.getElementById('mapaAdmin').style.display = (aba === 'mapa') ? '' : 'none';
       document.getElementById('dicaRedimensionarMapa').style.display = (aba === 'mapa') ? 'block' : 'none';
       document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
+      if(aba !== 'mapa'){ document.getElementById('painelRaioEscola').style.display = 'none'; }
+      document.getElementById('painelRotas').style.display = (aba === 'rotas') ? 'block' : 'none';
+      document.querySelector('.rodape-admin').style.display = (aba === 'rotas') ? 'none' : 'flex';
+      document.querySelector('.tabela-scroll').style.display = (aba === 'rotas') ? 'none' : 'block';
       document.getElementById('btnRelatorioResumo').style.display = (aba === 'resumo') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapa').style.display = (aba === 'mapa') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapaGeral').style.display = (aba === 'mapa') ? 'flex' : 'none';
       if(aba === 'mapa' && mapaAdmin){
         setTimeout(function(){ mapaAdmin.invalidateSize(); }, 100);
+      }
+      if(aba === 'rotas'){
+        inicializarMapaRotas();
+        setTimeout(function(){ if(mapaRotas){ mapaRotas.invalidateSize(); } }, 100);
       }
     });
   });
@@ -2991,11 +3011,6 @@
         maxZoom: 19, attribution: '© OpenStreetMap'
       }).addTo(mapaAdmin);
       mapaAdmin.on('zoomend', function(){ renderizarMapa(listaFiltradaCache); });
-      mapaAdmin.on('click', function(e){
-        if(!modoTracarRota){ return; }
-        pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, nome: '' });
-        renderizarRotaAtual();
-      });
 
       // reajusta os "quadradinhos" do mapa sempre que o usuário arrastar o cantinho para redimensionar
       if(window.ResizeObserver){
@@ -3307,10 +3322,10 @@
     if(mapaAdmin){ renderizarMapa(listaFiltradaCache); }
   });
 
-  // ---------- TRAÇADO DE ROTAS ----------
-  var modoTracarRota = false;
-  var pontosRotaAtual = [];
-  var camadaRotaAtual = null;
+  // ---------- ABA ROTAS (traçado seguindo as ruas, via OSRM) ----------
+  var mapaRotas = null;
+  var controleRotas = null;
+  var resumoRotaAtual = null; // { distanciaKm, tempoMin, coordenadas: [[lat,lng], ...] }
   var CHAVE_ROTAS_SALVAS = 'rotasTransporteEscolarAnchieta';
 
   function obterRotasSalvas(){
@@ -3321,103 +3336,136 @@
     try { localStorage.setItem(CHAVE_ROTAS_SALVAS, JSON.stringify(lista)); } catch(e){}
   }
 
-  function calcularDistanciaRotaKm(pontos){
-    var total = 0;
-    for(var i = 1; i < pontos.length; i++){
-      total += distanciaMetros(pontos[i-1].lat, pontos[i-1].lng, pontos[i].lat, pontos[i].lng);
-    }
-    return total / 1000;
+  function pontosValidosRota(){
+    if(!controleRotas){ return []; }
+    return controleRotas.getWaypoints().filter(function(wp){ return wp.latLng; });
   }
 
-  function renderizarRotaAtual(alvoMapa){
-    var mapa = alvoMapa || mapaAdmin;
-    if(!mapa){ return; }
-    if(!alvoMapa && camadaRotaAtual){ mapaAdmin.removeLayer(camadaRotaAtual); camadaRotaAtual = null; }
-    if(!pontosRotaAtual.length){ if(!alvoMapa){ atualizarPainelRota(); } return; }
-
-    var grupo = L.layerGroup();
-    if(pontosRotaAtual.length > 1){
-      L.polyline(pontosRotaAtual.map(function(p){ return [p.lat, p.lng]; }), {
-        color: '#EA580C', weight: 4, opacity: 0.85
-      }).addTo(grupo);
-    }
-    pontosRotaAtual.forEach(function(p, i){
-      var icone = L.divIcon({
-        html: '<div class="pino-parada-rota">' + (i + 1) + '</div>',
-        className: '', iconSize: [24, 24], iconAnchor: [12, 12]
-      });
-      L.marker([p.lat, p.lng], { icon: icone })
-        .addTo(grupo)
-        .bindPopup('<b>Parada ' + (i + 1) + '</b>' + (p.nome ? '<br>' + escapeHtml(p.nome) : ''));
+  function criarIconeParadaRota(indice){
+    return L.divIcon({
+      html: '<div class="pino-parada-rota">' + (indice + 1) + '</div>',
+      className: '', iconSize: [24, 24], iconAnchor: [12, 12]
     });
-    grupo.addTo(mapa);
-    if(!alvoMapa){ camadaRotaAtual = grupo; atualizarPainelRota(); }
-    return grupo;
   }
 
-  function atualizarPainelRota(){
-    var distanciaKm = calcularDistanciaRotaKm(pontosRotaAtual);
-    document.getElementById('metaRotaMapa').textContent = pontosRotaAtual.length
-      ? pontosRotaAtual.length + ' parada' + (pontosRotaAtual.length === 1 ? '' : 's') + ' · ' + distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km no total'
-      : 'Nenhuma parada ainda. Clique no mapa para começar.';
+  function inicializarMapaRotas(){
+    if(mapaRotas){ return; }
+    mapaRotas = L.map('mapaRotas').setView(CENTRO_ANCHIETA, 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(mapaRotas);
+
+    controleRotas = L.Routing.control({
+      waypoints: [],
+      routeWhileDragging: true,
+      addWaypoints: false,
+      show: false,
+      fitSelectedRoutes: false,
+      lineOptions: { styles: [{ color: '#EA580C', weight: 5, opacity: 0.85 }] },
+      router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+      createMarker: function(i, wp){
+        return L.marker(wp.latLng, { draggable: true, icon: criarIconeParadaRota(i) });
+      }
+    }).addTo(mapaRotas);
+
+    controleRotas.on('routesfound', function(e){
+      var rota = e.routes[0];
+      resumoRotaAtual = {
+        distanciaKm: rota.summary.totalDistance / 1000,
+        tempoMin: rota.summary.totalTime / 60,
+        coordenadas: rota.coordinates.map(function(c){ return [c.lat, c.lng]; })
+      };
+      atualizarResumoRota();
+    });
+    controleRotas.on('routingerror', function(){
+      resumoRotaAtual = null;
+      document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular o caminho pelas ruas entre esses pontos.';
+    });
+    controleRotas.on('waypointschanged', atualizarResumoRota);
+
+    mapaRotas.on('click', function(e){
+      var pontos = pontosValidosRota();
+      controleRotas.spliceWaypoints(pontos.length, 0, e.latlng);
+    });
+
+    if(window.ResizeObserver){
+      var timeoutRedimensionarRotas = null;
+      new ResizeObserver(function(){
+        clearTimeout(timeoutRedimensionarRotas);
+        timeoutRedimensionarRotas = setTimeout(function(){ mapaRotas.invalidateSize(); }, 120);
+      }).observe(document.getElementById('mapaRotas'));
+    }
+    var indicadorRedimensionarRotas = document.createElement('div');
+    indicadorRedimensionarRotas.className = 'indicador-redimensionar-mapa';
+    document.getElementById('mapaRotas').appendChild(indicadorRedimensionarRotas);
+  }
+
+  function atualizarResumoRota(){
+    var pontos = pontosValidosRota();
 
     var lista = document.getElementById('listaParadasRota');
-    lista.innerHTML = pontosRotaAtual.map(function(p, i){
-      return '<div class="item-parada-rota"><span>' + (i + 1) + '. ' + escapeHtml(p.nome || ('Parada ' + (i + 1))) + '</span>' +
-        '<button type="button" class="btn-remover-parada" data-indice="' + i + '" title="Remover esta parada">✕</button></div>';
+    lista.innerHTML = pontos.map(function(wp, i){
+      return '<div class="item-parada-rota"><span>' + (i + 1) + '. Ponto ' + (i + 1) + '</span>' +
+        '<button type="button" class="btn-remover-parada" data-indice="' + i + '" title="Remover este ponto">✕</button></div>';
     }).join('');
+
+    var metaEl = document.getElementById('metaRotaMapa');
+    if(pontos.length < 2){
+      metaEl.textContent = pontos.length === 1
+        ? '1 ponto marcado — clique em mais um lugar para traçar o caminho.'
+        : 'Nenhum ponto ainda. Clique no mapa para começar.';
+      return;
+    }
+    if(resumoRotaAtual){
+      var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
+      var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
+      var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
+      metaEl.textContent = pontos.length + ' pontos · ' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km · aprox. ' + tempoTexto + ' de percurso';
+    } else {
+      metaEl.textContent = 'Calculando o caminho pelas ruas...';
+    }
   }
+
+  document.getElementById('listaParadasRota').addEventListener('click', function(e){
+    var botao = e.target.closest('.btn-remover-parada');
+    if(!botao || !controleRotas){ return; }
+    controleRotas.spliceWaypoints(parseInt(botao.getAttribute('data-indice'), 10), 1);
+  });
+
+  document.getElementById('btnLimparRota').addEventListener('click', function(){
+    if(!controleRotas || !pontosValidosRota().length){ return; }
+    if(!confirm('Limpar todos os pontos da rota atual?')){ return; }
+    controleRotas.setWaypoints([]);
+    resumoRotaAtual = null;
+    document.getElementById('nomeRotaAtual').value = '';
+    atualizarResumoRota();
+  });
 
   function atualizarSeletorRotasSalvas(){
     var select = document.getElementById('seletorRotasSalvas');
     var rotas = obterRotasSalvas();
     var valorAtual = select.value;
     select.innerHTML = '<option value="">Rotas salvas neste navegador...</option>' +
-      rotas.map(function(r, i){ return '<option value="' + i + '">' + escapeHtml(r.nome) + ' (' + r.pontos.length + ' paradas)</option>'; }).join('');
+      rotas.map(function(r, i){ return '<option value="' + i + '">' + escapeHtml(r.nome) + ' (' + r.pontos.length + ' pontos)</option>'; }).join('');
     select.value = valorAtual;
   }
   atualizarSeletorRotasSalvas();
 
-  document.getElementById('listaParadasRota').addEventListener('click', function(e){
-    var botao = e.target.closest('.btn-remover-parada');
-    if(!botao){ return; }
-    pontosRotaAtual.splice(parseInt(botao.getAttribute('data-indice'), 10), 1);
-    renderizarRotaAtual();
-  });
-
-  document.getElementById('toggleTracarRota').addEventListener('click', function(){
-    modoTracarRota = !modoTracarRota;
-    this.setAttribute('aria-pressed', modoTracarRota ? 'true' : 'false');
-    document.getElementById('mapaAdmin').style.cursor = modoTracarRota ? 'crosshair' : '';
-    document.getElementById('painelRotaMapa').style.display = modoTracarRota ? 'block' : 'none';
-    if(modoTracarRota){ atualizarPainelRota(); atualizarSeletorRotasSalvas(); }
-  });
-
-  document.getElementById('fecharModoRota').addEventListener('click', function(){
-    document.getElementById('toggleTracarRota').click();
-  });
-
-  document.getElementById('btnDesfazerParadaRota').addEventListener('click', function(){
-    pontosRotaAtual.pop();
-    renderizarRotaAtual();
-  });
-
-  document.getElementById('btnLimparRota').addEventListener('click', function(){
-    if(!pontosRotaAtual.length){ return; }
-    if(!confirm('Limpar todas as paradas da rota atual?')){ return; }
-    pontosRotaAtual = [];
-    document.getElementById('nomeRotaAtual').value = '';
-    renderizarRotaAtual();
-  });
-
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
-    if(pontosRotaAtual.length < 2){
-      mostrarAviso('Marque pelo menos 2 paradas antes de salvar a rota.');
+    var pontos = pontosValidosRota();
+    if(pontos.length < 2 || !resumoRotaAtual){
+      mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de salvar.');
       return;
     }
     var nome = document.getElementById('nomeRotaAtual').value.trim() || ('Rota sem nome — ' + new Date().toLocaleDateString('pt-BR'));
     var rotas = obterRotasSalvas();
-    rotas.push({ nome: nome, pontos: pontosRotaAtual, criadoEm: new Date().toISOString() });
+    rotas.push({
+      nome: nome,
+      pontos: pontos.map(function(wp){ return { lat: wp.latLng.lat, lng: wp.latLng.lng }; }),
+      distanciaKm: resumoRotaAtual.distanciaKm,
+      tempoMin: resumoRotaAtual.tempoMin,
+      criadoEm: new Date().toISOString()
+    });
     gravarRotasSalvas(rotas);
     atualizarSeletorRotasSalvas();
     mostrarAviso('Rota "' + nome + '" salva neste navegador.', 'sucesso');
@@ -3425,13 +3473,12 @@
 
   document.getElementById('btnCarregarRotaSalva').addEventListener('click', function(){
     var select = document.getElementById('seletorRotasSalvas');
-    if(!select.value){ return; }
+    if(!select.value || !controleRotas){ return; }
     var rotas = obterRotasSalvas();
     var rota = rotas[parseInt(select.value, 10)];
     if(!rota){ return; }
-    pontosRotaAtual = rota.pontos.slice();
+    controleRotas.setWaypoints(rota.pontos.map(function(p){ return L.latLng(p.lat, p.lng); }));
     document.getElementById('nomeRotaAtual').value = rota.nome;
-    renderizarRotaAtual();
   });
 
   document.getElementById('btnExcluirRotaSalva').addEventListener('click', function(){
@@ -3445,23 +3492,62 @@
     atualizarSeletorRotasSalvas();
   });
 
+  function montarMapaRotaParaImpressao(aoFinalizar){
+    var LARGURA = 1000, ALTURA = 480;
+    var areaImp = document.getElementById('areaImpressao');
+    var containerImpressao = document.getElementById('mapaImpressaoContainer');
+
+    if(mapaImpressaoInstancia){ mapaImpressaoInstancia.remove(); mapaImpressaoInstancia = null; }
+    containerImpressao.innerHTML = '';
+    containerImpressao.style.width = LARGURA + 'px';
+    containerImpressao.style.height = ALTURA + 'px';
+    containerImpressao.style.maxWidth = '100%';
+    containerImpressao.style.margin = '0 auto 20px';
+
+    areaImp.style.display = 'block';
+    areaImp.style.visibility = 'hidden';
+    areaImp.style.position = 'fixed';
+    areaImp.style.top = '0'; areaImp.style.left = '0'; areaImp.style.zIndex = '-1';
+
+    var mapaTemp = L.map(containerImpressao, { zoomControl: false, attributionControl: true });
+    mapaImpressaoInstancia = mapaTemp;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaTemp);
+
+    var linhaRota = L.polyline(resumoRotaAtual.coordenadas, { color: '#EA580C', weight: 5, opacity: 0.9 }).addTo(mapaTemp);
+    pontosValidosRota().forEach(function(wp, i){
+      L.marker(wp.latLng, { icon: criarIconeParadaRota(i) }).addTo(mapaTemp);
+    });
+    mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
+
+    setTimeout(function(){
+      mapaTemp.invalidateSize();
+      mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
+      setTimeout(function(){
+        areaImp.style.display = ''; areaImp.style.visibility = ''; areaImp.style.position = ''; areaImp.style.top = ''; areaImp.style.left = ''; areaImp.style.zIndex = '';
+        aoFinalizar();
+      }, 700);
+    }, 150);
+  }
+
   function montarDadosRotaImpressao(){
     var nomeRota = document.getElementById('nomeRotaAtual').value.trim() || 'Rota sem nome';
-    var distanciaTotal = calcularDistanciaRotaKm(pontosRotaAtual);
+    var pontos = pontosValidosRota();
+    var horas = Math.floor(resumoRotaAtual.tempoMin / 60);
+    var minutos = Math.round(resumoRotaAtual.tempoMin % 60);
+    var tempoTexto = horas > 0 ? (horas + 'h' + (minutos > 0 ? minutos + 'min' : '')) : (minutos + ' min');
 
     var html = '<tr class="linha-evitar-quebra"><td>' +
       '<h2 class="titulo-secao-impressao">Detalhamento da rota — ' + escapeHtml(nomeRota) + '</h2>' +
       '<div class="metricas-impressao" style="margin-bottom:10px;">' +
-        '<div class="item-metrica-impressao"><strong>' + pontosRotaAtual.length + '</strong>Paradas</div>' +
-        '<div class="item-metrica-impressao"><strong>' + distanciaTotal.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância total</div>' +
+        '<div class="item-metrica-impressao"><strong>' + pontos.length + '</strong>Pontos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância (pelas ruas)</div>' +
+        '<div class="item-metrica-impressao"><strong>' + tempoTexto + '</strong>Tempo estimado</div>' +
       '</div>' +
     '</td></tr>';
 
-    html += pontosRotaAtual.map(function(p, i){
-      var distanciaPerna = i === 0 ? 0 : distanciaMetros(pontosRotaAtual[i-1].lat, pontosRotaAtual[i-1].lng, p.lat, p.lng) / 1000;
-      var textoDistancia = i === 0 ? 'Ponto de partida' : distanciaPerna.toFixed(1).replace(/\.0$/, '') + ' km desde a parada anterior';
+    html += pontos.map(function(wp, i){
       return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
-        '<div class="ponto-impressao-topo"><span>Parada ' + (i + 1) + (p.nome ? ' — ' + escapeHtml(p.nome) : '') + '</span><span>' + escapeHtml(textoDistancia) + '</span></div>' +
+        '<div class="ponto-impressao-topo"><span>Ponto ' + (i + 1) + '</span><span>' + wp.latLng.lat.toFixed(5) + ', ' + wp.latLng.lng.toFixed(5) + '</span></div>' +
         '</div></td></tr>';
     }).join('');
 
@@ -3470,8 +3556,9 @@
   }
 
   document.getElementById('btnImprimirRota').addEventListener('click', function(){
-    if(pontosRotaAtual.length < 2){
-      mostrarAviso('Marque pelo menos 2 paradas antes de gerar o relatório.');
+    var pontos = pontosValidosRota();
+    if(pontos.length < 2 || !resumoRotaAtual){
+      mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de imprimir.');
       return;
     }
 
@@ -3485,9 +3572,9 @@
 
     preencherCabecalhoImpressao('da Rota', listaFiltradaCache);
     montarDadosRotaImpressao();
-    definirOrientacaoImpressao('portrait');
+    definirOrientacaoImpressao('landscape', '8mm');
 
-    montarMapaGrandeParaImpressao(function(){
+    montarMapaRotaParaImpressao(function(){
       window.print();
     });
   });
@@ -3745,9 +3832,6 @@
     if(mostrarLimiteMunicipio){
       renderizarLimiteMunicipio(mapaTemp);
     }
-    if(pontosRotaAtual.length){
-      renderizarRotaAtual(mapaTemp);
-    }
 
     setTimeout(function(){
       mapaTemp.invalidateSize();
@@ -3865,12 +3949,8 @@
     preencherCabecalhoImpressao('do Mapa', listaFiltradaCache);
     montarDadosMapaImpressao();
     montarDadosRaioEscolaImpressao();
-    if(pontosRotaAtual.length >= 2){
-      montarDadosRotaImpressao();
-    } else {
-      document.getElementById('tbodyRotaImpressao').style.display = 'none';
-      document.getElementById('tbodyRotaImpressao').innerHTML = '';
-    }
+    document.getElementById('tbodyRotaImpressao').style.display = 'none';
+    document.getElementById('tbodyRotaImpressao').innerHTML = '';
     definirOrientacaoImpressao('portrait');
 
     montarMapaGrandeParaImpressao(function(){
