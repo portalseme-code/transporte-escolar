@@ -1470,7 +1470,7 @@
 
         <div class="controle-cluster" id="controleCluster" style="display:none;">
           <div class="controle-cluster-linha-topo">
-            <label for="raioCluster">Agrupar alunos num raio de <strong id="valorRaioCluster">200</strong> metros</label>
+            <label for="raioCluster" id="rotuloRaioCluster">Agrupar alunos num raio de <strong id="valorRaioCluster">200</strong> metros</label>
             <div class="grupo-toggles-mapa">
               <button type="button" class="toggle-escolas" id="toggleLimiteMunicipio" aria-pressed="true" title="Mostrar/ocultar limite do município" aria-label="Mostrar/ocultar limite do município">
                 <svg id="iconeOlhoLimiteAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
@@ -1479,6 +1479,9 @@
               <button type="button" class="toggle-escolas" id="toggleEscolasMapa" aria-pressed="true" title="Mostrar/ocultar escolas no mapa" aria-label="Mostrar/ocultar escolas no mapa">
                 <svg id="iconeOlhoEscolasAberto" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <svg id="iconeOlhoEscolasFechado" viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
+              </button>
+              <button type="button" class="toggle-escolas" id="toggleMapaCalor" aria-pressed="false" title="Ativar mapa de calor (densidade de alunos)" aria-label="Ativar mapa de calor">
+                <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.2 3-2.4 4.2-2.4 7.2a2.4 2.4 0 0 0 4.8 0c0-.8-.6-1.6-.6-2.4.8.8 2.4 2.6 2.4 5.2a4.2 4.2 0 0 1-8.4 0c0-4 3-5.6 4.2-10z"></path></svg>
               </button>
             </div>
           </div>
@@ -1725,6 +1728,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
 (function(){
   var CENTRO_ANCHIETA = [-20.8028, -40.6444];
@@ -2943,7 +2947,20 @@
     var zoomAtual = mapaAdmin.getZoom();
     var statusEl = document.getElementById('statusCluster');
 
-    if(zoomAtual >= LIMITE_ZOOM_INDIVIDUAL){
+    if(camadaMapaCalor){ mapaAdmin.removeLayer(camadaMapaCalor); camadaMapaCalor = null; }
+    document.getElementById('rotuloRaioCluster').style.display = modoMapaCalor ? 'none' : '';
+    document.getElementById('raioCluster').style.display = modoMapaCalor ? 'none' : '';
+
+    if(modoMapaCalor){
+      statusEl.textContent = 'Mapa de calor — mostrando a densidade de alunos cadastrados';
+      var pontosCalor = gruposArray.map(function(g){ return [g.lat, g.lng, Math.min(3, g.alunos.length)]; });
+      if(pontosCalor.length && window.L && L.heatLayer){
+        camadaMapaCalor = L.heatLayer(pontosCalor, {
+          radius: 32, blur: 24, maxZoom: 17,
+          gradient: { 0.2: '#2E7D32', 0.5: '#F0B429', 0.8: '#E0631E', 1: '#C2331A' }
+        }).addTo(mapaAdmin);
+      }
+    } else if(zoomAtual >= LIMITE_ZOOM_INDIVIDUAL){
       statusEl.textContent = 'Mostrando pontos individuais (afaste o zoom para agrupar)';
       gruposArray.forEach(function(grupo){
         var qtd = grupo.alunos.length;
@@ -2990,6 +3007,8 @@
   }
 
   var mostrarEscolasNoMapa = true;
+  var modoMapaCalor = false;
+  var camadaMapaCalor = null;
   var camadaEscolasMapa = null;
 
   function construirPopupEscola(nome, comRaio){
@@ -3197,6 +3216,15 @@
     document.getElementById('iconeOlhoLimiteAberto').style.display = mostrarLimiteMunicipio ? '' : 'none';
     document.getElementById('iconeOlhoLimiteFechado').style.display = mostrarLimiteMunicipio ? 'none' : '';
     if(mapaAdmin){ renderizarLimiteMunicipio(); }
+  });
+
+  document.getElementById('toggleMapaCalor').addEventListener('click', function(){
+    modoMapaCalor = !modoMapaCalor;
+    this.setAttribute('aria-pressed', modoMapaCalor ? 'true' : 'false');
+    var titulo = modoMapaCalor ? 'Desativar mapa de calor' : 'Ativar mapa de calor (densidade de alunos)';
+    this.setAttribute('title', titulo);
+    this.setAttribute('aria-label', titulo);
+    if(mapaAdmin){ renderizarMapa(listaFiltradaCache); }
   });
 
   document.getElementById('raioCluster').addEventListener('input', function(){
