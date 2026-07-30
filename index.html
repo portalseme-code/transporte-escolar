@@ -617,6 +617,22 @@
     max-height:88vh;overflow:auto;
     box-shadow:0 10px 40px rgba(0,0,0,.3);
   }
+  .caixa-modal-larga{max-width:680px;}
+  .cabecalho-modal-visualizar{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding-bottom:10px;border-bottom:1px solid var(--borda);
+  }
+  .secao-visualizar-rota{margin-top:14px;}
+  .secao-visualizar-rota h4{
+    font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--texto-suave);
+    margin:0 0 6px;font-weight:700;
+  }
+  .secao-visualizar-rota p{font-size:13px;margin:0 0 4px;color:var(--tinta);}
+  .lista-paradas-visualizar{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+  .item-parada-visualizar{
+    background:#FCFCFA;border:1px solid var(--borda);border-radius:8px;padding:8px 10px;font-size:12.5px;
+  }
+  .item-parada-visualizar strong{color:#EA580C;}
 
   .card-recente-acoes{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);}
   .btn-acao-cartao{
@@ -790,6 +806,11 @@
     background:#EA580C;border:1.5px solid #fff;opacity:.75;
     box-shadow:0 1px 3px rgba(0,0,0,.35);
   }
+  .seta-direcao-rota{
+    color:#7C2D12;font-size:16px;line-height:1;
+    text-shadow:0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff, 1px 1px 1px rgba(0,0,0,.4);
+    pointer-events:none;
+  }
 
   .pino-ponto-wrapper{ position:relative; width:34px; height:40px; }
   .pino-ponto-wrapper .pino-parada-rota{ position:absolute; top:12px; left:3px; }
@@ -884,6 +905,14 @@
   .meta-rota-mapa{font-size:12.5px;color:var(--texto-suave);margin:8px 0;font-weight:600;}
   .acoes-rota-mapa{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;}
   .acoes-rota-mapa .btn-mapa{flex:1 1 auto;}
+  .btn-cancelar-edicao-rota{
+    display:none;color:var(--erro);border-color:var(--erro);
+  }
+  .btn-cancelar-edicao-rota.mostrar{display:block;}
+  .btn-cancelar-edicao-rota:hover{background:var(--erro-bg);}
+  .aviso-edicao-rota{
+    font-size:11.5px;color:#EA580C;font-weight:600;margin:6px 0 0;font-style:italic;
+  }
   .selecao-rotas-salvas{
     display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);flex-wrap:wrap;
   }
@@ -1815,6 +1844,7 @@
                 <div class="lista-raio-escola" id="listaParadasRota"></div>
                 <div class="acoes-rota-mapa">
                   <button type="button" class="btn-mapa" id="btnLimparRota">Limpar rota</button>
+                  <button type="button" class="btn-mapa btn-cancelar-edicao-rota" id="btnCancelarEdicaoRota">↩️ Cancelar edição</button>
                   <button type="button" class="btn-icone-impressora" id="btnSalvarRota" title="Salvar esta rota" aria-label="Salvar esta rota">
                     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                   </button>
@@ -1822,6 +1852,7 @@
                     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
                   </button>
                 </div>
+                <p class="aviso-edicao-rota" id="avisoEdicaoRota" style="display:none;"></p>
                 <div class="selecao-rotas-salvas">
                   <select id="seletorRotasSalvas">
                     <option value="">Rotas salvas neste navegador...</option>
@@ -1913,6 +1944,18 @@
         <div id="listaRecentes" class="lista-recentes"><p class="sem-dados-grafico">Carregando...</p></div>
       </div>
     </section>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE ROTA (somente leitura) -->
+    <div class="overlay-modal" id="modalVisualizarRota" style="display:none;">
+      <div class="caixa-modal caixa-modal-larga">
+        <div class="cabecalho-modal-visualizar">
+          <p class="rotulo-secao" id="tituloModalVisualizarRota" style="margin-bottom:0;">Rota</p>
+          <button type="button" class="btn-fechar-raio-escola" id="fecharModalVisualizarRota" title="Fechar" aria-label="Fechar">✕</button>
+        </div>
+        <div id="mapaVisualizarRota" style="width:100%;height:280px;border-radius:10px;border:1.5px solid var(--borda);margin:12px 0;"></div>
+        <div id="corpoModalVisualizarRota"></div>
+      </div>
+    </div>
 
     <!-- MODAL DE EDIÇÃO -->
     <div class="overlay-modal" id="modalEditar" style="display:none;">
@@ -3639,6 +3682,7 @@
   var pontosRotaAtual = [];        // [{lat, lng, parada:false, nomeParada:''}]
   var marcadoresRotaAtual = [];    // L.Marker[]
   var linhaRotaAtual = null;       // L.Polyline (caminho real, seguindo ruas)
+  var camadaSetasRota = null;      // setas indicando o sentido do trajeto
   var resumoRotaAtual = null;      // { distanciaKm, tempoMin, coordenadas: [[lat,lng], ...] }
   var CHAVE_ROTAS_SALVAS = 'rotasTransporteEscolarAnchieta';
   var historicoRotaUndo = [];
@@ -3989,11 +4033,43 @@
 
   var versaoCalculoRota = 0;
 
+  // calcula o rumo (bearing) em graus entre dois pontos (0° = norte, sentido horário)
+  function calcularRumo(lat1, lng1, lat2, lng2){
+    var rad = Math.PI / 180;
+    var dLng = (lng2 - lng1) * rad;
+    var y = Math.sin(dLng) * Math.cos(lat2 * rad);
+    var x = Math.cos(lat1 * rad) * Math.sin(lat2 * rad) - Math.sin(lat1 * rad) * Math.cos(lat2 * rad) * Math.cos(dLng);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+
+  function criarIconeSetaDirecao(anguloGraus){
+    return L.divIcon({
+      html: '<div class="seta-direcao-rota" style="transform:rotate(' + anguloGraus + 'deg);">▲</div>',
+      className: '', iconSize: [18, 18], iconAnchor: [9, 9]
+    });
+  }
+
+  function desenharSetasDirecaoRota(coordenadas, mapa){
+    if(!coordenadas || coordenadas.length < 2){ return null; }
+    var grupo = L.layerGroup();
+    var qtdSetas = Math.min(10, Math.max(3, Math.floor(coordenadas.length / 20)));
+    var passo = Math.max(1, Math.floor(coordenadas.length / (qtdSetas + 1)));
+    for(var i = passo; i < coordenadas.length - 1; i += passo){
+      var p1 = coordenadas[i];
+      var p2 = coordenadas[i + 1];
+      var angulo = calcularRumo(p1[0], p1[1], p2[0], p2[1]);
+      L.marker(p1, { icon: criarIconeSetaDirecao(angulo), interactive: false }).addTo(grupo);
+    }
+    grupo.addTo(mapa);
+    return grupo;
+  }
+
   function calcularRotaOSRM(aoConcluir){
     versaoCalculoRota++;
     var minhaVersao = versaoCalculoRota;
 
     if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
+    if(camadaSetasRota){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
     resumoRotaAtual = null;
 
     if(pontosRotaAtual.length < 2){
@@ -4021,6 +4097,7 @@
           coordenadas: coordenadas
         };
         linhaRotaAtual = L.polyline(coordenadas, { color: '#EA580C', weight: 5, opacity: 0.85 }).addTo(mapaRotas);
+        camadaSetasRota = desenharSetasDirecaoRota(coordenadas, mapaRotas);
         habilitarEdicaoDaLinha();
         atualizarMetaRota();
         if(aoConcluir){ aoConcluir(true); }
@@ -4128,6 +4205,7 @@
     salvarEstadoRotaParaUndo();
     pontosRotaAtual = [];
     if(linhaRotaAtual && mapaRotas){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
+    if(camadaSetasRota && mapaRotas){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
     resumoRotaAtual = null;
     turnosVinculadosRota.clear();
     indicePainelAlunosAberto = null;
@@ -4137,6 +4215,7 @@
     escolasVinculadasRota.clear();
     try { popularOpcoesEscolasRota(); } catch(erro){ console.error('Erro ao atualizar lista de escolas:', erro); }
     try { popularOpcoesTurnosRota(); } catch(erro){ console.error('Erro ao atualizar lista de turnos:', erro); }
+    sairDoModoEdicao();
   });
 
   function atualizarSeletorRotasSalvas(){
@@ -4173,6 +4252,24 @@
 
   // ---------- ESCOLAS VINCULADAS À ROTA ----------
   var escolasVinculadasRota = new Set();
+  var rotaEmEdicaoIndice = null;
+  var snapshotRotaEmEdicao = null;
+
+  function marcarComoEditandoRotaExistente(indice, rota){
+    rotaEmEdicaoIndice = indice;
+    snapshotRotaEmEdicao = JSON.parse(JSON.stringify(rota));
+    document.getElementById('btnCancelarEdicaoRota').classList.add('mostrar');
+    document.getElementById('avisoEdicaoRota').style.display = 'block';
+    document.getElementById('avisoEdicaoRota').textContent = 'Editando "' + rota.nome + '" — clique em Salvar pra atualizar, ou em Cancelar edição pra descartar as mudanças.';
+  }
+
+  function sairDoModoEdicao(){
+    rotaEmEdicaoIndice = null;
+    snapshotRotaEmEdicao = null;
+    document.getElementById('btnCancelarEdicaoRota').classList.remove('mostrar');
+    document.getElementById('avisoEdicaoRota').style.display = 'none';
+  }
+
   var turnosVinculadosRota = new Set();
   var TURNOS_DISPONIVEIS_ROTA = ['Matutino', 'Vespertino', 'Integral', 'Noturno'];
 
@@ -4388,7 +4485,8 @@
     }
     var nome = document.getElementById('nomeRotaAtual').value.trim() || ('ROTA SEM NOME — ' + new Date().toLocaleDateString('pt-BR'));
     var rotas = obterRotasSalvas();
-    rotas.push({
+    var editandoExistente = rotaEmEdicaoIndice !== null && rotas[rotaEmEdicaoIndice];
+    var dadosRota = {
       nome: nome,
       pontos: pontosRotaAtual.slice(),
       distanciaKm: resumoRotaAtual.distanciaKm,
@@ -4396,19 +4494,53 @@
       cadastro: coletarDadosCadastroRota(),
       escolas: Array.from(escolasVinculadasRota),
       turnos: Array.from(turnosVinculadosRota),
-      criadoEm: new Date().toISOString()
-    });
+      criadoEm: editandoExistente ? rotas[rotaEmEdicaoIndice].criadoEm : new Date().toISOString(),
+      atualizadoEm: new Date().toISOString()
+    };
+
+    if(editandoExistente){
+      rotas[rotaEmEdicaoIndice] = dadosRota;
+    } else {
+      rotas.push(dadosRota);
+      rotaEmEdicaoIndice = rotas.length - 1;
+    }
     gravarRotasSalvas(rotas);
+    marcarComoEditandoRotaExistente(rotaEmEdicaoIndice, dadosRota);
     atualizarSeletorRotasSalvas();
     if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); }
-    mostrarAviso('Rota "' + nome + '" salva neste navegador.', 'sucesso');
+    mostrarAviso((editandoExistente ? 'Rota "' + nome + '" atualizada.' : 'Rota "' + nome + '" salva neste navegador.'), 'sucesso');
+  });
+
+  document.getElementById('btnCancelarEdicaoRota').addEventListener('click', function(){
+    if(!confirm('Descartar as alterações feitas e voltar como estava?')){ return; }
+    salvarEstadoRotaParaUndo();
+    if(rotaEmEdicaoIndice !== null && snapshotRotaEmEdicao){
+      pontosRotaAtual = snapshotRotaEmEdicao.pontos.slice();
+      document.getElementById('nomeRotaAtual').value = snapshotRotaEmEdicao.nome;
+      preencherDadosCadastroRota(snapshotRotaEmEdicao.cadastro);
+      escolasVinculadasRota = new Set(snapshotRotaEmEdicao.escolas || []);
+      turnosVinculadosRota = new Set(snapshotRotaEmEdicao.turnos || []);
+    } else {
+      pontosRotaAtual = [];
+      document.getElementById('nomeRotaAtual').value = '';
+      preencherDadosCadastroRota({});
+      escolasVinculadasRota.clear();
+      turnosVinculadosRota.clear();
+    }
+    popularOpcoesEscolasRota();
+    popularOpcoesTurnosRota();
+    redesenharPontosRota();
+    calcularRotaOSRM();
+    sairDoModoEdicao();
+    mostrarAviso('Edição cancelada.', 'sucesso');
   });
 
   document.getElementById('btnCarregarRotaSalva').addEventListener('click', function(){
     var select = document.getElementById('seletorRotasSalvas');
     if(!select.value){ return; }
+    var indiceCarregado = parseInt(select.value, 10);
     var rotas = obterRotasSalvas();
-    var rota = rotas[parseInt(select.value, 10)];
+    var rota = rotas[indiceCarregado];
     if(!rota){ return; }
     salvarEstadoRotaParaUndo();
     pontosRotaAtual = rota.pontos.slice();
@@ -4420,6 +4552,7 @@
     popularOpcoesTurnosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
+    marcarComoEditandoRotaExistente(indiceCarregado, rota);
   });
 
   document.getElementById('btnExcluirRotaSalva').addEventListener('click', function(){
@@ -4502,6 +4635,7 @@
         vagasHtml +
         (r.escolas && r.escolas.length ? '<p class="card-rota-info">Escolas: ' + escapeHtml(r.escolas.join(', ')) + '</p>' : '') +
         '<div class="card-rota-acoes">' +
+          '<button type="button" class="btn-mapa" data-acao="visualizar" data-indice="' + x.indice + '">👁️ Visualizar</button>' +
           '<button type="button" class="btn-mapa" data-acao="editar" data-indice="' + x.indice + '">✏️ Editar</button>' +
           '<button type="button" class="btn-mapa" data-acao="duplicar" data-indice="' + x.indice + '">📄 Duplicar</button>' +
           '<button type="button" class="btn-mapa" data-acao="imprimir" data-indice="' + x.indice + '">🖨️ Imprimir</button>' +
@@ -4531,6 +4665,11 @@
     var rota = rotas[indice];
     if(!rota){ return; }
 
+    if(acao === 'visualizar'){
+      abrirModalVisualizarRota(rota);
+      return;
+    }
+
     if(acao === 'editar'){
       salvarEstadoRotaParaUndo();
       pontosRotaAtual = rota.pontos.slice();
@@ -4542,6 +4681,7 @@
       popularOpcoesTurnosRota();
       redesenharPontosRota();
       calcularRotaOSRM();
+      marcarComoEditandoRotaExistente(indice, rota);
       setTimeout(function(){ document.getElementById('mapaRotas').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
       mostrarAviso('Rota "' + rota.nome + '" carregada para edição.', 'sucesso');
     } else if(acao === 'excluir'){
@@ -4562,6 +4702,7 @@
     } else if(acao === 'imprimir'){
       botao.disabled = true;
       botao.textContent = 'Preparando...';
+      sairDoModoEdicao();
       salvarEstadoRotaParaUndo();
       pontosRotaAtual = rota.pontos.slice();
       document.getElementById('nomeRotaAtual').value = rota.nome;
@@ -4602,6 +4743,7 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaTemp);
 
     var linhaRota = L.polyline(resumoRotaAtual.coordenadas, { color: '#EA580C', weight: 5, opacity: 0.9 }).addTo(mapaTemp);
+    desenharSetasDirecaoRota(resumoRotaAtual.coordenadas, mapaTemp);
     var total = pontosRotaAtual.length;
     pontosRotaAtual.forEach(function(p, i){
       L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
@@ -4618,6 +4760,80 @@
       }, 700);
     }, 150);
   }
+
+  // ---------- MODAL DE VISUALIZAÇÃO (somente leitura, não entra no modo de edição) ----------
+  var mapaVisualizarRotaInstancia = null;
+
+  function abrirModalVisualizarRota(rota){
+    document.getElementById('tituloModalVisualizarRota').textContent = rota.nome;
+
+    var c = rota.cadastro || {};
+    var total = rota.pontos.length;
+    var qtdParadas = rota.pontos.filter(function(p){ return p.parada; }).length;
+    var qtdAlunosTotal = rota.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
+
+    var linhaCadastro = [];
+    if(c.tipoVeiculo){ linhaCadastro.push(c.tipoVeiculo + (c.propriedade ? ' · ' + c.propriedade : '')); }
+    if(c.turno){ linhaCadastro.push(c.turno); }
+    if(c.sentido){ linhaCadastro.push(c.sentido === 'IDA' ? 'Ida' : 'Volta'); }
+    if(c.horarioInicio || c.horarioFim){ linhaCadastro.push((c.horarioInicio || '—') + ' às ' + (c.horarioFim || '—')); }
+
+    var vagasHtml = '';
+    if(c.vagas){
+      var restantes = parseInt(c.vagas, 10) - qtdAlunosTotal;
+      var estourou = restantes < 0;
+      vagasHtml = '<p' + (estourou ? ' style="color:var(--erro);font-weight:700;"' : '') + '>' +
+        c.vagas + ' vagas · ' + qtdAlunosTotal + ' ocupada' + (qtdAlunosTotal === 1 ? '' : 's') + ' · ' +
+        (estourou ? ('⚠️ ' + Math.abs(restantes) + ' acima da capacidade!') : (restantes + ' restante' + (restantes === 1 ? '' : 's'))) +
+      '</p>';
+    }
+
+    var html = '<div class="secao-visualizar-rota">' +
+      (linhaCadastro.length ? '<p>' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
+      vagasHtml +
+      '<div class="metricas-impressao" style="margin:10px 0;">' +
+        '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
+        '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + rota.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
+      '</div>' +
+      (rota.escolas && rota.escolas.length ? '<h4>Escolas atendidas</h4><p>' + escapeHtml(rota.escolas.join(' · ')) + '</p>' : '') +
+      (rota.turnos && rota.turnos.length ? '<h4>Turnos atendidos</h4><p>' + escapeHtml(rota.turnos.join(' · ')) + '</p>' : '') +
+    '</div>';
+
+    html += '<div class="secao-visualizar-rota"><h4>Pontos do trajeto</h4><div class="lista-paradas-visualizar">' +
+      rota.pontos.map(function(p, i){
+        var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' — ' + p.nomeParada : '');
+        var qtd = (p.alunos || []).length;
+        return '<div class="item-parada-visualizar"><strong>' + escapeHtml(rotulo) + '</strong>' + (qtd ? ' · ' + qtd + ' aluno' + (qtd === 1 ? '' : 's') : '') + '</div>';
+      }).join('') +
+    '</div></div>';
+
+    document.getElementById('corpoModalVisualizarRota').innerHTML = html;
+    document.getElementById('modalVisualizarRota').style.display = 'flex';
+
+    setTimeout(function(){
+      if(mapaVisualizarRotaInstancia){ mapaVisualizarRotaInstancia.remove(); mapaVisualizarRotaInstancia = null; }
+      mapaVisualizarRotaInstancia = L.map('mapaVisualizarRota', { scrollWheelZoom: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaVisualizarRotaInstancia);
+
+      var pontosLatLng = rota.pontos.map(function(p){ return [p.lat, p.lng]; });
+      var linha = L.polyline(pontosLatLng, { color: '#EA580C', weight: 4, opacity: 0.8, dashArray: '2,8' }).addTo(mapaVisualizarRotaInstancia);
+      rota.pontos.forEach(function(p, i){
+        L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
+      });
+      mapaVisualizarRotaInstancia.fitBounds(linha.getBounds(), { padding: [24, 24] });
+      setTimeout(function(){ mapaVisualizarRotaInstancia.invalidateSize(); }, 80);
+    }, 60);
+  }
+
+  document.getElementById('fecharModalVisualizarRota').addEventListener('click', function(){
+    document.getElementById('modalVisualizarRota').style.display = 'none';
+    if(mapaVisualizarRotaInstancia){ mapaVisualizarRotaInstancia.remove(); mapaVisualizarRotaInstancia = null; }
+  });
+  document.getElementById('modalVisualizarRota').addEventListener('click', function(e){
+    if(e.target === this){ document.getElementById('fecharModalVisualizarRota').click(); }
+  });
 
   function montarDadosRotaImpressao(){
     var nomeRota = document.getElementById('nomeRotaAtual').value.trim() || 'ROTA SEM NOME';
