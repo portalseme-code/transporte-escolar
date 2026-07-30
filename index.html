@@ -550,11 +550,12 @@
 
   .campo-filtro-multi{position:relative;}
 
-  .campo-vinculo-rota{margin-bottom:14px;position:relative;}
+  .campo-vinculo-rota{margin-bottom:14px;position:relative;flex:1 1 220px;}
   .campo-vinculo-rota label{
     display:block;font-size:11px;font-weight:600;color:var(--texto-suave);
     text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;
   }
+  .linha-vinculos-rota{display:flex;gap:14px;flex-wrap:wrap;}
 
   .linha-mapa-rota-editor{display:flex;flex-direction:column;gap:16px;}
   .coluna-mapa-rota{flex:1 1 auto;min-width:0;}
@@ -810,6 +811,11 @@
     margin-top:6px;padding:8px;background:#fff;border:1px solid var(--borda);border-radius:8px;
   }
   .lista-alunos-ponto{max-height:180px;overflow:auto;margin-top:4px;}
+
+  .titulo-rotas-cadastradas{
+    font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--verde-escuro);
+    margin:26px 0 14px;padding-top:18px;border-top:2px solid var(--borda);
+  }
 
   .card-rota-cadastrada{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
@@ -1662,49 +1668,6 @@
             <div><strong>Como usar:</strong> clique no mapa para marcar os pontos da rota, em ordem — o caminho é traçado automaticamente seguindo as ruas de verdade. Depois, marque quais desses pontos são <strong>paradas reais</strong> (onde os alunos embarcam). Arraste um pino pra ajustar sua posição. Use <strong>Ctrl+Z</strong> para desfazer e <strong>Ctrl+Y</strong> para refazer.</div>
           </div>
 
-          <button type="button" class="btn-mapa" id="btnAlternarRotasCadastradas" style="width:100%;margin-bottom:16px;">📋 Ver rotas cadastradas</button>
-
-          <div id="painelRotasCadastradas" style="display:none;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--borda);">
-            <div class="barra-filtros" style="margin-top:0;">
-              <div class="campo-filtro">
-                <label>Turno</label>
-                <select id="filtroRotaTurno">
-                  <option value="">Todos</option>
-                  <option value="MATUTINO">Matutino</option>
-                  <option value="VESPERTINO">Vespertino</option>
-                  <option value="NOTURNO">Noturno</option>
-                  <option value="INTEGRAL">Integral</option>
-                </select>
-              </div>
-              <div class="campo-filtro">
-                <label>Tipo de veículo</label>
-                <select id="filtroRotaTipoVeiculo">
-                  <option value="">Todos</option>
-                  <option value="ÔNIBUS">Ônibus</option>
-                  <option value="MICRO-ÔNIBUS">Micro-ônibus</option>
-                  <option value="VAN">Van</option>
-                </select>
-              </div>
-              <div class="campo-filtro">
-                <label>Veículo é</label>
-                <select id="filtroRotaPropriedade">
-                  <option value="">Todas</option>
-                  <option value="PRÓPRIO">Próprio</option>
-                  <option value="TERCEIRIZADO">Terceirizado</option>
-                </select>
-              </div>
-              <div class="campo-filtro">
-                <label>Escola atendida</label>
-                <select id="filtroRotaEscola">
-                  <option value="">Todas</option>
-                </select>
-              </div>
-              <button class="btn-mapa" id="btnLimparFiltrosRotas" type="button">Limpar filtros</button>
-            </div>
-            <p class="contagem-filtro" id="contagemRotasCadastradas"></p>
-            <div id="listaRotasCadastradas"></div>
-          </div>
-
           <input type="text" class="busca-filtro-multi" id="nomeRotaAtual" placeholder="Nome da rota (ex: Rota 1 — Manhã, Ônibus 02)">
 
           <div class="grade-cadastro-rota">
@@ -1749,16 +1712,30 @@
             </div>
           </div>
 
-          <div class="campo-vinculo-rota">
-            <label>Escolas atendidas por esta rota</label>
-            <button type="button" class="seletor-multi" id="botaoEscolasRota">Nenhuma escola selecionada</button>
-            <div class="painel-multi painel-multi-redimensionavel" id="painelEscolasRota" style="display:none;">
-              <input type="text" class="busca-filtro-multi" placeholder="Buscar escola...">
-              <div class="painel-multi-acoes">
-                <button type="button" class="link-multi-rota" data-acao="todos-escolas">Marcar todas</button>
-                <button type="button" class="link-multi-rota" data-acao="nenhum-escolas">Limpar</button>
+          <div class="linha-vinculos-rota">
+            <div class="campo-vinculo-rota">
+              <label>Escolas atendidas por esta rota</label>
+              <button type="button" class="seletor-multi" id="botaoEscolasRota">Nenhuma escola selecionada</button>
+              <div class="painel-multi painel-multi-redimensionavel" id="painelEscolasRota" style="display:none;">
+                <input type="text" class="busca-filtro-multi" placeholder="Buscar escola...">
+                <div class="painel-multi-acoes">
+                  <button type="button" class="link-multi-rota" data-acao="todos-escolas">Marcar todas</button>
+                  <button type="button" class="link-multi-rota" data-acao="nenhum-escolas">Limpar</button>
+                </div>
+                <div class="lista-opcoes-multi" id="opcoesEscolasRota"></div>
               </div>
-              <div class="lista-opcoes-multi" id="opcoesEscolasRota"></div>
+            </div>
+
+            <div class="campo-vinculo-rota">
+              <label>Turnos atendidos por esta rota</label>
+              <button type="button" class="seletor-multi" id="botaoTurnosRota">Nenhum turno selecionado</button>
+              <div class="painel-multi painel-multi-redimensionavel" id="painelTurnosRota" style="display:none;">
+                <div class="painel-multi-acoes">
+                  <button type="button" class="link-multi-rota" data-acao="todos-turnos">Marcar todos</button>
+                  <button type="button" class="link-multi-rota" data-acao="nenhum-turnos">Limpar</button>
+                </div>
+                <div class="lista-opcoes-multi" id="opcoesTurnosRota"></div>
+              </div>
             </div>
           </div>
 
@@ -1809,6 +1786,48 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <h3 class="titulo-rotas-cadastradas">📋 Rotas cadastradas</h3>
+          <div id="painelRotasCadastradas">
+            <div class="barra-filtros" style="margin-top:0;">
+              <div class="campo-filtro">
+                <label>Turno</label>
+                <select id="filtroRotaTurno">
+                  <option value="">Todos</option>
+                  <option value="MATUTINO">Matutino</option>
+                  <option value="VESPERTINO">Vespertino</option>
+                  <option value="NOTURNO">Noturno</option>
+                  <option value="INTEGRAL">Integral</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label>Tipo de veículo</label>
+                <select id="filtroRotaTipoVeiculo">
+                  <option value="">Todos</option>
+                  <option value="ÔNIBUS">Ônibus</option>
+                  <option value="MICRO-ÔNIBUS">Micro-ônibus</option>
+                  <option value="VAN">Van</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label>Veículo é</label>
+                <select id="filtroRotaPropriedade">
+                  <option value="">Todas</option>
+                  <option value="PRÓPRIO">Próprio</option>
+                  <option value="TERCEIRIZADO">Terceirizado</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
+                <label>Escola atendida</label>
+                <select id="filtroRotaEscola">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+              <button class="btn-mapa" id="btnLimparFiltrosRotas" type="button">Limpar filtros</button>
+            </div>
+            <p class="contagem-filtro" id="contagemRotasCadastradas"></p>
+            <div id="listaRotasCadastradas"></div>
           </div>
         </div>
 
@@ -3688,6 +3707,9 @@
     renderizarEscolasNoMapaRotas();
     renderizarTodosAlunosNoMapaRotas();
     popularOpcoesEscolasRota();
+    popularOpcoesTurnosRota();
+    popularFiltroEscolaRotas();
+    renderizarListaRotasCadastradas();
   }
 
   function renderizarEscolasNoMapaRotas(){
@@ -3729,16 +3751,25 @@
   // ----- alunos vinculados a um ponto específico (parada) -----
   var indicePainelAlunosAberto = null;
 
-  function construirPainelAlunosDoPonto(indice){
-    var ponto = pontosRotaAtual[indice];
-    var vinculados = new Set(ponto.alunos || []);
+  // filtra a lista de alunos pelas escolas/turnos atendidos por esta rota (se nada selecionado, retorna todos)
+  function obterAlunosFiltradosPorEscolaTurnoRota(){
     var candidatos = registrosCache.slice();
     if(escolasVinculadasRota.size){
       candidatos = candidatos.filter(function(r){ return escolasVinculadasRota.has(r.escola); });
     }
+    if(turnosVinculadosRota.size){
+      candidatos = candidatos.filter(function(r){ return turnosVinculadosRota.has(r.turno); });
+    }
+    return candidatos;
+  }
+
+  function construirPainelAlunosDoPonto(indice){
+    var ponto = pontosRotaAtual[indice];
+    var vinculados = new Set(ponto.alunos || []);
+    var candidatos = obterAlunosFiltradosPorEscolaTurnoRota();
     var ordenados = candidatos.sort(function(a, b){ return (a.nomeAluno || '').localeCompare(b.nomeAluno || ''); });
-    var avisoFiltro = escolasVinculadasRota.size
-      ? '<p style="font-size:11px;color:var(--texto-suave);margin:0 0 6px;">Mostrando só alunos das escolas atendidas por esta rota.</p>'
+    var avisoFiltro = (escolasVinculadasRota.size || turnosVinculadosRota.size)
+      ? '<p style="font-size:11px;color:var(--texto-suave);margin:0 0 6px;">Mostrando só alunos das escolas/turnos atendidos por esta rota.</p>'
       : '';
     return '<div class="painel-alunos-ponto">' +
       avisoFiltro +
@@ -3747,7 +3778,7 @@
         (ordenados.length ? ordenados.map(function(r){
           var marcado = vinculados.has(r.id) ? ' checked' : '';
           return '<label class="opcao-multi"><input type="checkbox" class="check-aluno-ponto" data-indice-ponto="' + indice + '" value="' + escapeHtml(r.id) + '"' + marcado + '> ' + escapeHtml(r.nomeAluno) + ' <span style="color:var(--texto-suave);font-size:11px;">— ' + escapeHtml(r.escola) + '</span></label>';
-        }).join('') : '<p class="sem-dados-grafico">Nenhum aluno encontrado para a(s) escola(s) atendida(s).</p>') +
+        }).join('') : '<p class="sem-dados-grafico">Nenhum aluno encontrado para a(s) escola(s)/turno(s) atendido(s).</p>') +
       '</div>' +
     '</div>';
   }
@@ -3799,7 +3830,7 @@
     if(camadaTodosAlunosRotas){ mapaRotas.removeLayer(camadaTodosAlunosRotas); camadaTodosAlunosRotas = null; }
     if(!mostrarTodosAlunosRotas){ return; }
     var grupo = L.layerGroup();
-    registrosCache.forEach(function(r){
+    obterAlunosFiltradosPorEscolaTurnoRota().forEach(function(r){
       var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
       if(lat === null || lng === null){ return; }
       var icone = L.divIcon({ html: '<div class="pino-todos-alunos-rota"></div>', className: '', iconSize: [11, 11], iconAnchor: [5, 5] });
@@ -4041,6 +4072,8 @@
 
   // ---------- ESCOLAS VINCULADAS À ROTA ----------
   var escolasVinculadasRota = new Set();
+  var turnosVinculadosRota = new Set();
+  var TURNOS_DISPONIVEIS_ROTA = ['Matutino', 'Vespertino', 'Integral', 'Noturno'];
 
   function popularOpcoesEscolasRota(){
     var nomes = Object.keys(ESCOLAS_COORDENADAS).sort();
@@ -4052,6 +4085,15 @@
     atualizarRotuloEscolasRota();
   }
 
+  function popularOpcoesTurnosRota(){
+    var container = document.getElementById('opcoesTurnosRota');
+    container.innerHTML = TURNOS_DISPONIVEIS_ROTA.map(function(turno){
+      var marcado = turnosVinculadosRota.has(turno) ? ' checked' : '';
+      return '<label class="opcao-multi"><input type="checkbox" class="check-turno-rota" value="' + turno + '"' + marcado + '> ' + turno + '</label>';
+    }).join('');
+    atualizarRotuloTurnosRota();
+  }
+
   function atualizarRotuloEscolasRota(){
     var botao = document.getElementById('botaoEscolasRota');
     var n = escolasVinculadasRota.size;
@@ -4059,10 +4101,25 @@
     botao.classList.toggle('tem-selecao', n > 0);
   }
 
+  function atualizarRotuloTurnosRota(){
+    var botao = document.getElementById('botaoTurnosRota');
+    var n = turnosVinculadosRota.size;
+    botao.textContent = n === 0 ? 'Nenhum turno selecionado' : (n === 1 ? Array.from(turnosVinculadosRota)[0] : n + ' turnos selecionados');
+    botao.classList.toggle('tem-selecao', n > 0);
+  }
+
   document.getElementById('opcoesEscolasRota').addEventListener('change', function(e){
     if(!e.target.classList.contains('check-escola-rota')){ return; }
     if(e.target.checked){ escolasVinculadasRota.add(e.target.value); } else { escolasVinculadasRota.delete(e.target.value); }
     atualizarRotuloEscolasRota();
+    renderizarTodosAlunosNoMapaRotas();
+  });
+
+  document.getElementById('opcoesTurnosRota').addEventListener('change', function(e){
+    if(!e.target.classList.contains('check-turno-rota')){ return; }
+    if(e.target.checked){ turnosVinculadosRota.add(e.target.value); } else { turnosVinculadosRota.delete(e.target.value); }
+    atualizarRotuloTurnosRota();
+    renderizarTodosAlunosNoMapaRotas();
   });
 
   document.querySelectorAll('.link-multi-rota').forEach(function(botao){
@@ -4071,9 +4128,19 @@
       if(acao === 'todos-escolas'){
         Object.keys(ESCOLAS_COORDENADAS).forEach(function(nome){ escolasVinculadasRota.add(nome); });
         popularOpcoesEscolasRota();
+        renderizarTodosAlunosNoMapaRotas();
       } else if(acao === 'nenhum-escolas'){
         escolasVinculadasRota.clear();
         popularOpcoesEscolasRota();
+        renderizarTodosAlunosNoMapaRotas();
+      } else if(acao === 'todos-turnos'){
+        TURNOS_DISPONIVEIS_ROTA.forEach(function(t){ turnosVinculadosRota.add(t); });
+        popularOpcoesTurnosRota();
+        renderizarTodosAlunosNoMapaRotas();
+      } else if(acao === 'nenhum-turnos'){
+        turnosVinculadosRota.clear();
+        popularOpcoesTurnosRota();
+        renderizarTodosAlunosNoMapaRotas();
       }
     });
   });
@@ -4092,8 +4159,7 @@
     var RAIO_SUGESTAO_METROS = 300;
     var sugeridos = 0;
 
-    registrosCache.forEach(function(r){
-      if(escolasVinculadasRota.size && !escolasVinculadasRota.has(r.escola)){ return; }
+    obterAlunosFiltradosPorEscolaTurnoRota().forEach(function(r){
       var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
       if(lat === null || lng === null){ return; }
       var jaVinculado = pontosRotaAtual.some(function(p){ return (p.alunos || []).indexOf(r.id) !== -1; });
@@ -4129,6 +4195,7 @@
       tempoMin: resumoRotaAtual.tempoMin,
       cadastro: coletarDadosCadastroRota(),
       escolas: Array.from(escolasVinculadasRota),
+      turnos: Array.from(turnosVinculadosRota),
       criadoEm: new Date().toISOString()
     });
     gravarRotasSalvas(rotas);
@@ -4148,7 +4215,9 @@
     document.getElementById('nomeRotaAtual').value = rota.nome;
     preencherDadosCadastroRota(rota.cadastro);
     escolasVinculadasRota = new Set(rota.escolas || []);
+    turnosVinculadosRota = new Set(rota.turnos || []);
     popularOpcoesEscolasRota();
+    popularOpcoesTurnosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
   });
@@ -4164,17 +4233,7 @@
     atualizarSeletorRotasSalvas();
   });
 
-  // ---------- TELA DE ROTAS CADASTRADAS (com filtros) ----------
-  document.getElementById('btnAlternarRotasCadastradas').addEventListener('click', function(){
-    var painel = document.getElementById('painelRotasCadastradas');
-    var abrir = painel.style.display === 'none';
-    painel.style.display = abrir ? 'block' : 'none';
-    this.textContent = abrir ? '📋 Ocultar rotas cadastradas' : '📋 Ver rotas cadastradas';
-    if(abrir){
-      popularFiltroEscolaRotas();
-      renderizarListaRotasCadastradas();
-    }
-  });
+  // ---------- TELA DE ROTAS CADASTRADAS (com filtros, sempre visível) ----------
 
   function popularFiltroEscolaRotas(){
     var select = document.getElementById('filtroRotaEscola');
@@ -4263,11 +4322,11 @@
       document.getElementById('nomeRotaAtual').value = rota.nome;
       preencherDadosCadastroRota(rota.cadastro);
       escolasVinculadasRota = new Set(rota.escolas || []);
+      turnosVinculadosRota = new Set(rota.turnos || []);
       popularOpcoesEscolasRota();
+      popularOpcoesTurnosRota();
       redesenharPontosRota();
       calcularRotaOSRM();
-      document.getElementById('painelRotasCadastradas').style.display = 'none';
-      document.getElementById('btnAlternarRotasCadastradas').textContent = '📋 Ver rotas cadastradas';
       setTimeout(function(){ document.getElementById('mapaRotas').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
       mostrarAviso('Rota "' + rota.nome + '" carregada para edição.', 'sucesso');
     } else if(acao === 'excluir'){
@@ -4356,10 +4415,11 @@
           '</div></td></tr>';
       }).join('');
 
-    if(escolasVinculadasRota.size){
+    if(escolasVinculadasRota.size || turnosVinculadosRota.size){
       html += '<tr class="linha-evitar-quebra"><td>' +
-        '<h2 class="titulo-secao-impressao">Escolas atendidas por esta rota</h2>' +
-        '<p style="font-size:13px;">' + escapeHtml(Array.from(escolasVinculadasRota).join(' · ')) + '</p>' +
+        '<h2 class="titulo-secao-impressao">Escolas e turnos atendidos por esta rota</h2>' +
+        (escolasVinculadasRota.size ? '<p style="font-size:13px;margin:0 0 3px;"><strong>Escolas:</strong> ' + escapeHtml(Array.from(escolasVinculadasRota).join(' · ')) + '</p>' : '') +
+        (turnosVinculadosRota.size ? '<p style="font-size:13px;margin:0;"><strong>Turnos:</strong> ' + escapeHtml(Array.from(turnosVinculadosRota).join(' · ')) + '</p>' : '') +
       '</td></tr>';
     }
 
@@ -4376,13 +4436,19 @@
         var alunosDoPonto = registrosCache
           .filter(function(r){ return x.ponto.alunos.indexOf(r.id) !== -1; })
           .sort(function(a, b){ return (a.nomeAluno || '').localeCompare(b.nomeAluno || ''); });
-        var rotuloPonto = 'Ponto ' + (x.indice + 1) + (x.ponto.nomeParada ? ' — ' + x.ponto.nomeParada : '');
+        var rotuloPonto = rotuloPapelPonto(x.indice, total, true) + (x.ponto.nomeParada ? ' — ' + x.ponto.nomeParada : '');
         html += '<tr class="linha-evitar-quebra"><td>' +
           '<p style="font-weight:600;font-size:12.5px;color:#EA580C;margin:6px 0 4px;">' + escapeHtml(rotuloPonto) + '</p>' +
         '</td></tr>';
         html += alunosDoPonto.map(function(r){
+          var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+          var textoDistancia = '—';
+          if(lat !== null && lng !== null){
+            var distanciaM = distanciaMetros(x.ponto.lat, x.ponto.lng, lat, lng);
+            textoDistancia = distanciaM < 1000 ? Math.round(distanciaM) + 'm até o ponto' : (distanciaM / 1000).toFixed(1) + 'km até o ponto';
+          }
           return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
-            '<div class="ponto-impressao-topo"><span>' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + '</span><span>' + escapeHtml(r.turno) + '</span></div>' +
+            '<div class="ponto-impressao-topo"><span>' + escapeHtml(r.nomeAluno) + ' — ' + escapeHtml(r.escola) + ' (' + escapeHtml(r.turno) + ')</span><span>' + escapeHtml(textoDistancia) + '</span></div>' +
             '</div></td></tr>';
         }).join('');
       });
