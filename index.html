@@ -1025,6 +1025,10 @@
     display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:10px;
     margin-bottom:14px;
   }
+  .campos-empresa-terceirizada{
+    background:#FFF1E9;border:1.5px dashed #EA580C;border-radius:var(--raio-sm);
+    padding:12px;margin-top:-4px;
+  }
   .item-parada-rota-expandido{flex-direction:column;align-items:stretch;gap:6px;}
   .item-parada-rota-topo{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:600;}
   .opcao-parada-checkbox{
@@ -1953,6 +1957,17 @@
             </div>
           </div>
 
+          <div id="camposEmpresaTerceirizada" class="grade-cadastro-rota campos-empresa-terceirizada" style="display:none;">
+            <div class="campo-filtro">
+              <label>Nome da empresa terceirizada</label>
+              <input type="text" id="empresaTerceirizadaRota" placeholder="Ex: TRANSPORTES ABC LTDA">
+            </div>
+            <div class="campo-filtro">
+              <label>Nº da linha na licitação</label>
+              <input type="text" id="numeroLicitacaoRota" placeholder="Ex: Linha 12 — Edital 003/2026">
+            </div>
+          </div>
+
           <h3 class="titulo-etapa-rota" id="secaoEscolasTurnosRota">🏫 Escolas e turnos atendidos</h3>
           <div class="linha-vinculos-rota">
             <div class="campo-vinculo-rota">
@@ -2732,7 +2747,7 @@
   }
   ['nomeResp', 'nomeAluno', 'rua', 'numero', 'localidade', 'referencia', 'nomeAlunoExtra',
    'editNomeAluno', 'editRua', 'editNumero', 'editLocalidade', 'editReferencia', 'editNomeResp',
-   'nomeRotaAtual'
+   'nomeRotaAtual', 'empresaTerceirizadaRota', 'numeroLicitacaoRota'
   ].forEach(aplicarMaiusculas);
   configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
 
@@ -4676,7 +4691,9 @@
       turno: document.getElementById('turnoRota').value,
       horarioInicio: document.getElementById('horarioInicioRota').value,
       horarioFim: document.getElementById('horarioFimRota').value,
-      sentido: document.getElementById('sentidoRota').value
+      sentido: document.getElementById('sentidoRota').value,
+      empresaTerceirizada: document.getElementById('empresaTerceirizadaRota').value,
+      numeroLicitacao: document.getElementById('numeroLicitacaoRota').value
     };
   }
   function preencherDadosCadastroRota(dados){
@@ -4688,7 +4705,16 @@
     document.getElementById('horarioInicioRota').value = dados.horarioInicio || '';
     document.getElementById('horarioFimRota').value = dados.horarioFim || '';
     document.getElementById('sentidoRota').value = dados.sentido || '';
+    document.getElementById('empresaTerceirizadaRota').value = dados.empresaTerceirizada || '';
+    document.getElementById('numeroLicitacaoRota').value = dados.numeroLicitacao || '';
+    atualizarVisibilidadeCamposTerceirizada();
   }
+
+  function atualizarVisibilidadeCamposTerceirizada(){
+    var ehTerceirizado = document.getElementById('propriedadeVeiculoRota').value === 'TERCEIRIZADO';
+    document.getElementById('camposEmpresaTerceirizada').style.display = ehTerceirizado ? 'grid' : 'none';
+  }
+  document.getElementById('propriedadeVeiculoRota').addEventListener('change', atualizarVisibilidadeCamposTerceirizada);
 
   // ---------- ESCOLAS VINCULADAS À ROTA ----------
   var escolasVinculadasRota = new Set();
@@ -5356,6 +5382,7 @@
       var qtdAlunos = r.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
       var infoLinha = [];
       if(c.tipoVeiculo){ infoLinha.push(c.tipoVeiculo + (c.propriedade ? ' · ' + c.propriedade : '')); }
+      if(c.propriedade === 'TERCEIRIZADO' && c.empresaTerceirizada){ infoLinha.push('Empresa: ' + c.empresaTerceirizada + (c.numeroLicitacao ? ' (' + c.numeroLicitacao + ')' : '')); }
       if(c.turno){ infoLinha.push(c.turno); }
       if(c.sentido){ infoLinha.push(c.sentido === 'IDA' ? 'Ida' : 'Volta'); }
       if(c.horarioInicio || c.horarioFim){ infoLinha.push((c.horarioInicio || '—') + ' às ' + (c.horarioFim || '—')); }
@@ -5647,6 +5674,7 @@
 
     var linhaCadastro = [];
     if(c.tipoVeiculo){ linhaCadastro.push(c.tipoVeiculo + (c.propriedade ? ' · ' + c.propriedade : '')); }
+    if(c.propriedade === 'TERCEIRIZADO' && c.empresaTerceirizada){ linhaCadastro.push('Empresa: ' + c.empresaTerceirizada + (c.numeroLicitacao ? ' (' + c.numeroLicitacao + ')' : '')); }
     if(c.turno){ linhaCadastro.push(c.turno); }
     if(c.sentido){ linhaCadastro.push(c.sentido === 'IDA' ? 'Ida' : 'Volta'); }
     if(c.horarioInicio || c.horarioFim){ linhaCadastro.push((c.horarioInicio || '—') + ' às ' + (c.horarioFim || '—')); }
@@ -5738,6 +5766,7 @@
 
     var linhaCadastro = [];
     if(cadastro.tipoVeiculo){ linhaCadastro.push('Veículo: ' + cadastro.tipoVeiculo + (cadastro.propriedade ? ' (' + cadastro.propriedade + ')' : '')); }
+    if(cadastro.propriedade === 'TERCEIRIZADO' && cadastro.empresaTerceirizada){ linhaCadastro.push('Empresa: ' + cadastro.empresaTerceirizada + (cadastro.numeroLicitacao ? ' — ' + cadastro.numeroLicitacao : '')); }
     if(cadastro.vagas){ linhaCadastro.push('Vagas: ' + cadastro.vagas); }
     if(cadastro.turno){ linhaCadastro.push('Turno: ' + cadastro.turno); }
     if(cadastro.sentido){ linhaCadastro.push('Sentido: ' + (cadastro.sentido === 'IDA' ? 'Ida' : 'Volta')); }
