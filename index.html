@@ -556,6 +556,12 @@
     text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;
   }
   .linha-vinculos-rota{display:flex;gap:14px;flex-wrap:wrap;}
+  .titulo-etapa-rota{
+    font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:#9A3412;
+    text-transform:uppercase;letter-spacing:.03em;margin:20px 0 10px;
+    padding-bottom:6px;border-bottom:2px solid #FFE4D1;
+  }
+  .titulo-etapa-rota:first-of-type{margin-top:6px;}
 
   .linha-mapa-rota-editor{display:flex;flex-direction:column;gap:16px;}
   .coluna-mapa-rota{flex:1 1 auto;min-width:0;}
@@ -764,11 +770,53 @@
     background:#EAF1FC;border:1.5px solid #2E6FDE;border-radius:8px;padding:10px 12px;margin-bottom:8px;
   }
   .card-sugestao-parada p{font-size:12.5px;margin:0 0 6px;color:#1d3a6b;}
-  .card-sugestao-parada button{
-    width:100%;background:#2E6FDE;color:#fff;border:none;border-radius:6px;
+  .acoes-sugestao-parada{display:flex;gap:6px;}
+  .acoes-sugestao-parada button{
+    flex:1 1 auto;border:none;border-radius:6px;
     font-size:12px;font-weight:600;padding:7px;cursor:pointer;font-family:inherit;
   }
-  .card-sugestao-parada button:hover{background:#1d54b3;}
+  .btn-confirmar-sugestao{background:var(--verde);color:#fff;}
+  .btn-confirmar-sugestao:hover{background:var(--verde-escuro);}
+  .btn-descartar-sugestao{background:#fff;color:var(--texto-suave);border:1.5px solid var(--borda) !important;}
+  .btn-descartar-sugestao:hover{background:var(--erro-bg);color:var(--erro);}
+  .pino-previa-sugestao{
+    width:26px;height:26px;border-radius:50%;background:#EA580C;border:2.5px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
+    font-size:13px;cursor:grab;animation:pulsarPrevia 1.4s infinite;
+  }
+  @keyframes pulsarPrevia{
+    0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.5), 0 0 0 0 rgba(234,88,12,.5);}
+    50%{box-shadow:0 2px 8px rgba(0,0,0,.5), 0 0 0 8px rgba(234,88,12,0);}
+  }
+
+  .busca-endereco-rota{display:flex;gap:8px;margin-bottom:6px;}
+  .busca-endereco-rota input{flex:1 1 auto;}
+  .busca-endereco-rota .btn-mapa{flex:0 0 auto;}
+  .resultados-busca-endereco{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+  .resultados-busca-endereco:empty{margin-bottom:0;}
+  .item-resultado-busca{
+    text-align:left;background:#fff;border:1px solid var(--borda);border-radius:8px;
+    padding:8px 10px;font-size:12px;color:var(--tinta);cursor:pointer;font-family:inherit;
+  }
+  .item-resultado-busca:hover{border-color:#2E6FDE;background:#EAF1FC;}
+
+  .seletor-rotas-alternativas{display:flex;gap:8px;flex-wrap:wrap;margin-top:-4px;margin-bottom:14px;}
+  .btn-rota-alternativa{
+    flex:1 1 auto;background:#fff;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    padding:8px 10px;font-size:12px;font-weight:600;color:var(--texto-suave);cursor:pointer;font-family:inherit;
+  }
+  .btn-rota-alternativa:hover{border-color:#EA580C;color:#EA580C;}
+  .btn-rota-alternativa.ativo{background:#EA580C;border-color:#EA580C;color:#fff;}
+
+  .resultado-simulacao-horarios{
+    margin-top:8px;padding:10px 12px;background:#FCFCFA;border:1px solid var(--borda);border-radius:8px;
+    max-height:220px;overflow:auto;
+  }
+  .item-horario-simulado{
+    display:flex;gap:8px;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--borda);
+  }
+  .item-horario-simulado:last-child{border-bottom:none;}
+  .item-horario-simulado strong{color:#EA580C;font-family:'Space Grotesk',sans-serif;min-width:44px;}
 
   .lista-raio-escola{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px;}
   .item-raio-escola{
@@ -872,7 +920,8 @@
   .card-rota-info{font-size:12.5px;color:var(--texto-suave);margin:2px 0;}
   .card-rota-alerta{color:var(--erro);font-weight:700;}
   .card-rota-acoes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-  .card-rota-acoes .btn-mapa{flex:1 1 auto;}
+  .card-rota-acoes .btn-mapa{flex:1 1 calc(33.333% - 6px);justify-content:center;min-width:100px;}
+  .card-rota-acoes .btn-excluir-rota{flex-basis:100%;}
 
   .grade-cadastro-rota{
     display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:10px;
@@ -1729,6 +1778,7 @@
 
           <input type="text" class="busca-filtro-multi" id="nomeRotaAtual" placeholder="Nome da rota (ex: Rota 1 — Manhã, Ônibus 02)">
 
+          <h3 class="titulo-etapa-rota">🚌 Dados do veículo e horário</h3>
           <div class="grade-cadastro-rota">
             <div class="campo-filtro">
               <label>Tipo de veículo</label>
@@ -1779,6 +1829,7 @@
             </div>
           </div>
 
+          <h3 class="titulo-etapa-rota">🏫 Escolas e turnos atendidos</h3>
           <div class="linha-vinculos-rota">
             <div class="campo-vinculo-rota">
               <label>Escolas atendidas por esta rota</label>
@@ -1806,6 +1857,7 @@
             </div>
           </div>
 
+          <h3 class="titulo-etapa-rota">🗺️ Traçar o trajeto</h3>
           <div class="linha-mapa-rota-editor">
             <div class="coluna-mapa-rota">
               <div class="controle-cluster-linha-topo" style="margin-bottom:8px;">
@@ -1827,7 +1879,15 @@
                   </button>
                 </div>
               </div>
+
+              <div class="busca-endereco-rota">
+                <input type="text" id="buscaEnderecoRota" class="busca-filtro-multi" placeholder="Buscar endereço, rua ou bairro...">
+                <button type="button" class="btn-mapa" id="btnBuscarEnderecoRota">🔍 Buscar</button>
+              </div>
+              <div id="resultadosBuscaEndereco" class="resultados-busca-endereco"></div>
+
               <div id="mapaRotas" class="mapa-redimensionavel" style="width:100%;height:480px;min-height:280px;border-radius:10px;border:1.5px solid var(--borda);margin-bottom:14px;box-shadow:var(--sombra);"></div>
+              <div id="seletorRotasAlternativas" class="seletor-rotas-alternativas" style="display:none;"></div>
             </div>
 
             <div class="coluna-info-rota">
@@ -1852,6 +1912,12 @@
                     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
                   </button>
                 </div>
+                <div class="acoes-rota-mapa">
+                  <button type="button" class="btn-mapa" id="btnExportarGPX" title="Exportar em formato GPX">📤 GPX</button>
+                  <button type="button" class="btn-mapa" id="btnExportarKML" title="Exportar em formato KML">📤 KML</button>
+                  <button type="button" class="btn-mapa" id="btnSimularHorarios" title="Estimar horário em cada parada">🕐 Simular horários</button>
+                </div>
+                <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
                 <p class="aviso-edicao-rota" id="avisoEdicaoRota" style="display:none;"></p>
                 <div class="selecao-rotas-salvas">
                   <select id="seletorRotasSalvas">
@@ -3016,7 +3082,7 @@
       document.querySelector('.rodape-admin').style.display = (aba === 'rotas') ? 'none' : 'flex';
       document.querySelector('.tabela-scroll').style.display = (aba === 'rotas') ? 'none' : 'block';
       document.querySelector('.titulo-lista-recentes').style.display = (aba === 'rotas') ? 'none' : 'block';
-      document.getElementById('listaRecentes').style.display = (aba === 'rotas') ? 'none' : 'flex';
+      document.getElementById('listaRecentes').style.display = (aba === 'rotas') ? 'none' : '';
       document.getElementById('btnRelatorioResumo').style.display = (aba === 'resumo') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapa').style.display = (aba === 'mapa') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapaGeral').style.display = (aba === 'mapa') ? 'flex' : 'none';
@@ -3816,7 +3882,19 @@
     if(!mapaRotas){ return; }
     if(camadaEscolasRotas){ mapaRotas.removeLayer(camadaEscolasRotas); camadaEscolasRotas = null; }
     if(!mostrarEscolasNoMapaRotas){ return; }
-    camadaEscolasRotas = renderizarEscolasNoMapa(mapaRotas);
+
+    var nomesParaMostrar = escolasVinculadasRota.size ? Array.from(escolasVinculadasRota) : Object.keys(ESCOLAS_COORDENADAS);
+    var camada = L.layerGroup();
+    nomesParaMostrar.forEach(function(nome){
+      var coords = ESCOLAS_COORDENADAS[nome];
+      if(!coords){ return; }
+      L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() })
+        .bindTooltip(construirPopupEscola(nome, false), { direction: 'top', offset: [0, -14], sticky: true, maxWidth: 260 })
+        .bindPopup(construirPopupEscola(nome, false), { maxWidth: 260 })
+        .addTo(camada);
+    });
+    camada.addTo(mapaRotas);
+    camadaEscolasRotas = camada;
   }
 
   document.getElementById('toggleEscolasRotas').addEventListener('click', function(){
@@ -4064,6 +4142,9 @@
     return grupo;
   }
 
+  var rotasAlternativasAtuais = [];
+  var indiceRotaEscolhida = 0;
+
   function calcularRotaOSRM(aoConcluir){
     versaoCalculoRota++;
     var minhaVersao = versaoCalculoRota;
@@ -4071,6 +4152,10 @@
     if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     if(camadaSetasRota){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
     resumoRotaAtual = null;
+    rotasAlternativasAtuais = [];
+    indiceRotaEscolhida = 0;
+    document.getElementById('seletorRotasAlternativas').style.display = 'none';
+    document.getElementById('resultadoSimulacaoHorarios').style.display = 'none';
 
     if(pontosRotaAtual.length < 2){
       atualizarMetaRota();
@@ -4080,7 +4165,7 @@
     document.getElementById('metaRotaMapa').textContent = 'Calculando o caminho pelas ruas...';
 
     var coordsStr = pontosRotaAtual.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
-    var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson';
+    var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson&alternatives=true&steps=false';
 
     fetch(url)
       .then(function(resp){ return resp.json(); })
@@ -4089,16 +4174,17 @@
         if(dados.code !== 'Ok' || !dados.routes || !dados.routes.length){
           throw new Error('OSRM não retornou uma rota válida');
         }
-        var rota = dados.routes[0];
-        var coordenadas = rota.geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
-        resumoRotaAtual = {
-          distanciaKm: rota.distance / 1000,
-          tempoMin: rota.duration / 60,
-          coordenadas: coordenadas
-        };
-        linhaRotaAtual = L.polyline(coordenadas, { color: '#EA580C', weight: 5, opacity: 0.85 }).addTo(mapaRotas);
-        camadaSetasRota = desenharSetasDirecaoRota(coordenadas, mapaRotas);
-        habilitarEdicaoDaLinha();
+        rotasAlternativasAtuais = dados.routes.slice(0, 3).map(function(r){
+          return {
+            distanciaKm: r.distance / 1000,
+            tempoMin: r.duration / 60,
+            coordenadas: r.geometry.coordinates.map(function(c){ return [c[1], c[0]]; }),
+            legs: r.legs || []
+          };
+        });
+        indiceRotaEscolhida = 0;
+        aplicarRotaAlternativaEscolhida();
+        atualizarSeletorRotasAlternativas();
         atualizarMetaRota();
         if(aoConcluir){ aoConcluir(true); }
       })
@@ -4109,6 +4195,163 @@
         if(aoConcluir){ aoConcluir(false); }
       });
   }
+
+  function aplicarRotaAlternativaEscolhida(){
+    var escolhida = rotasAlternativasAtuais[indiceRotaEscolhida];
+    if(!escolhida){ return; }
+    if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
+    if(camadaSetasRota){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
+    resumoRotaAtual = escolhida;
+    linhaRotaAtual = L.polyline(escolhida.coordenadas, { color: '#EA580C', weight: 5, opacity: 0.85 }).addTo(mapaRotas);
+    camadaSetasRota = desenharSetasDirecaoRota(escolhida.coordenadas, mapaRotas);
+    habilitarEdicaoDaLinha();
+  }
+
+  function atualizarSeletorRotasAlternativas(){
+    var container = document.getElementById('seletorRotasAlternativas');
+    if(rotasAlternativasAtuais.length < 2){
+      container.style.display = 'none';
+      container.innerHTML = '';
+      return;
+    }
+    container.style.display = 'flex';
+    container.innerHTML = rotasAlternativasAtuais.map(function(r, i){
+      return '<button type="button" class="btn-rota-alternativa' + (i === indiceRotaEscolhida ? ' ativo' : '') + '" data-indice-rota="' + i + '">Opção ' + (i + 1) + ' · ' + r.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</button>';
+    }).join('');
+  }
+
+  document.getElementById('seletorRotasAlternativas').addEventListener('click', function(e){
+    var botao = e.target.closest('.btn-rota-alternativa');
+    if(!botao){ return; }
+    indiceRotaEscolhida = parseInt(botao.getAttribute('data-indice-rota'), 10);
+    aplicarRotaAlternativaEscolhida();
+    atualizarSeletorRotasAlternativas();
+    atualizarMetaRota();
+    document.getElementById('resultadoSimulacaoHorarios').style.display = 'none';
+  });
+
+  // ---------- BUSCAR ENDEREÇO (Nominatim) ----------
+  function buscarEnderecoRota(){
+    var termo = document.getElementById('buscaEnderecoRota').value.trim();
+    if(!termo){ return; }
+    var resultados = document.getElementById('resultadosBuscaEndereco');
+    resultados.innerHTML = '<p class="sem-dados-grafico">Buscando...</p>';
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=br&q=' + encodeURIComponent(termo + ', Anchieta, Espírito Santo, Brasil');
+    fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
+      .then(function(resp){ return resp.json(); })
+      .then(function(lista){
+        if(!lista || !lista.length){
+          resultados.innerHTML = '<p class="sem-dados-grafico">Nenhum resultado encontrado. Tente um nome de rua ou bairro diferente.</p>';
+          return;
+        }
+        resultados.innerHTML = lista.map(function(item){
+          return '<button type="button" class="item-resultado-busca" data-lat="' + item.lat + '" data-lng="' + item.lon + '">' + escapeHtml(item.display_name) + '</button>';
+        }).join('');
+      })
+      .catch(function(){
+        resultados.innerHTML = '<p class="sem-dados-grafico">Não foi possível buscar agora. Tente novamente em instantes.</p>';
+      });
+  }
+  document.getElementById('btnBuscarEnderecoRota').addEventListener('click', buscarEnderecoRota);
+  document.getElementById('buscaEnderecoRota').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); buscarEnderecoRota(); }
+  });
+  document.getElementById('resultadosBuscaEndereco').addEventListener('click', function(e){
+    var botao = e.target.closest('.item-resultado-busca');
+    if(!botao || !mapaRotas){ return; }
+    var lat = parseFloat(botao.getAttribute('data-lat'));
+    var lng = parseFloat(botao.getAttribute('data-lng'));
+    mapaRotas.setView([lat, lng], 17);
+    document.getElementById('resultadosBuscaEndereco').innerHTML = '';
+  });
+
+  // ---------- EXPORTAR GPX / KML ----------
+  function escaparXml(texto){
+    return String(texto).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function baixarArquivoTexto(conteudo, nomeArquivo, tipoMime){
+    var blob = new Blob([conteudo], { type: tipoMime });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function nomeArquivoRota(extensao){
+    var base = (document.getElementById('nomeRotaAtual').value.trim() || 'rota').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase().replace(/^-+|-+$/g, '');
+    return (base || 'rota') + '.' + extensao;
+  }
+
+  document.getElementById('btnExportarGPX').addEventListener('click', function(){
+    if(!resumoRotaAtual){ mostrarAviso('Trace o trajeto (pelo menos 2 pontos) antes de exportar.'); return; }
+    var nome = document.getElementById('nomeRotaAtual').value.trim() || 'Rota sem nome';
+    var trkpts = resumoRotaAtual.coordenadas.map(function(c){ return '<trkpt lat="' + c[0] + '" lon="' + c[1] + '"></trkpt>'; }).join('');
+    var total = pontosRotaAtual.length;
+    var wpts = pontosRotaAtual.map(function(p, i){
+      var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' - ' + p.nomeParada : '');
+      return '<wpt lat="' + p.lat + '" lon="' + p.lng + '"><name>' + escaparXml(rotulo) + '</name></wpt>';
+    }).join('\n');
+    var gpx = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<gpx version="1.1" creator="Mapeamento Transporte Escolar - Anchieta" xmlns="http://www.topografix.com/GPX/1/1">\n' +
+      '<trk><name>' + escaparXml(nome) + '</name><trkseg>' + trkpts + '</trkseg></trk>\n' +
+      wpts + '\n</gpx>';
+    baixarArquivoTexto(gpx, nomeArquivoRota('gpx'), 'application/gpx+xml');
+  });
+
+  document.getElementById('btnExportarKML').addEventListener('click', function(){
+    if(!resumoRotaAtual){ mostrarAviso('Trace o trajeto (pelo menos 2 pontos) antes de exportar.'); return; }
+    var nome = document.getElementById('nomeRotaAtual').value.trim() || 'Rota sem nome';
+    var coordsLinha = resumoRotaAtual.coordenadas.map(function(c){ return c[1] + ',' + c[0] + ',0'; }).join(' ');
+    var total = pontosRotaAtual.length;
+    var placemarksPontos = pontosRotaAtual.map(function(p, i){
+      var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' - ' + p.nomeParada : '');
+      return '<Placemark><name>' + escaparXml(rotulo) + '</name><Point><coordinates>' + p.lng + ',' + p.lat + ',0</coordinates></Point></Placemark>';
+    }).join('\n');
+    var kml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>' + escaparXml(nome) + '</name>\n' +
+      '<Placemark><name>Trajeto</name><LineString><coordinates>' + coordsLinha + '</coordinates></LineString></Placemark>\n' +
+      placemarksPontos + '\n</Document></kml>';
+    baixarArquivoTexto(kml, nomeArquivoRota('kml'), 'application/vnd.google-earth.kml+xml');
+  });
+
+  // ---------- SIMULAR HORÁRIOS (com base no horário de início e na duração de cada trecho) ----------
+  document.getElementById('btnSimularHorarios').addEventListener('click', function(){
+    if(!resumoRotaAtual || !resumoRotaAtual.legs || !resumoRotaAtual.legs.length){
+      mostrarAviso('Trace o trajeto (pelo menos 2 pontos, com o caminho já calculado) antes de simular os horários.');
+      return;
+    }
+    var horarioInicio = document.getElementById('horarioInicioRota').value;
+    if(!horarioInicio){
+      mostrarAviso('Preencha o campo "Horário de início" da rota antes de simular.');
+      return;
+    }
+    var partes = horarioInicio.split(':');
+    var minutosAcumulados = parseInt(partes[0], 10) * 60 + parseInt(partes[1], 10);
+    var total = pontosRotaAtual.length;
+
+    var linhas = pontosRotaAtual.map(function(p, i){
+      if(i > 0){
+        var leg = resumoRotaAtual.legs[i - 1];
+        minutosAcumulados += leg ? (leg.duration / 60) : 0;
+      }
+      var papel = papelDoPonto(i, total);
+      if(papel === 'meio' && !p.parada){ return null; }
+      var h = Math.floor(minutosAcumulados / 60) % 24;
+      var m = Math.round(minutosAcumulados % 60);
+      var horarioTexto = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+      var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' — ' + p.nomeParada : '');
+      return '<div class="item-horario-simulado"><strong>' + horarioTexto + '</strong> ' + escapeHtml(rotulo) + '</div>';
+    }).filter(function(l){ return l !== null; });
+
+    var painel = document.getElementById('resultadoSimulacaoHorarios');
+    painel.innerHTML = linhas.join('');
+    painel.style.display = 'block';
+  });
 
   document.getElementById('listaParadasRota').addEventListener('click', function(e){
     var botaoMover = e.target.closest('.btn-mover-ponto');
@@ -4214,7 +4457,10 @@
     atualizarMetaRota();
     escolasVinculadasRota.clear();
     try { popularOpcoesEscolasRota(); } catch(erro){ console.error('Erro ao atualizar lista de escolas:', erro); }
+    renderizarEscolasNoMapaRotas();
     try { popularOpcoesTurnosRota(); } catch(erro){ console.error('Erro ao atualizar lista de turnos:', erro); }
+    limparPreviaSugestoes();
+    document.getElementById('sugestoesNovasParadas').innerHTML = '';
     sairDoModoEdicao();
   });
 
@@ -4311,6 +4557,7 @@
     if(e.target.checked){ escolasVinculadasRota.add(e.target.value); } else { escolasVinculadasRota.delete(e.target.value); }
     atualizarRotuloEscolasRota();
     renderizarTodosAlunosNoMapaRotas();
+    renderizarEscolasNoMapaRotas();
   });
 
   document.getElementById('opcoesTurnosRota').addEventListener('change', function(e){
@@ -4327,10 +4574,12 @@
         Object.keys(ESCOLAS_COORDENADAS).forEach(function(nome){ escolasVinculadasRota.add(nome); });
         popularOpcoesEscolasRota();
         renderizarTodosAlunosNoMapaRotas();
+        renderizarEscolasNoMapaRotas();
       } else if(acao === 'nenhum-escolas'){
         escolasVinculadasRota.clear();
         popularOpcoesEscolasRota();
         renderizarTodosAlunosNoMapaRotas();
+        renderizarEscolasNoMapaRotas();
       } else if(acao === 'todos-turnos'){
         TURNOS_DISPONIVEIS_ROTA.forEach(function(t){ turnosVinculadosRota.add(t); });
         popularOpcoesTurnosRota();
@@ -4381,6 +4630,14 @@
 
   // ---------- ANALISAR TRAJETO: sugerir novos pontos de parada onde há alunos sem cobertura ----------
   var clustersSugeridosAtuais = [];
+  var camadaPreviaSugestoes = null;
+  var marcadoresPreviaSugestoes = [];
+
+  function limparPreviaSugestoes(){
+    if(camadaPreviaSugestoes && mapaRotas){ mapaRotas.removeLayer(camadaPreviaSugestoes); }
+    camadaPreviaSugestoes = null;
+    marcadoresPreviaSugestoes = [];
+  }
 
   document.getElementById('btnAnalisarTrajeto').addEventListener('click', function(){
     if(!resumoRotaAtual || !resumoRotaAtual.coordenadas || !resumoRotaAtual.coordenadas.length){
@@ -4413,6 +4670,7 @@
       }
     });
 
+    limparPreviaSugestoes();
     var painel = document.getElementById('sugestoesNovasParadas');
     if(!candidatos.length){
       clustersSugeridosAtuais = [];
@@ -4439,43 +4697,66 @@
     clusters.sort(function(a, b){ return b.itens.length - a.itens.length; });
     clustersSugeridosAtuais = clusters;
 
+    camadaPreviaSugestoes = L.layerGroup().addTo(mapaRotas);
+
     painel.innerHTML = clusters.map(function(c, indiceCluster){
       var melhorPonto = trajeto[0], menorDist = Infinity;
       trajeto.forEach(function(coord){
         var d = distanciaMetros(coord[0], coord[1], c.lat, c.lng);
         if(d < menorDist){ menorDist = d; melhorPonto = coord; }
       });
+      c.previewLat = melhorPonto[0];
+      c.previewLng = melhorPonto[1];
+
+      var iconePrevia = L.divIcon({ html: '<div class="pino-previa-sugestao">➕</div>', className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+      var marcadorPrevia = L.marker([c.previewLat, c.previewLng], { draggable: true, icon: iconePrevia })
+        .bindTooltip('Arraste pra ajustar a posição — mais perto do aluno se precisar', { direction: 'top', offset: [0, -14], sticky: true });
+      marcadorPrevia.on('drag', function(ev){
+        var pos = ev.target.getLatLng();
+        c.previewLat = pos.lat;
+        c.previewLng = pos.lng;
+      });
+      marcadorPrevia.addTo(camadaPreviaSugestoes);
+      marcadoresPreviaSugestoes[indiceCluster] = marcadorPrevia;
+
       var nomes = c.itens.map(function(it){ return it.aluno.nomeAluno; });
       var nomesTexto = nomes.slice(0, 3).join(', ') + (nomes.length > 3 ? ' e mais ' + (nomes.length - 3) : '');
       return '<div class="card-sugestao-parada">' +
         '<p><strong>' + c.itens.length + ' aluno' + (c.itens.length === 1 ? '' : 's') + '</strong> perto do trajeto, sem parada por perto<br>' + escapeHtml(nomesTexto) + '</p>' +
-        '<button type="button" class="btn-adicionar-sugestao" data-indice-cluster="' + indiceCluster + '" data-lat="' + melhorPonto[0] + '" data-lng="' + melhorPonto[1] + '">➕ Adicionar parada aqui e vincular</button>' +
+        '<p style="font-size:11px;color:#1d54b3;margin:0 0 8px;">📍 O pino laranja "➕" apareceu no mapa — arraste-o pra deixar mais perto do aluno antes de confirmar.</p>' +
+        '<div class="acoes-sugestao-parada">' +
+          '<button type="button" class="btn-confirmar-sugestao" data-indice-cluster="' + indiceCluster + '">✅ Adicionar parada aqui</button>' +
+          '<button type="button" class="btn-descartar-sugestao" data-indice-cluster="' + indiceCluster + '">✕ Descartar</button>' +
+        '</div>' +
       '</div>';
     }).join('');
   });
 
   document.getElementById('sugestoesNovasParadas').addEventListener('click', function(e){
-    var botao = e.target.closest('.btn-adicionar-sugestao');
-    if(!botao){ return; }
-    var indiceCluster = parseInt(botao.getAttribute('data-indice-cluster'), 10);
+    var botaoConfirmar = e.target.closest('.btn-confirmar-sugestao');
+    var botaoDescartar = e.target.closest('.btn-descartar-sugestao');
+    if(!botaoConfirmar && !botaoDescartar){ return; }
+
+    var indiceCluster = parseInt((botaoConfirmar || botaoDescartar).getAttribute('data-indice-cluster'), 10);
     var cluster = clustersSugeridosAtuais[indiceCluster];
-    if(!cluster){ return; }
-    var lat = parseFloat(botao.getAttribute('data-lat'));
-    var lng = parseFloat(botao.getAttribute('data-lng'));
+    var card = (botaoConfirmar || botaoDescartar).closest('.card-sugestao-parada');
+    var marcadorPrevia = marcadoresPreviaSugestoes[indiceCluster];
+    if(marcadorPrevia && camadaPreviaSugestoes){ camadaPreviaSugestoes.removeLayer(marcadorPrevia); }
 
-    salvarEstadoRotaParaUndo();
-    var indiceInsercao = encontrarIndiceInsercao({ lat: lat, lng: lng });
-    var novoPonto = {
-      lat: lat, lng: lng, parada: true, nomeParada: '',
-      alunos: cluster.itens.map(function(it){ return it.aluno.id; })
-    };
-    pontosRotaAtual.splice(indiceInsercao, 0, novoPonto);
-    redesenharPontosRota();
-    calcularRotaOSRM();
+    if(botaoConfirmar && cluster){
+      salvarEstadoRotaParaUndo();
+      var indiceInsercao = encontrarIndiceInsercao({ lat: cluster.previewLat, lng: cluster.previewLng });
+      var novoPonto = {
+        lat: cluster.previewLat, lng: cluster.previewLng, parada: true, nomeParada: '',
+        alunos: cluster.itens.map(function(it){ return it.aluno.id; })
+      };
+      pontosRotaAtual.splice(indiceInsercao, 0, novoPonto);
+      redesenharPontosRota();
+      calcularRotaOSRM();
+      mostrarAviso('Nova parada adicionada com ' + cluster.itens.length + ' aluno' + (cluster.itens.length === 1 ? '' : 's') + ' vinculado' + (cluster.itens.length === 1 ? '' : 's') + '.', 'sucesso');
+    }
 
-    var card = botao.closest('.card-sugestao-parada');
     if(card){ card.remove(); }
-    mostrarAviso('Nova parada adicionada com ' + cluster.itens.length + ' aluno' + (cluster.itens.length === 1 ? '' : 's') + ' vinculado' + (cluster.itens.length === 1 ? '' : 's') + '.', 'sucesso');
   });
 
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
@@ -4528,9 +4809,12 @@
       turnosVinculadosRota.clear();
     }
     popularOpcoesEscolasRota();
+    renderizarEscolasNoMapaRotas();
     popularOpcoesTurnosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
+    limparPreviaSugestoes();
+    document.getElementById('sugestoesNovasParadas').innerHTML = '';
     sairDoModoEdicao();
     mostrarAviso('Edição cancelada.', 'sucesso');
   });
@@ -4549,6 +4833,7 @@
     escolasVinculadasRota = new Set(rota.escolas || []);
     turnosVinculadosRota = new Set(rota.turnos || []);
     popularOpcoesEscolasRota();
+    renderizarEscolasNoMapaRotas();
     popularOpcoesTurnosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
@@ -4678,6 +4963,7 @@
       escolasVinculadasRota = new Set(rota.escolas || []);
       turnosVinculadosRota = new Set(rota.turnos || []);
       popularOpcoesEscolasRota();
+      renderizarEscolasNoMapaRotas();
       popularOpcoesTurnosRota();
       redesenharPontosRota();
       calcularRotaOSRM();
@@ -4710,6 +4996,7 @@
       escolasVinculadasRota = new Set(rota.escolas || []);
       turnosVinculadosRota = new Set(rota.turnos || []);
       popularOpcoesEscolasRota();
+      renderizarEscolasNoMapaRotas();
       popularOpcoesTurnosRota();
       redesenharPontosRota();
       calcularRotaOSRM(function(sucesso){
@@ -4818,12 +5105,30 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaVisualizarRotaInstancia);
 
       var pontosLatLng = rota.pontos.map(function(p){ return [p.lat, p.lng]; });
-      var linha = L.polyline(pontosLatLng, { color: '#EA580C', weight: 4, opacity: 0.8, dashArray: '2,8' }).addTo(mapaVisualizarRotaInstancia);
+      var limites = L.latLngBounds(pontosLatLng);
+
       rota.pontos.forEach(function(p, i){
         L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
       });
-      mapaVisualizarRotaInstancia.fitBounds(linha.getBounds(), { padding: [24, 24] });
-      setTimeout(function(){ mapaVisualizarRotaInstancia.invalidateSize(); }, 80);
+      mapaVisualizarRotaInstancia.fitBounds(limites, { padding: [24, 24] });
+      setTimeout(function(){ if(mapaVisualizarRotaInstancia){ mapaVisualizarRotaInstancia.invalidateSize(); } }, 80);
+
+      // linha provisória reta, enquanto o caminho real (seguindo as ruas) é buscado
+      var linhaProvisoria = L.polyline(pontosLatLng, { color: '#EA580C', weight: 3, opacity: 0.5, dashArray: '2,8' }).addTo(mapaVisualizarRotaInstancia);
+
+      var coordsStr = rota.pontos.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+      var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson';
+      fetch(url)
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(!mapaVisualizarRotaInstancia || dados.code !== 'Ok' || !dados.routes || !dados.routes.length){ return; }
+          var coordenadas = dados.routes[0].geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+          mapaVisualizarRotaInstancia.removeLayer(linhaProvisoria);
+          var linhaReal = L.polyline(coordenadas, { color: '#EA580C', weight: 4, opacity: 0.85 }).addTo(mapaVisualizarRotaInstancia);
+          desenharSetasDirecaoRota(coordenadas, mapaVisualizarRotaInstancia);
+          mapaVisualizarRotaInstancia.fitBounds(linhaReal.getBounds(), { padding: [24, 24] });
+        })
+        .catch(function(erro){ console.error('Não foi possível carregar o traçado real para a visualização:', erro); });
     }, 60);
   }
 
