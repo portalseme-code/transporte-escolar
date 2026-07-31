@@ -929,6 +929,42 @@
     background:var(--verde-suave);border:1.5px solid var(--verde);border-top:none;
     border-radius:0 0 var(--raio-sm) var(--raio-sm);padding:16px;margin-bottom:20px;
   }
+  .painel-dashboard-frota{
+    background:var(--verde-suave);border:1.5px solid var(--verde);border-top:none;
+    border-radius:0 0 var(--raio-sm) var(--raio-sm);padding:16px;margin-bottom:20px;
+  }
+  .grade-dashboard-frota{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;margin-bottom:14px;
+  }
+  .metrica-dashboard{
+    background:#fff;border:1px solid var(--borda);border-radius:8px;padding:12px;text-align:center;
+  }
+  .metrica-dashboard strong{
+    display:block;font-family:'Space Grotesk',sans-serif;font-size:22px;color:var(--verde-escuro);line-height:1.2;
+  }
+  .metrica-dashboard.alerta strong{color:var(--erro);}
+  .metrica-dashboard span{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.02em;}
+  .grade-repartição-dashboard{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;}
+  .bloco-repartição-dashboard{background:#fff;border:1px solid var(--borda);border-radius:8px;padding:12px 14px;}
+  .bloco-repartição-dashboard h4{
+    font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--texto-suave);margin:0 0 8px;font-weight:700;
+  }
+  .linha-repartição{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;}
+  .linha-repartição strong{color:var(--verde-escuro);}
+
+  .painel-alunos-sem-rota{
+    background:#FFF1E9;border:1.5px solid #EA580C;border-top:none;
+    border-radius:0 0 var(--raio-sm) var(--raio-sm);padding:16px;margin-bottom:20px;
+  }
+  .lista-alunos-sem-rota{
+    max-height:260px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px;margin-top:8px;
+  }
+  .item-aluno-sem-rota{
+    background:#fff;border:1px solid var(--borda);border-radius:8px;padding:8px 10px;
+    display:flex;flex-direction:column;font-size:12.5px;
+  }
+  .item-aluno-sem-rota strong{color:#9A3412;}
+  .item-aluno-sem-rota span{color:var(--texto-suave);font-size:11.5px;}
 
   .card-rota-cadastrada{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
@@ -1954,6 +1990,15 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <h3 class="titulo-rotas-cadastradas">📊 Painel geral da frota</h3>
+          <div id="painelDashboardFrota" class="painel-dashboard-frota"></div>
+
+          <h3 class="titulo-rotas-cadastradas">🚸 Alunos sem rota vinculada</h3>
+          <div id="painelAlunosSemRota" class="painel-alunos-sem-rota">
+            <p class="contagem-filtro" id="contagemAlunosSemRota"></p>
+            <div id="listaAlunosSemRota" class="lista-alunos-sem-rota"></div>
           </div>
 
           <h3 class="titulo-rotas-cadastradas">📋 Rotas cadastradas</h3>
@@ -3901,7 +3946,7 @@
     popularOpcoesEscolasRota();
     popularOpcoesTurnosRota();
     popularFiltroEscolaRotas();
-    renderizarListaRotasCadastradas();
+    renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
   }
 
   function renderizarEscolasNoMapaRotas(){
@@ -4978,7 +5023,7 @@
     gravarRotasSalvas(rotas);
     marcarComoEditandoRotaExistente(rotaEmEdicaoIndice, dadosRota);
     atualizarSeletorRotasSalvas();
-    if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); }
+    if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota(); }
     mostrarAviso((editandoExistente ? 'Rota "' + nome + '" atualizada.' : 'Rota "' + nome + '" salva neste navegador.'), 'sucesso');
   });
 
@@ -5051,6 +5096,96 @@
     var nomes = Object.keys(ESCOLAS_COORDENADAS).sort();
     select.innerHTML = '<option value="">Todas</option>' + nomes.map(function(n){ return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
     select.value = valorAtual;
+  }
+
+  // ---------- ALUNOS SEM ROTA VINCULADA ----------
+  function obterIdsAlunosComRota(){
+    var ids = new Set();
+    obterRotasSalvas().forEach(function(rota){
+      rota.pontos.forEach(function(p){
+        (p.alunos || []).forEach(function(id){ ids.add(id); });
+      });
+    });
+    return ids;
+  }
+
+  function renderizarAlunosSemRota(){
+    var idsComRota = obterIdsAlunosComRota();
+    var semRota = registrosCache.filter(function(r){ return !idsComRota.has(r.id); });
+    document.getElementById('contagemAlunosSemRota').textContent =
+      semRota.length + ' de ' + registrosCache.length + ' aluno' + (registrosCache.length === 1 ? '' : 's') + ' cadastrado' + (registrosCache.length === 1 ? '' : 's') + ' ainda não estão vinculados a nenhuma rota.';
+
+    var lista = document.getElementById('listaAlunosSemRota');
+    if(!semRota.length){
+      lista.innerHTML = '<p class="sem-dados-grafico">🎉 Todos os alunos cadastrados já estão vinculados a alguma rota.</p>';
+      return;
+    }
+    var ordenados = semRota.slice().sort(function(a, b){
+      return (a.escola || '').localeCompare(b.escola || '') || (a.nomeAluno || '').localeCompare(b.nomeAluno || '');
+    });
+    lista.innerHTML = ordenados.map(function(r){
+      return '<div class="item-aluno-sem-rota"><strong>' + escapeHtml(r.nomeAluno) + '</strong><span>' + escapeHtml(r.escola) + ' · ' + escapeHtml(r.turno) + '</span></div>';
+    }).join('');
+  }
+
+  // ---------- DASHBOARD GERAL DA FROTA ----------
+  function renderizarDashboardFrota(){
+    var rotas = obterRotasSalvas();
+    var totalRotas = rotas.length;
+    var totalKm = rotas.reduce(function(s, r){ return s + (r.distanciaKm || 0); }, 0);
+    var idsComRota = obterIdsAlunosComRota();
+    var alunosAtendidos = registrosCache.filter(function(r){ return idsComRota.has(r.id); }).length;
+    var alunosSemRota = registrosCache.length - alunosAtendidos;
+
+    var porTipoVeiculo = {};
+    var porPropriedade = {};
+    var porTurno = {};
+    var totalVagas = 0;
+    var rotasSuperlotadas = 0;
+
+    rotas.forEach(function(r){
+      var c = r.cadastro || {};
+      if(c.tipoVeiculo){ porTipoVeiculo[c.tipoVeiculo] = (porTipoVeiculo[c.tipoVeiculo] || 0) + 1; }
+      if(c.propriedade){ porPropriedade[c.propriedade] = (porPropriedade[c.propriedade] || 0) + 1; }
+      if(c.turno){ porTurno[c.turno] = (porTurno[c.turno] || 0) + 1; }
+      if(c.vagas){
+        var vagasNum = parseInt(c.vagas, 10);
+        totalVagas += vagasNum;
+        var qtdAlunosRota = r.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
+        if(qtdAlunosRota > vagasNum){ rotasSuperlotadas++; }
+      }
+    });
+
+    function montarBlocoRepartição(titulo, objeto){
+      var chaves = Object.keys(objeto);
+      if(!chaves.length){ return ''; }
+      return '<div class="bloco-repartição-dashboard"><h4>' + titulo + '</h4>' +
+        chaves.sort().map(function(k){ return '<div class="linha-repartição"><span>' + escapeHtml(k) + '</span><strong>' + objeto[k] + '</strong></div>'; }).join('') +
+      '</div>';
+    }
+
+    var html = '<div class="grade-dashboard-frota">' +
+      '<div class="metrica-dashboard"><strong>' + totalRotas + '</strong><span>Rotas cadastradas</span></div>' +
+      '<div class="metrica-dashboard"><strong>' + totalKm.toFixed(1).replace(/\.0$/, '') + ' km</strong><span>Total percorrido/dia</span></div>' +
+      '<div class="metrica-dashboard"><strong>' + alunosAtendidos + '/' + registrosCache.length + '</strong><span>Alunos atendidos</span></div>' +
+      '<div class="metrica-dashboard' + (alunosSemRota > 0 ? ' alerta' : '') + '"><strong>' + alunosSemRota + '</strong><span>Alunos sem rota</span></div>' +
+      '<div class="metrica-dashboard"><strong>' + totalVagas + '</strong><span>Vagas ofertadas</span></div>' +
+      '<div class="metrica-dashboard' + (rotasSuperlotadas > 0 ? ' alerta' : '') + '"><strong>' + rotasSuperlotadas + '</strong><span>Rotas superlotadas</span></div>' +
+    '</div>';
+
+    var blocos = montarBlocoRepartição('Por tipo de veículo', porTipoVeiculo) +
+      montarBlocoRepartição('Por propriedade', porPropriedade) +
+      montarBlocoRepartição('Por turno', porTurno);
+
+    if(blocos){
+      html += '<div class="grade-repartição-dashboard">' + blocos + '</div>';
+    }
+
+    if(!totalRotas){
+      html = '<p class="sem-dados-grafico">Nenhuma rota cadastrada ainda — os números aparecem aqui assim que você salvar a primeira rota.</p>';
+    }
+
+    document.getElementById('painelDashboardFrota').innerHTML = html;
   }
 
   function renderizarListaRotasCadastradas(){
@@ -5130,7 +5265,7 @@
     ['filtroRotaTurno', 'filtroRotaTipoVeiculo', 'filtroRotaPropriedade', 'filtroRotaEscola', 'filtroRotaSentido'].forEach(function(id){
       document.getElementById(id).value = '';
     });
-    renderizarListaRotasCadastradas();
+    renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
   });
 
   document.getElementById('listaRotasCadastradas').addEventListener('click', function(e){
@@ -5167,7 +5302,7 @@
       rotas.splice(indice, 1);
       gravarRotasSalvas(rotas);
       atualizarSeletorRotasSalvas();
-      renderizarListaRotasCadastradas();
+      renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
     } else if(acao === 'duplicar'){
       var copia = JSON.parse(JSON.stringify(rota));
       copia.nome = copia.nome + ' (cópia)';
@@ -5175,7 +5310,7 @@
       rotas.push(copia);
       gravarRotasSalvas(rotas);
       atualizarSeletorRotasSalvas();
-      renderizarListaRotasCadastradas();
+      renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
       mostrarAviso('Rota duplicada como "' + copia.nome + '".', 'sucesso');
     } else if(acao === 'imprimir'){
       botao.disabled = true;
