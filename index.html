@@ -761,6 +761,29 @@
   .btn-sugerir-alunos-rota:hover{background:#EA580C;color:#fff;}
   .btn-analisar-trajeto{background:#EAF1FC;border-color:#2E6FDE;color:#1d54b3;}
   .btn-analisar-trajeto:hover{background:#2E6FDE;color:#fff;}
+  .btn-otimizar-trajeto{background:var(--verde-suave);border-color:var(--verde);color:var(--verde-escuro);}
+  .btn-otimizar-trajeto:hover{background:var(--verde);color:#fff;}
+
+  .card-otimizacao{border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+  .card-otimizacao p{font-size:12.5px;margin:0 0 8px;}
+  .card-otimizacao-reducao{background:var(--erro-bg);border:1.5px solid var(--erro);}
+  .card-otimizacao-reducao p{color:#8a2818;}
+  .card-otimizacao-reducao button{
+    width:100%;background:var(--erro);color:#fff;border:none;border-radius:6px;
+    font-size:12px;font-weight:600;padding:7px;cursor:pointer;font-family:inherit;
+  }
+  .card-otimizacao-reducao button:hover{background:#8a2818;}
+  .card-otimizacao-extensao{background:#EAF1FC;border:1.5px solid #2E6FDE;}
+  .card-otimizacao-extensao p{color:#1d3a6b;}
+  .pino-previa-extensao{
+    width:26px;height:26px;border-radius:50%;background:#2E6FDE;border:2.5px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
+    font-size:13px;cursor:grab;animation:pulsarPreviaAzul 1.4s infinite;
+  }
+  @keyframes pulsarPreviaAzul{
+    0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.5), 0 0 0 0 rgba(46,111,222,.5);}
+    50%{box-shadow:0 2px 8px rgba(0,0,0,.5), 0 0 0 8px rgba(46,111,222,0);}
+  }
 
   .rotulo-raio-sugestao{display:block;font-size:12px;font-weight:600;color:var(--tinta);margin-bottom:4px;}
   .rotulo-raio-sugestao strong{color:#EA580C;font-family:'Space Grotesk',sans-serif;}
@@ -1900,6 +1923,9 @@
                 <button type="button" class="btn-sugerir-alunos-rota" id="btnSugerirAlunosRota">📍 Sugerir alunos próximos às paradas</button>
                 <button type="button" class="btn-sugerir-alunos-rota btn-analisar-trajeto" id="btnAnalisarTrajeto">🔍 Analisar trajeto e sugerir novas paradas</button>
                 <div id="sugestoesNovasParadas"></div>
+
+                <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
+                <div id="sugestoesOtimizacao"></div>
 
                 <div class="lista-raio-escola" id="listaParadasRota"></div>
                 <div class="acoes-rota-mapa">
@@ -4461,6 +4487,8 @@
     try { popularOpcoesTurnosRota(); } catch(erro){ console.error('Erro ao atualizar lista de turnos:', erro); }
     limparPreviaSugestoes();
     document.getElementById('sugestoesNovasParadas').innerHTML = '';
+    limparPreviaExtensao();
+    document.getElementById('sugestoesOtimizacao').innerHTML = '';
     sairDoModoEdicao();
   });
 
@@ -4759,6 +4787,168 @@
     if(card){ card.remove(); }
   });
 
+  // ---------- OTIMIZAR TRAJETO: sugerir reduzir (paradas sem alunos) ou estender (alunos distantes) ----------
+  var pontosVaziosAtuais = [];
+  var clustersExtensaoAtuais = [];
+  var camadaPreviaExtensao = null;
+  var marcadoresPreviaExtensao = [];
+
+  function limparPreviaExtensao(){
+    if(camadaPreviaExtensao && mapaRotas){ mapaRotas.removeLayer(camadaPreviaExtensao); }
+    camadaPreviaExtensao = null;
+    marcadoresPreviaExtensao = [];
+  }
+
+  document.getElementById('btnOtimizarTrajeto').addEventListener('click', function(){
+    if(!resumoRotaAtual || !resumoRotaAtual.coordenadas || !resumoRotaAtual.coordenadas.length){
+      mostrarAviso('Trace o trajeto (pelo menos 2 pontos, com o caminho já calculado) antes de otimizar.');
+      return;
+    }
+
+    var painel = document.getElementById('sugestoesOtimizacao');
+    limparPreviaExtensao();
+    var partesHtml = [];
+
+    // ----- 1) REDUZIR: paradas marcadas sem nenhum aluno vinculado -----
+    pontosVaziosAtuais = pontosRotaAtual.filter(function(p){ return p.parada && (p.alunos || []).length === 0; });
+    var totalAtual = pontosRotaAtual.length;
+    pontosVaziosAtuais.forEach(function(p, indiceVazio){
+      var i = pontosRotaAtual.indexOf(p);
+      var rotulo = rotuloPapelPonto(i, totalAtual, true) + (p.nomeParada ? ' — ' + p.nomeParada : '');
+      partesHtml.push('<div class="card-otimizacao card-otimizacao-reducao">' +
+        '<p>🔻 <strong>' + escapeHtml(rotulo) + '</strong> não tem nenhum aluno vinculado. Removê-la encurta o trajeto sem afetar ninguém.</p>' +
+        '<button type="button" class="btn-remover-otimizacao" data-indice-vazio="' + indiceVazio + '">Remover esta parada</button>' +
+      '</div>');
+    });
+
+    // ----- 2) ESTENDER: alunos fora do raio normal de sugestão, mas ainda razoavelmente perto -----
+    var raioBase = parseInt(document.getElementById('raioSugestaoAlunos').value, 10) || 300;
+    var raioMinExtensao = raioBase;
+    var raioMaxExtensao = raioBase * 4;
+    var trajeto = resumoRotaAtual.coordenadas;
+
+    var candidatosExtensao = [];
+    obterAlunosFiltradosPorEscolaTurnoRota().forEach(function(r){
+      var jaVinculado = pontosRotaAtual.some(function(p){ return (p.alunos || []).indexOf(r.id) !== -1; });
+      if(jaVinculado){ return; }
+      var lat = paraNumero(r.lat), lng = paraNumero(r.lng);
+      if(lat === null || lng === null){ return; }
+
+      var menorDist = Infinity;
+      for(var i = 0; i < trajeto.length; i++){
+        var d = distanciaMetros(trajeto[i][0], trajeto[i][1], lat, lng);
+        if(d < menorDist){ menorDist = d; }
+      }
+      if(menorDist > raioMinExtensao && menorDist <= raioMaxExtensao){
+        candidatosExtensao.push({ aluno: r, lat: lat, lng: lng, distancia: menorDist });
+      }
+    });
+
+    var raioCluster = Math.max(150, raioBase);
+    var clusters = [];
+    candidatosExtensao.forEach(function(item){
+      var destino = null;
+      for(var i = 0; i < clusters.length; i++){
+        if(distanciaMetros(clusters[i].lat, clusters[i].lng, item.lat, item.lng) <= raioCluster){ destino = clusters[i]; break; }
+      }
+      if(destino){
+        destino.itens.push(item);
+        destino.lat = destino.itens.reduce(function(s, it){ return s + it.lat; }, 0) / destino.itens.length;
+        destino.lng = destino.itens.reduce(function(s, it){ return s + it.lng; }, 0) / destino.itens.length;
+      } else {
+        clusters.push({ lat: item.lat, lng: item.lng, itens: [item] });
+      }
+    });
+    clusters.sort(function(a, b){ return b.itens.length - a.itens.length; });
+    clustersExtensaoAtuais = clusters;
+
+    if(clusters.length){
+      camadaPreviaExtensao = L.layerGroup().addTo(mapaRotas);
+      clusters.forEach(function(c, indiceCluster){
+        var melhorPonto = trajeto[0], menorDist = Infinity;
+        trajeto.forEach(function(coord){
+          var d = distanciaMetros(coord[0], coord[1], c.lat, c.lng);
+          if(d < menorDist){ menorDist = d; melhorPonto = coord; }
+        });
+        c.previewLat = c.lat;
+        c.previewLng = c.lng;
+        var kmExtraEstimado = (menorDist * 2 / 1000);
+
+        var iconePrevia = L.divIcon({ html: '<div class="pino-previa-extensao">↔️</div>', className: '', iconSize: [28, 28], iconAnchor: [14, 14] });
+        var marcadorPrevia = L.marker([c.previewLat, c.previewLng], { draggable: true, icon: iconePrevia })
+          .bindTooltip('Arraste pra ajustar — nova parada de extensão', { direction: 'top', offset: [0, -14], sticky: true });
+        marcadorPrevia.on('drag', function(ev){
+          var pos = ev.target.getLatLng();
+          c.previewLat = pos.lat;
+          c.previewLng = pos.lng;
+        });
+        marcadorPrevia.addTo(camadaPreviaExtensao);
+        marcadoresPreviaExtensao[indiceCluster] = marcadorPrevia;
+
+        var nomes = c.itens.map(function(it){ return it.aluno.nomeAluno; });
+        var nomesTexto = nomes.slice(0, 3).join(', ') + (nomes.length > 3 ? ' e mais ' + (nomes.length - 3) : '');
+        partesHtml.push('<div class="card-otimizacao card-otimizacao-extensao">' +
+          '<p>↔️ <strong>' + c.itens.length + ' aluno' + (c.itens.length === 1 ? '' : 's') + '</strong> a cerca de ' + Math.round(menorDist) + 'm do trajeto atual, fora do raio de sugestão<br>' + escapeHtml(nomesTexto) +
+          '<br><span style="font-size:11px;">Estender até ali custaria aproximadamente <strong>+' + kmExtraEstimado.toFixed(1).replace(/\.0$/, '') + ' km</strong> (estimativa de ida e volta) — arraste o pino azul "↔️" no mapa pra ajustar antes de decidir.</span></p>' +
+          '<div class="acoes-sugestao-parada">' +
+            '<button type="button" class="btn-confirmar-extensao" data-indice-cluster="' + indiceCluster + '">✅ Estender até aqui</button>' +
+            '<button type="button" class="btn-descartar-extensao" data-indice-cluster="' + indiceCluster + '">✕ Descartar</button>' +
+          '</div>' +
+        '</div>');
+      });
+    }
+
+    if(!partesHtml.length){
+      painel.innerHTML = '<p class="sem-dados-grafico">Nada a otimizar no momento — o trajeto parece bem ajustado aos alunos vinculados e ao raio de sugestão atual.</p>';
+      return;
+    }
+    painel.innerHTML = partesHtml.join('');
+  });
+
+  document.getElementById('sugestoesOtimizacao').addEventListener('click', function(e){
+    var botaoRemover = e.target.closest('.btn-remover-otimizacao');
+    if(botaoRemover){
+      var indiceVazio = parseInt(botaoRemover.getAttribute('data-indice-vazio'), 10);
+      var ponto = pontosVaziosAtuais[indiceVazio];
+      var idxAtual = ponto ? pontosRotaAtual.indexOf(ponto) : -1;
+      if(idxAtual !== -1){
+        salvarEstadoRotaParaUndo();
+        pontosRotaAtual.splice(idxAtual, 1);
+        redesenharPontosRota();
+        calcularRotaOSRM();
+        mostrarAviso('Parada removida do trajeto.', 'sucesso');
+      }
+      var cardRemover = botaoRemover.closest('.card-otimizacao');
+      if(cardRemover){ cardRemover.remove(); }
+      return;
+    }
+
+    var botaoConfirmar = e.target.closest('.btn-confirmar-extensao');
+    var botaoDescartar = e.target.closest('.btn-descartar-extensao');
+    if(!botaoConfirmar && !botaoDescartar){ return; }
+
+    var indiceCluster = parseInt((botaoConfirmar || botaoDescartar).getAttribute('data-indice-cluster'), 10);
+    var cluster = clustersExtensaoAtuais[indiceCluster];
+    var card = (botaoConfirmar || botaoDescartar).closest('.card-otimizacao');
+    var marcadorPrevia = marcadoresPreviaExtensao[indiceCluster];
+    if(marcadorPrevia && camadaPreviaExtensao){ camadaPreviaExtensao.removeLayer(marcadorPrevia); }
+
+    if(botaoConfirmar && cluster){
+      salvarEstadoRotaParaUndo();
+      var indiceInsercao = encontrarIndiceInsercao({ lat: cluster.previewLat, lng: cluster.previewLng });
+      var novoPonto = {
+        lat: cluster.previewLat, lng: cluster.previewLng, parada: true, nomeParada: '',
+        alunos: cluster.itens.map(function(it){ return it.aluno.id; })
+      };
+      pontosRotaAtual.splice(indiceInsercao, 0, novoPonto);
+      redesenharPontosRota();
+      calcularRotaOSRM();
+      mostrarAviso('Trajeto estendido com nova parada e ' + cluster.itens.length + ' aluno' + (cluster.itens.length === 1 ? '' : 's') + ' vinculado' + (cluster.itens.length === 1 ? '' : 's') + '.', 'sucesso');
+    }
+
+    if(card){ card.remove(); }
+  });
+
   document.getElementById('btnSalvarRota').addEventListener('click', function(){
     if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de salvar.');
@@ -4815,6 +5005,8 @@
     calcularRotaOSRM();
     limparPreviaSugestoes();
     document.getElementById('sugestoesNovasParadas').innerHTML = '';
+    limparPreviaExtensao();
+    document.getElementById('sugestoesOtimizacao').innerHTML = '';
     sairDoModoEdicao();
     mostrarAviso('Edição cancelada.', 'sucesso');
   });
