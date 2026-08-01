@@ -1008,6 +1008,18 @@
   .card-rota-topo span{font-size:13px;color:var(--texto-suave);font-weight:600;}
   .card-rota-info{font-size:12.5px;color:var(--texto-suave);margin:2px 0;}
   .card-rota-alerta{color:var(--erro);font-weight:700;}
+
+  .barra-backup-rotas{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--borda);border-radius:var(--raio-sm);
+    padding:10px 14px;margin-bottom:14px;
+  }
+  .status-backup-rotas{font-size:12px;font-weight:600;color:var(--texto-suave);}
+  .status-backup-rotas.status-ok{color:var(--verde-escuro);}
+  .status-backup-rotas.status-erro{color:var(--erro);}
+  .status-backup-rotas.status-processando{color:#1d54b3;}
+  .botoes-backup-rotas{display:flex;gap:8px;flex-wrap:wrap;}
+
   .btn-comparar-rotas{
     display:block;width:100%;text-align:center;margin:10px 0;
     background:#2E6FDE;color:#fff;border:none;border-radius:var(--raio-sm);
@@ -2114,6 +2126,17 @@
 
           <h3 class="titulo-rotas-cadastradas" id="secaoRotasCadastradas">📋 Rotas cadastradas</h3>
           <div id="painelRotasCadastradas">
+
+            <div class="barra-backup-rotas">
+              <div class="status-backup-rotas" id="statusBackupRotas">☁️ Backup automático: nunca rodou ainda</div>
+              <div class="botoes-backup-rotas">
+                <button type="button" class="btn-mapa" id="btnBackupAgora">☁️ Fazer backup agora</button>
+                <button type="button" class="btn-mapa" id="btnExportarTodasRotas">💾 Exportar tudo (.json)</button>
+                <button type="button" class="btn-mapa" id="btnImportarTodasRotas">📂 Importar rotas</button>
+                <input type="file" id="inputImportarRotas" accept=".json" style="display:none;">
+              </div>
+            </div>
+
             <div class="barra-filtros" style="margin-top:0;">
               <div class="campo-filtro">
                 <label>Turno</label>
@@ -3957,8 +3980,134 @@
     catch(e){ return []; }
   }
   function gravarRotasSalvas(lista){
-    try { localStorage.setItem(CHAVE_ROTAS_SALVAS, JSON.stringify(lista)); } catch(e){}
+    try {
+      localStorage.setItem(CHAVE_ROTAS_SALVAS, JSON.stringify(lista));
+      return true;
+    } catch(erro){
+      console.error('Falha ao salvar rotas no navegador:', erro);
+      return false;
+    }
   }
+
+  // ---------- BACKUP AUTOMÁTICO NO GOOGLE DRIVE ----------
+  var CHAVE_STATUS_BACKUP = 'statusBackupRotasTransporteEscolarAnchieta';
+
+  function obterStatusBackup(){
+    try { return JSON.parse(localStorage.getItem(CHAVE_STATUS_BACKUP) || 'null'); } catch(erro){ return null; }
+  }
+  function gravarStatusBackup(status){
+    try { localStorage.setItem(CHAVE_STATUS_BACKUP, JSON.stringify(status)); } catch(erro){}
+  }
+
+  function atualizarIndicadorStatusBackup(processando){
+    var el = document.getElementById('statusBackupRotas');
+    if(processando){
+      el.className = 'status-backup-rotas status-processando';
+      el.textContent = '☁️ Fazendo backup no Google Drive...';
+      return;
+    }
+    var status = obterStatusBackup();
+    if(!status){
+      el.className = 'status-backup-rotas';
+      el.textContent = '☁️ Backup automático: nunca rodou ainda (roda sozinho a cada rota salva)';
+      return;
+    }
+    var quando = new Date(status.data).toLocaleString('pt-BR');
+    if(status.ok){
+      el.className = 'status-backup-rotas status-ok';
+      el.textContent = '✅ Backup em dia — último em ' + quando;
+    } else {
+      el.className = 'status-backup-rotas status-erro';
+      el.textContent = '⚠️ Último backup falhou (' + quando + '). Use "💾 Exportar tudo" como garantia.';
+    }
+  }
+
+  function enviarBackupParaDrive(manual){
+    if(!URL_PLANILHA){ return; }
+    atualizarIndicadorStatusBackup(true);
+    var rotasJson = JSON.stringify(obterRotasSalvas());
+    fetch(URL_PLANILHA, {
+      method: 'POST',
+      body: JSON.stringify({ acao: 'backupRotas', chaveAdmin: SENHA_ADMIN, rotasJson: rotasJson })
+    })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        gravarStatusBackup({ ok: !!dados.ok, data: new Date().toISOString() });
+        atualizarIndicadorStatusBackup(false);
+        if(manual){
+          if(dados.ok){ mostrarAviso('Backup enviado ao Google Drive com sucesso.', 'sucesso'); }
+          else { mostrarAviso('O backup não funcionou: ' + (dados.erro || 'erro desconhecido') + '. Use "Exportar tudo" por enquanto.'); }
+        }
+      })
+      .catch(function(erro){
+        console.error('Erro ao enviar backup para o Drive:', erro);
+        gravarStatusBackup({ ok: false, data: new Date().toISOString() });
+        atualizarIndicadorStatusBackup(false);
+        if(manual){ mostrarAviso('Não foi possível conectar pra fazer o backup agora. Use "Exportar tudo" como garantia.'); }
+      });
+  }
+
+  document.getElementById('btnBackupAgora').addEventListener('click', function(){
+    enviarBackupParaDrive(true);
+  });
+
+  // ---------- EXPORTAR / IMPORTAR TODAS AS ROTAS (arquivo .json manual) ----------
+  document.getElementById('btnExportarTodasRotas').addEventListener('click', function(){
+    var rotas = obterRotasSalvas();
+    if(!rotas.length){
+      mostrarAviso('Não há nenhuma rota salva ainda pra exportar.');
+      return;
+    }
+    var pacote = { app: 'mapeamento-transporte-escolar-anchieta', versao: 1, exportadoEm: new Date().toISOString(), rotas: rotas };
+    var carimbo = new Date().toLocaleDateString('pt-BR').split('/').join('-');
+    baixarArquivoTexto(JSON.stringify(pacote, null, 2), 'rotas-transporte-escolar-anchieta-' + carimbo + '.json', 'application/json');
+    mostrarAviso(rotas.length + ' rota' + (rotas.length === 1 ? '' : 's') + ' exportada' + (rotas.length === 1 ? '' : 's') + '. Guarde esse arquivo num lugar seguro.', 'sucesso');
+  });
+
+  document.getElementById('btnImportarTodasRotas').addEventListener('click', function(){
+    document.getElementById('inputImportarRotas').click();
+  });
+
+  document.getElementById('inputImportarRotas').addEventListener('change', function(e){
+    var arquivo = e.target.files[0];
+    if(!arquivo){ return; }
+    var leitor = new FileReader();
+    leitor.onload = function(){
+      var pacote;
+      try { pacote = JSON.parse(leitor.result); }
+      catch(erro){ mostrarAviso('Esse arquivo não é um .json válido.'); e.target.value = ''; return; }
+
+      var rotasImportadas = Array.isArray(pacote) ? pacote : pacote.rotas;
+      if(!Array.isArray(rotasImportadas) || !rotasImportadas.length){
+        mostrarAviso('Esse arquivo não parece ter rotas do Mapeamento do Transporte Escolar dentro.');
+        e.target.value = '';
+        return;
+      }
+
+      var rotasAtuais = obterRotasSalvas();
+      var nomesAtuais = rotasAtuais.map(function(r){ return r.nome; });
+      var confirmado = confirm('Isso vai ADICIONAR ' + rotasImportadas.length + ' rota(s) desse arquivo às ' + rotasAtuais.length + ' que você já tem aqui (nada é apagado). Continuar?');
+      if(!confirmado){ e.target.value = ''; return; }
+
+      rotasImportadas.forEach(function(rotaImportada){
+        var novaRota = JSON.parse(JSON.stringify(rotaImportada));
+        if(nomesAtuais.indexOf(novaRota.nome) !== -1){ novaRota.nome = novaRota.nome + ' (importada)'; }
+        nomesAtuais.push(novaRota.nome);
+        rotasAtuais.push(novaRota);
+      });
+
+      var salvouComSucesso = gravarRotasSalvas(rotasAtuais);
+      e.target.value = '';
+      if(!salvouComSucesso){
+        mostrarAviso('⚠️ Não foi possível salvar as rotas importadas neste navegador (modo anônimo/privado ou espaço cheio).');
+        return;
+      }
+      atualizarSeletorRotasSalvas();
+      renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
+      mostrarAviso(rotasImportadas.length + ' rota(s) importada(s) com sucesso.', 'sucesso');
+    };
+    leitor.readAsText(arquivo);
+  });
 
   // ----- desfazer / refazer -----
   function clonarPontosRota(){ return JSON.parse(JSON.stringify(pontosRotaAtual)); }
@@ -4072,6 +4221,7 @@
     popularOpcoesTurnosRota();
     popularFiltroEscolaRotas();
     renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
+    atualizarIndicadorStatusBackup(false);
   }
 
   function renderizarEscolasNoMapaRotas(){
@@ -5167,11 +5317,16 @@
       rotas.push(dadosRota);
       rotaEmEdicaoIndice = rotas.length - 1;
     }
-    gravarRotasSalvas(rotas);
+    var salvouComSucesso = gravarRotasSalvas(rotas);
+    if(!salvouComSucesso){
+      mostrarAviso('⚠️ Não foi possível salvar a rota neste navegador (pode ser modo anônimo/privado, ou espaço cheio). Use "💾 Exportar tudo" pra não perder o trabalho, e tente salvar de novo num navegador normal.');
+      return;
+    }
     marcarComoEditandoRotaExistente(rotaEmEdicaoIndice, dadosRota);
     atualizarSeletorRotasSalvas();
     if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota(); }
     mostrarAviso((editandoExistente ? 'Rota "' + nome + '" atualizada.' : 'Rota "' + nome + '" salva neste navegador.'), 'sucesso');
+    enviarBackupParaDrive();
   });
 
   document.getElementById('btnCancelarEdicaoRota').addEventListener('click', function(){
@@ -5434,6 +5589,7 @@
     ['filtroRotaTurno', 'filtroRotaTipoVeiculo', 'filtroRotaPropriedade', 'filtroRotaEscola', 'filtroRotaSentido'].forEach(function(id){
       document.getElementById(id).value = '';
     });
+    document.getElementById('btnFiltroSoComProblema').setAttribute('aria-pressed', 'false');
     renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
   });
 
