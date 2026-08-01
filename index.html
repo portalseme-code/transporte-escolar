@@ -574,6 +574,19 @@
     .coluna-info-rota .painel-rota-mapa{max-height:494px;overflow-y:auto;}
   }
 
+  /* ---- ajustes pra telas pequenas (celular) ---- */
+  @media(max-width:600px){
+    .card-rota-acoes .btn-mapa{flex-basis:calc(50% - 4px);}
+    .navegacao-rapida-rotas{position:static;box-shadow:none;}
+    .barra-backup-rotas{flex-direction:column;align-items:stretch;}
+    .botoes-backup-rotas{flex-direction:column;}
+    .botoes-backup-rotas .btn-mapa{width:100%;}
+    .grade-dashboard-frota{grid-template-columns:repeat(2, 1fr);}
+    .colunas-legenda-atalhos{grid-template-columns:1fr;}
+    .metrica-dashboard strong{font-size:18px;}
+    .titulo-etapa-rota, .titulo-rotas-cadastradas{font-size:14px;}
+  }
+
   .painel-multi-redimensionavel{resize:both;overflow:auto;max-width:90vw;}
   .seletor-multi{
     padding:9px 10px;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
@@ -983,7 +996,7 @@
   .linha-repartição strong{color:var(--verde-escuro);}
 
   .painel-alunos-sem-rota{
-    background:#FFF1E9;border:1.5px solid #EA580C;border-top:none;
+    background:var(--verde-suave);border:1.5px solid var(--verde);border-top:none;
     border-radius:0 0 var(--raio-sm) var(--raio-sm);padding:16px;margin-bottom:20px;
   }
   .lista-alunos-sem-rota{
@@ -1093,6 +1106,22 @@
   .aviso-edicao-rota{
     font-size:11.5px;color:#EA580C;font-weight:600;margin:6px 0 0;font-style:italic;
   }
+
+  .grupo-recolhivel-rota{
+    margin-top:12px;border:1px solid var(--borda);border-radius:var(--raio-sm);
+    background:#FCFCFA;overflow:hidden;
+  }
+  .grupo-recolhivel-rota summary{
+    cursor:pointer;padding:10px 14px;font-size:12.5px;font-weight:700;color:var(--verde-escuro);
+    list-style:none;display:flex;align-items:center;
+  }
+  .grupo-recolhivel-rota summary::-webkit-details-marker{display:none;}
+  .grupo-recolhivel-rota summary::before{content:'▸ ';color:var(--texto-suave);margin-right:2px;}
+  .grupo-recolhivel-rota[open] summary::before{content:'▾ ';}
+  .grupo-recolhivel-rota summary:hover{background:var(--verde-suave);}
+  .conteudo-grupo-recolhivel{padding:4px 14px 14px;}
+  .acoes-principais-rota{margin-top:10px;}
+
   .selecao-rotas-salvas{
     display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);flex-wrap:wrap;
   }
@@ -2072,38 +2101,52 @@
               <div class="painel-rota-mapa">
                 <p class="meta-rota-mapa" id="metaRotaMapa">Nenhum ponto ainda. Clique no mapa para começar.</p>
 
-                <label for="raioSugestaoAlunos" class="rotulo-raio-sugestao">Raio de sugestão: <strong id="valorRaioSugestaoAlunos">300</strong> m</label>
-                <input type="range" id="raioSugestaoAlunos" min="50" max="1000" step="50" value="300">
-
-                <button type="button" class="btn-sugerir-alunos-rota" id="btnSugerirAlunosRota">📍 Sugerir alunos próximos às paradas</button>
-                <button type="button" class="btn-sugerir-alunos-rota btn-analisar-trajeto" id="btnAnalisarTrajeto">🔍 Analisar trajeto e sugerir novas paradas</button>
-                <div id="sugestoesNovasParadas"></div>
-
-                <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
-                <div id="sugestoesOtimizacao"></div>
-
                 <div class="lista-raio-escola" id="listaParadasRota"></div>
-                <div class="acoes-rota-mapa">
+
+                <div class="acoes-rota-mapa acoes-principais-rota">
                   <button type="button" class="btn-mapa" id="btnLimparRota">Limpar rota</button>
                   <button type="button" class="btn-mapa btn-cancelar-edicao-rota" id="btnCancelarEdicaoRota">↩️ Cancelar edição</button>
                   <button type="button" class="btn-icone-impressora" id="btnSalvarRota" title="Salvar esta rota" aria-label="Salvar esta rota">
                     <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
                   </button>
-                  <button type="button" class="btn-icone-impressora" id="btnImprimirRota" title="Gerar relatório desta rota para impressão" aria-label="Gerar relatório desta rota">
-                    <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
-                  </button>
                 </div>
-                <div class="acoes-rota-mapa">
-                  <button type="button" class="btn-mapa" id="btnExportarGPX" title="Exportar em formato GPX">📤 GPX</button>
-                  <button type="button" class="btn-mapa" id="btnExportarKML" title="Exportar em formato KML">📤 KML</button>
-                  <button type="button" class="btn-mapa" id="btnSimularHorarios" title="Estimar horário em cada parada">🕐 Simular horários</button>
-                </div>
-                <div class="acoes-rota-mapa">
-                  <button type="button" class="btn-mapa" id="btnCopiarParadasRota" title="Copiar as paradas desta rota">📋 Copiar paradas</button>
-                  <button type="button" class="btn-mapa" id="btnColarParadas" style="display:none;"></button>
-                </div>
-                <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
                 <p class="aviso-edicao-rota" id="avisoEdicaoRota" style="display:none;"></p>
+
+                <details class="grupo-recolhivel-rota">
+                  <summary>🛠️ Ferramentas de análise (sugerir/otimizar paradas)</summary>
+                  <div class="conteudo-grupo-recolhivel">
+                    <label for="raioSugestaoAlunos" class="rotulo-raio-sugestao">Raio de sugestão: <strong id="valorRaioSugestaoAlunos">300</strong> m</label>
+                    <input type="range" id="raioSugestaoAlunos" min="50" max="1000" step="50" value="300">
+
+                    <button type="button" class="btn-sugerir-alunos-rota" id="btnSugerirAlunosRota">📍 Sugerir alunos próximos às paradas</button>
+                    <button type="button" class="btn-sugerir-alunos-rota btn-analisar-trajeto" id="btnAnalisarTrajeto">🔍 Analisar trajeto e sugerir novas paradas</button>
+                    <div id="sugestoesNovasParadas"></div>
+
+                    <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
+                    <div id="sugestoesOtimizacao"></div>
+
+                    <button type="button" class="btn-mapa" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;">🕐 Simular horários</button>
+                    <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
+                  </div>
+                </details>
+
+                <details class="grupo-recolhivel-rota">
+                  <summary>📤 Exportar, imprimir e copiar paradas</summary>
+                  <div class="conteudo-grupo-recolhivel">
+                    <div class="acoes-rota-mapa">
+                      <button type="button" class="btn-mapa" id="btnExportarGPX" title="Exportar em formato GPX">📤 GPX</button>
+                      <button type="button" class="btn-mapa" id="btnExportarKML" title="Exportar em formato KML">📤 KML</button>
+                      <button type="button" class="btn-icone-impressora" id="btnImprimirRota" title="Gerar relatório desta rota para impressão" aria-label="Gerar relatório desta rota">
+                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><path d="M6 14h12v8H6z"></path></svg>
+                      </button>
+                    </div>
+                    <div class="acoes-rota-mapa">
+                      <button type="button" class="btn-mapa" id="btnCopiarParadasRota" title="Copiar as paradas desta rota">📋 Copiar paradas</button>
+                      <button type="button" class="btn-mapa" id="btnColarParadas" style="display:none;"></button>
+                    </div>
+                  </div>
+                </details>
+
                 <div class="selecao-rotas-salvas">
                   <select id="seletorRotasSalvas">
                     <option value="">Rotas salvas neste navegador...</option>
@@ -3975,9 +4018,20 @@
   var mostrarEscolasNoMapaRotas = true;
   var camadaEscolasRotas = null;
 
+  function gerarIdRota(){
+    return 'rota-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
   function obterRotasSalvas(){
-    try { return JSON.parse(localStorage.getItem(CHAVE_ROTAS_SALVAS) || '[]'); }
+    var lista;
+    try { lista = JSON.parse(localStorage.getItem(CHAVE_ROTAS_SALVAS) || '[]'); }
     catch(e){ return []; }
+    var precisouMigrar = false;
+    lista.forEach(function(r){
+      if(!r.id){ r.id = gerarIdRota(); precisouMigrar = true; }
+    });
+    if(precisouMigrar){ gravarRotasSalvas(lista); }
+    return lista;
   }
   function gravarRotasSalvas(lista){
     try {
@@ -4091,6 +4145,7 @@
 
       rotasImportadas.forEach(function(rotaImportada){
         var novaRota = JSON.parse(JSON.stringify(rotaImportada));
+        novaRota.id = gerarIdRota();
         if(nomesAtuais.indexOf(novaRota.nome) !== -1){ novaRota.nome = novaRota.nome + ' (importada)'; }
         nomesAtuais.push(novaRota.nome);
         rotasAtuais.push(novaRota);
@@ -5300,6 +5355,7 @@
     var rotas = obterRotasSalvas();
     var editandoExistente = rotaEmEdicaoIndice !== null && rotas[rotaEmEdicaoIndice];
     var dadosRota = {
+      id: editandoExistente ? (rotas[rotaEmEdicaoIndice].id || gerarIdRota()) : gerarIdRota(),
       nome: nome,
       pontos: pontosRotaAtual.slice(),
       distanciaKm: resumoRotaAtual.distanciaKm,
@@ -5561,7 +5617,7 @@
         '<p class="card-rota-info">' + qtdParadas + ' parada' + (qtdParadas === 1 ? '' : 's') + ' · ' + qtdAlunos + ' aluno' + (qtdAlunos === 1 ? '' : 's') + ' vinculado' + (qtdAlunos === 1 ? '' : 's') + '</p>' +
         vagasHtml +
         (r.escolas && r.escolas.length ? '<p class="card-rota-info">Escolas: ' + escapeHtml(r.escolas.join(', ')) + '</p>' : '') +
-        '<label class="opcao-parada-checkbox"><input type="checkbox" class="check-comparar-rota" data-indice="' + x.indice + '"> Selecionar para comparar no mapa</label>' +
+        '<label class="opcao-parada-checkbox"><input type="checkbox" class="check-comparar-rota" data-id-rota="' + escapeHtml(r.id) + '"' + (rotasSelecionadasParaComparar.has(r.id) ? ' checked' : '') + '> Selecionar para comparar no mapa</label>' +
         '<div class="card-rota-acoes">' +
           '<button type="button" class="btn-mapa" data-acao="visualizar" data-indice="' + x.indice + '">👁️ Visualizar</button>' +
           '<button type="button" class="btn-mapa" data-acao="editar" data-indice="' + x.indice + '">✏️ Editar</button>' +
@@ -5593,25 +5649,30 @@
     renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
   });
 
+  var rotasSelecionadasParaComparar = new Set();
+
   document.getElementById('listaRotasCadastradas').addEventListener('change', function(e){
-    if(e.target.classList.contains('check-comparar-rota')){ atualizarBotaoCompararRotas(); }
+    if(!e.target.classList.contains('check-comparar-rota')){ return; }
+    var idRota = e.target.getAttribute('data-id-rota');
+    if(e.target.checked){ rotasSelecionadasParaComparar.add(idRota); } else { rotasSelecionadasParaComparar.delete(idRota); }
+    atualizarBotaoCompararRotas();
   });
 
   function atualizarBotaoCompararRotas(){
-    var checks = document.querySelectorAll('.check-comparar-rota:checked');
     var botao = document.getElementById('btnCompararRotasSelecionadas');
-    if(checks.length >= 2){
+    var qtd = rotasSelecionadasParaComparar.size;
+    if(qtd >= 2){
       botao.style.display = 'block';
-      botao.textContent = '🗺️ Comparar ' + checks.length + ' rotas selecionadas' + (checks.length > 3 ? ' (só as 3 primeiras)' : '');
+      botao.textContent = '🗺️ Comparar ' + qtd + ' rota' + (qtd === 1 ? '' : 's') + ' selecionada' + (qtd === 1 ? '' : 's') + (qtd > 3 ? ' (só as 3 primeiras)' : '');
     } else {
       botao.style.display = 'none';
     }
   }
 
   document.getElementById('btnCompararRotasSelecionadas').addEventListener('click', function(){
-    var indices = Array.from(document.querySelectorAll('.check-comparar-rota:checked')).slice(0, 3).map(function(el){ return parseInt(el.getAttribute('data-indice'), 10); });
+    var idsSelecionados = Array.from(rotasSelecionadasParaComparar).slice(0, 3);
     var rotas = obterRotasSalvas();
-    var selecionadas = indices.map(function(i){ return rotas[i]; }).filter(Boolean);
+    var selecionadas = idsSelecionados.map(function(id){ return rotas.filter(function(r){ return r.id === id; })[0]; }).filter(Boolean);
     if(selecionadas.length < 2){ return; }
     abrirModalComparacaoRotas(selecionadas);
   });
@@ -5741,10 +5802,12 @@
       if(!confirm('Excluir a rota "' + rota.nome + '"? Essa ação não pode ser desfeita.')){ return; }
       rotas.splice(indice, 1);
       gravarRotasSalvas(rotas);
+      rotasSelecionadasParaComparar.delete(rota.id);
       atualizarSeletorRotasSalvas();
       renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
     } else if(acao === 'duplicar'){
       var copia = JSON.parse(JSON.stringify(rota));
+      copia.id = gerarIdRota();
       copia.nome = copia.nome + ' (cópia)';
       copia.criadoEm = new Date().toISOString();
       rotas.push(copia);
