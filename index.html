@@ -547,6 +547,13 @@
     width:100%;box-sizing:border-box;
   }
   .campo-filtro select:focus, .campo-filtro input:focus{outline:none;border-color:var(--verde);background:#fff;}
+  .btn-filtro-problema{
+    flex:0 0 auto;white-space:nowrap;align-self:flex-end;
+    padding:9px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
+    background:#fff;border:1.5px solid var(--borda);border-radius:var(--raio-sm);color:var(--texto-suave);
+  }
+  .btn-filtro-problema:hover{border-color:var(--erro);color:var(--erro);background:var(--erro-bg);}
+  .btn-filtro-problema[aria-pressed="true"]{background:var(--erro);border-color:var(--erro);color:#fff;}
   .contagem-filtro{font-size:12px;color:var(--texto-suave);margin:8px 2px 0;}
 
   .campo-filtro-multi{position:relative;}
@@ -2222,7 +2229,7 @@
                   <option value="VOLTA">Volta</option>
                 </select>
               </div>
-              <button type="button" class="toggle-escolas" id="btnFiltroSoComProblema" aria-pressed="false" title="Mostrar só rotas superlotadas ou sem alunos" style="align-self:flex-end;">⚠️ Só com problema</button>
+              <button type="button" class="btn-filtro-problema" id="btnFiltroSoComProblema" aria-pressed="false" title="Mostrar só rotas superlotadas ou sem alunos">⚠️ Só com problema</button>
               <button class="btn-mapa" id="btnLimparFiltrosRotas" type="button">Limpar filtros</button>
             </div>
             <p class="contagem-filtro" id="contagemRotasCadastradas"></p>
