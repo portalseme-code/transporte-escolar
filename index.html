@@ -844,6 +844,34 @@
   }
   .item-resultado-busca:hover{border-color:#2E6FDE;background:#EAF1FC;}
 
+  .btn-cortar-trajeto{color:var(--erro);border-color:var(--erro);}
+  .btn-cortar-trajeto:hover{background:var(--erro-bg);}
+  .btn-cortar-trajeto[aria-pressed="true"]{background:var(--erro);color:#fff;}
+  .btn-estender-trajeto{color:#2E6FDE;border-color:#2E6FDE;}
+  .btn-estender-trajeto:hover{background:#EAF1FC;}
+  .btn-estender-trajeto[aria-pressed="true"]{background:#2E6FDE;color:#fff;}
+
+  .painel-ferramenta-mapa-ativa{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:#FFF1E9;border:1.5px solid var(--erro);border-radius:var(--raio-sm);
+    padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:#8a2818;
+  }
+  .painel-ferramenta-mapa-ativa.tema-estender{background:#EAF1FC;border-color:#2E6FDE;color:#1d3a6b;}
+  .painel-ferramenta-mapa-ativa button{
+    background:#fff;border:1.5px solid var(--borda);border-radius:8px;
+    padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  .painel-ferramenta-mapa-ativa .btn-confirmar-ferramenta{background:var(--verde);color:#fff;border-color:var(--verde);}
+  .painel-ferramenta-mapa-ativa .btn-confirmar-ferramenta:hover{background:var(--verde-escuro);}
+  .pino-marca-corte{
+    width:22px;height:22px;border-radius:50%;background:var(--erro);border:2.5px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
+  }
+  .pino-marca-estender{
+    width:22px;height:22px;border-radius:50%;background:#2E6FDE;border:2.5px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
+  }
+
   .painel-legenda-atalhos{
     background:#FCFCFA;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
     padding:14px 16px;margin-bottom:14px;
@@ -2118,8 +2146,12 @@
                     <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14 20 9l-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg>
                   </button>
                   <button type="button" class="toggle-escolas" id="btnAlternarLegenda" aria-pressed="false" title="Mostrar/ocultar legenda do mapa" aria-label="Mostrar/ocultar legenda do mapa">❓</button>
+                  <button type="button" class="toggle-escolas btn-cortar-trajeto" id="btnModoCortarTrajeto" aria-pressed="false" title="Cortar um trecho do trajeto: clique em 2 pontos da linha pra remover o que está entre eles" aria-label="Cortar trecho do trajeto">✂️</button>
+                  <button type="button" class="toggle-escolas btn-estender-trajeto" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique em qualquer lugar do mapa pra levar o início ou fim da rota até ali" aria-label="Estender rota até aqui">↔️</button>
                 </div>
               </div>
+
+              <div class="painel-ferramenta-mapa-ativa" id="painelFerramentaMapaAtiva" style="display:none;"></div>
 
               <div id="painelLegendaAtalhos" class="painel-legenda-atalhos" style="display:none;">
                 <div class="colunas-legenda-atalhos">
@@ -2175,7 +2207,12 @@
                   </div>
                 </details>
 
-                <div class="lista-raio-escola" id="listaParadasRota"></div>
+                <details class="grupo-recolhivel-rota" id="detalhesListaPontos" open>
+                  <summary id="resumoListaPontos">📍 Pontos do trajeto</summary>
+                  <div class="conteudo-grupo-recolhivel">
+                    <div class="lista-raio-escola" id="listaParadasRota"></div>
+                  </div>
+                </details>
 
                 <details class="grupo-recolhivel-rota">
                   <summary>🛠️ Ferramentas de análise (sugerir/otimizar paradas)</summary>
@@ -4378,6 +4415,8 @@
     adicionarControleCamadaBase(mapaRotas, camadaOsmRotas);
 
     mapaRotas.on('click', function(e){
+      if(modoCortarTrajeto){ adicionarMarcaCorte(e.latlng); return; }
+      if(modoEstenderTrajeto){ confirmarExtensaoAte(e.latlng); return; }
       salvarEstadoRotaParaUndo();
       pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, parada: false, nomeParada: '' });
       redesenharPontosRota();
@@ -4561,6 +4600,10 @@
         (p.parada && indicePainelAlunosAberto === i ? construirPainelAlunosDoPonto(i) : '') +
       '</div>';
     }).join('') || '<p class="sem-dados-grafico">Clique no mapa para adicionar pontos.</p>';
+    var qtdParadasResumo = pontosRotaAtual.filter(function(p){ return p.parada; }).length;
+    document.getElementById('resumoListaPontos').textContent = total
+      ? '📍 Pontos do trajeto (' + total + ' pontos, ' + qtdParadasResumo + ' parada' + (qtdParadasResumo === 1 ? '' : 's') + ')'
+      : '📍 Pontos do trajeto';
   }
 
   var camadaAlunosVinculadosRota = null;
@@ -4699,6 +4742,7 @@
   function habilitarEdicaoDaLinha(){
     if(!linhaRotaAtual){ return; }
     linhaRotaAtual.on('mousedown', function(e){
+      if(modoCortarTrajeto || modoEstenderTrajeto){ return; } // deixa o clique passar pro handler da ferramenta ativa
       L.DomEvent.stopPropagation(e);
       mapaRotas.dragging.disable();
 
@@ -4723,6 +4767,112 @@
       mapaRotas.on('mousemove', aoMover);
       mapaRotas.on('mouseup', aoSoltar);
     });
+  }
+
+  // ---------- CORTAR TRAJETO / ESTENDER ROTA (ferramentas de mapa) ----------
+  var modoCortarTrajeto = false;
+  var modoEstenderTrajeto = false;
+  var pontosCorteSelecionados = [];
+  var marcadoresCorteAtual = [];
+
+  function limparMarcadoresCorte(){
+    marcadoresCorteAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
+    marcadoresCorteAtual = [];
+    pontosCorteSelecionados = [];
+  }
+
+  function sairDosModosDeFerramenta(){
+    modoCortarTrajeto = false;
+    modoEstenderTrajeto = false;
+    document.getElementById('btnModoCortarTrajeto').setAttribute('aria-pressed', 'false');
+    document.getElementById('btnModoEstenderTrajeto').setAttribute('aria-pressed', 'false');
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.style.display = 'none';
+    painel.className = 'painel-ferramenta-mapa-ativa';
+    limparMarcadoresCorte();
+  }
+
+  document.getElementById('btnModoCortarTrajeto').addEventListener('click', function(){
+    var vaiAtivar = this.getAttribute('aria-pressed') !== 'true';
+    sairDosModosDeFerramenta();
+    if(!vaiAtivar){ return; }
+    if(!resumoRotaAtual){
+      mostrarAviso('Trace o trajeto (pelo menos 2 pontos) antes de usar a ferramenta de cortar.');
+      return;
+    }
+    modoCortarTrajeto = true;
+    this.setAttribute('aria-pressed', 'true');
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.className = 'painel-ferramenta-mapa-ativa';
+    painel.innerHTML = '<span>✂️</span><div>Clique em <strong>2 pontos da linha laranja</strong> pra marcar o início e o fim do trecho que você quer cortar.</div>';
+    painel.style.display = 'flex';
+  });
+
+  document.getElementById('btnModoEstenderTrajeto').addEventListener('click', function(){
+    var vaiAtivar = this.getAttribute('aria-pressed') !== 'true';
+    sairDosModosDeFerramenta();
+    if(!vaiAtivar){ return; }
+    if(!pontosRotaAtual.length){
+      mostrarAviso('Marque pelo menos 1 ponto antes de usar a ferramenta de estender.');
+      return;
+    }
+    modoEstenderTrajeto = true;
+    this.setAttribute('aria-pressed', 'true');
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.className = 'painel-ferramenta-mapa-ativa tema-estender';
+    painel.innerHTML = '<span>↔️</span><div>Clique em qualquer lugar do mapa — a rota se estende até ali, a partir do início ou do fim (o que estiver mais perto).</div>';
+    painel.style.display = 'flex';
+  });
+
+  function adicionarMarcaCorte(latlng){
+    pontosCorteSelecionados.push({ lat: latlng.lat, lng: latlng.lng });
+    var marcador = L.marker(latlng, {
+      icon: L.divIcon({ html: '<div class="pino-marca-corte">' + pontosCorteSelecionados.length + '</div>', className: '', iconSize: [22, 22], iconAnchor: [11, 11] })
+    }).addTo(mapaRotas);
+    marcadoresCorteAtual.push(marcador);
+
+    if(pontosCorteSelecionados.length === 2){
+      var painel = document.getElementById('painelFerramentaMapaAtiva');
+      painel.innerHTML = '<span>✂️</span><div>Pronto pra cortar o trecho entre as 2 marcações.</div>' +
+        '<button type="button" class="btn-confirmar-ferramenta" id="btnConfirmarCorte">🔪 Recalcular sem esse trecho</button>' +
+        '<button type="button" id="btnCancelarFerramentaCorte">Cancelar</button>';
+      document.getElementById('btnConfirmarCorte').addEventListener('click', confirmarCorteTrajeto);
+      document.getElementById('btnCancelarFerramentaCorte').addEventListener('click', sairDosModosDeFerramenta);
+    }
+  }
+
+  function confirmarCorteTrajeto(){
+    var idxA = encontrarIndiceInsercao(pontosCorteSelecionados[0]);
+    var idxB = encontrarIndiceInsercao(pontosCorteSelecionados[1]);
+    var menor = Math.min(idxA, idxB), maior = Math.max(idxA, idxB);
+    if(maior <= menor){
+      mostrarAviso('As duas marcações precisam estar em trechos diferentes da linha. Tente marcar pontos mais afastados um do outro.');
+      return;
+    }
+    salvarEstadoRotaParaUndo();
+    var novoPonto1 = { lat: pontosCorteSelecionados[0].lat, lng: pontosCorteSelecionados[0].lng, parada: false, nomeParada: '', alunos: [] };
+    var novoPonto2 = { lat: pontosCorteSelecionados[1].lat, lng: pontosCorteSelecionados[1].lng, parada: false, nomeParada: '', alunos: [] };
+    pontosRotaAtual.splice(menor, maior - menor, novoPonto1, novoPonto2);
+    sairDosModosDeFerramenta();
+    redesenharPontosRota();
+    calcularRotaOSRM();
+    mostrarAviso('Trecho cortado — trajeto recalculado sem passar mais por ali.', 'sucesso');
+  }
+
+  function confirmarExtensaoAte(latlng){
+    if(!pontosRotaAtual.length){ return; }
+    var primeiro = pontosRotaAtual[0];
+    var ultimo = pontosRotaAtual[pontosRotaAtual.length - 1];
+    var distIni = distanciaMetros(primeiro.lat, primeiro.lng, latlng.lat, latlng.lng);
+    var distFim = distanciaMetros(ultimo.lat, ultimo.lng, latlng.lat, latlng.lng);
+    var estenderPeloInicio = distIni <= distFim;
+    salvarEstadoRotaParaUndo();
+    var novoPonto = { lat: latlng.lat, lng: latlng.lng, parada: false, nomeParada: '', alunos: [] };
+    if(estenderPeloInicio){ pontosRotaAtual.unshift(novoPonto); } else { pontosRotaAtual.push(novoPonto); }
+    sairDosModosDeFerramenta();
+    redesenharPontosRota();
+    calcularRotaOSRM();
+    mostrarAviso('Rota estendida a partir do ' + (estenderPeloInicio ? 'início' : 'fim') + '.', 'sucesso');
   }
 
   var versaoCalculoRota = 0;
@@ -5076,6 +5226,7 @@
   document.getElementById('btnLimparRota').addEventListener('click', function(){
     if(!pontosRotaAtual.length){ return; }
     if(!confirm('Limpar todos os pontos da rota atual?')){ return; }
+    sairDosModosDeFerramenta();
     versaoCalculoRota++;
     salvarEstadoRotaParaUndo();
     pontosRotaAtual = [];
@@ -5608,18 +5759,38 @@
       mostrarAviso('⚠️ Não foi possível salvar a rota neste navegador (pode ser modo anônimo/privado, ou espaço cheio). Use "💾 Exportar tudo" pra não perder o trabalho, e tente salvar de novo num navegador normal.');
       return;
     }
-    marcarComoEditandoRotaExistente(rotaEmEdicaoIndice, dadosRota);
-    marcarComoEditandoRotaExistente(rotaEmEdicaoIndice, dadosRota);
     limparAlteracoesNaoSalvas();
     limparRascunhoSalvo();
     atualizarSeletorRotasSalvas();
     if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota(); }
     mostrarAviso((editandoExistente ? 'Rota "' + nome + '" atualizada.' : 'Rota "' + nome + '" salva neste navegador.'), 'sucesso');
     enviarBackupParaDrive();
+
+    // depois de salvar, limpa o mapa e os campos pra começar uma rota nova do zero
+    pontosRotaAtual = [];
+    if(linhaRotaAtual && mapaRotas){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
+    if(camadaSetasRota && mapaRotas){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
+    resumoRotaAtual = null;
+    document.getElementById('nomeRotaAtual').value = '';
+    preencherDadosCadastroRota({});
+    escolasVinculadasRota.clear();
+    turnosVinculadosRota.clear();
+    popularOpcoesEscolasRota();
+    renderizarEscolasNoMapaRotas();
+    popularOpcoesTurnosRota();
+    document.getElementById('sugestoesNovasParadas').innerHTML = '';
+    document.getElementById('sugestoesOtimizacao').innerHTML = '';
+    limparPreviaSugestoes();
+    limparPreviaExtensao();
+    sairDosModosDeFerramenta();
+    redesenharPontosRota();
+    atualizarMetaRota();
+    sairDoModoEdicao();
   });
 
   document.getElementById('btnCancelarEdicaoRota').addEventListener('click', function(){
     if(!confirm('Descartar as alterações feitas e voltar como estava?')){ return; }
+    sairDosModosDeFerramenta();
     salvarEstadoRotaParaUndo();
     if(rotaEmEdicaoIndice !== null && snapshotRotaEmEdicao){
       pontosRotaAtual = snapshotRotaEmEdicao.pontos.slice();
