@@ -2147,7 +2147,7 @@
                   </button>
                   <button type="button" class="toggle-escolas" id="btnAlternarLegenda" aria-pressed="false" title="Mostrar/ocultar legenda do mapa" aria-label="Mostrar/ocultar legenda do mapa">❓</button>
                   <button type="button" class="toggle-escolas btn-cortar-trajeto" id="btnModoCortarTrajeto" aria-pressed="false" title="Cortar um trecho do trajeto: clique em 2 pontos da linha pra remover o que está entre eles" aria-label="Cortar trecho do trajeto">✂️</button>
-                  <button type="button" class="toggle-escolas btn-estender-trajeto" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique em qualquer lugar do mapa pra levar o início ou fim da rota até ali" aria-label="Estender rota até aqui">↔️</button>
+                  <button type="button" class="toggle-escolas btn-estender-trajeto" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique num ponto do trajeto já traçado e depois no destino" aria-label="Estender rota até aqui">↔️</button>
                 </div>
               </div>
 
@@ -4416,7 +4416,7 @@
 
     mapaRotas.on('click', function(e){
       if(modoCortarTrajeto){ adicionarMarcaCorte(e.latlng); return; }
-      if(modoEstenderTrajeto){ confirmarExtensaoAte(e.latlng); return; }
+      if(modoEstenderTrajeto){ adicionarMarcaExtensao(e.latlng); return; }
       salvarEstadoRotaParaUndo();
       pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, parada: false, nomeParada: '' });
       redesenharPontosRota();
@@ -4774,6 +4774,14 @@
   var modoEstenderTrajeto = false;
   var pontosCorteSelecionados = [];
   var marcadoresCorteAtual = [];
+  var pontosExtensaoSelecionados = [];
+  var marcadoresExtensaoAtual = [];
+
+  function limparMarcadoresExtensao(){
+    marcadoresExtensaoAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
+    marcadoresExtensaoAtual = [];
+    pontosExtensaoSelecionados = [];
+  }
 
   function limparMarcadoresCorte(){
     marcadoresCorteAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
@@ -4790,6 +4798,7 @@
     painel.style.display = 'none';
     painel.className = 'painel-ferramenta-mapa-ativa';
     limparMarcadoresCorte();
+    limparMarcadoresExtensao();
   }
 
   document.getElementById('btnModoCortarTrajeto').addEventListener('click', function(){
@@ -4812,15 +4821,15 @@
     var vaiAtivar = this.getAttribute('aria-pressed') !== 'true';
     sairDosModosDeFerramenta();
     if(!vaiAtivar){ return; }
-    if(!pontosRotaAtual.length){
-      mostrarAviso('Marque pelo menos 1 ponto antes de usar a ferramenta de estender.');
+    if(!resumoRotaAtual){
+      mostrarAviso('Trace o trajeto (pelo menos 2 pontos) antes de usar a ferramenta de estender.');
       return;
     }
     modoEstenderTrajeto = true;
     this.setAttribute('aria-pressed', 'true');
     var painel = document.getElementById('painelFerramentaMapaAtiva');
     painel.className = 'painel-ferramenta-mapa-ativa tema-estender';
-    painel.innerHTML = '<span>↔️</span><div>Clique em qualquer lugar do mapa — a rota se estende até ali, a partir do início ou do fim (o que estiver mais perto).</div>';
+    painel.innerHTML = '<span>↔️</span><div>Clique em <strong>1 ponto do trajeto já traçado</strong> (de onde estender), depois clique em <strong>outro lugar do mapa</strong> (até onde estender).</div>';
     painel.style.display = 'flex';
   });
 
@@ -4888,20 +4897,56 @@
     });
   }
 
-  function confirmarExtensaoAte(latlng){
-    if(!pontosRotaAtual.length){ return; }
-    var primeiro = pontosRotaAtual[0];
-    var ultimo = pontosRotaAtual[pontosRotaAtual.length - 1];
-    var distIni = distanciaMetros(primeiro.lat, primeiro.lng, latlng.lat, latlng.lng);
-    var distFim = distanciaMetros(ultimo.lat, ultimo.lng, latlng.lat, latlng.lng);
-    var estenderPeloInicio = distIni <= distFim;
+  function adicionarMarcaExtensao(latlng){
+    pontosExtensaoSelecionados.push({ lat: latlng.lat, lng: latlng.lng });
+    var numero = pontosExtensaoSelecionados.length;
+    var marcador = L.marker(latlng, {
+      icon: L.divIcon({ html: '<div class="pino-marca-estender">' + numero + '</div>', className: '', iconSize: [22, 22], iconAnchor: [11, 11] })
+    }).addTo(mapaRotas);
+    marcadoresExtensaoAtual.push(marcador);
+
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    if(numero === 1){
+      painel.innerHTML = '<span>↔️</span><div>Ponto 1 marcado (de onde estender). Agora clique em <strong>outro lugar do mapa</strong> — até onde a rota deve ir.</div>';
+    } else if(numero === 2){
+      painel.innerHTML = '<span>↔️</span><div>Pronto pra estender a rota entre essas 2 marcações.</div>' +
+        '<button type="button" class="btn-confirmar-ferramenta" id="btnConfirmarExtensao">➕ Estender e recalcular</button>' +
+        '<button type="button" id="btnCancelarFerramentaExtensao">Cancelar</button>';
+      document.getElementById('btnConfirmarExtensao').addEventListener('click', confirmarExtensaoTrajeto);
+      document.getElementById('btnCancelarFerramentaExtensao').addEventListener('click', sairDosModosDeFerramenta);
+    }
+  }
+
+  function confirmarExtensaoTrajeto(){
+    if(!resumoRotaAtual || pontosExtensaoSelecionados.length < 2){ return; }
+    var ancora = pontosExtensaoSelecionados[0]; // ponto do trajeto já traçado, escolhido por você
+    var destino = pontosExtensaoSelecionados[1]; // até onde estender
+
+    var trajeto = resumoRotaAtual.coordenadas;
+    var idxAncora = indicePathMaisProximo(ancora);
+    var pertoDoInicio = idxAncora <= trajeto.length * 0.15;
+    var pertoDoFim = idxAncora >= trajeto.length * 0.85;
+
     salvarEstadoRotaParaUndo();
-    var novoPonto = { lat: latlng.lat, lng: latlng.lng, parada: false, nomeParada: '', alunos: [] };
-    if(estenderPeloInicio){ pontosRotaAtual.unshift(novoPonto); } else { pontosRotaAtual.push(novoPonto); }
+    var novoPonto = { lat: destino.lat, lng: destino.lng, parada: false, nomeParada: '', alunos: [] };
+
+    var ondeEstendeu;
+    if(pertoDoInicio && !pertoDoFim){
+      pontosRotaAtual.unshift(novoPonto);
+      ondeEstendeu = 'início';
+    } else if(pertoDoFim && !pertoDoInicio){
+      pontosRotaAtual.push(novoPonto);
+      ondeEstendeu = 'fim';
+    } else {
+      var indiceInsercao = encontrarIndiceInsercao(ancora);
+      pontosRotaAtual.splice(indiceInsercao, 0, novoPonto);
+      ondeEstendeu = 'meio do trajeto (novo desvio)';
+    }
+
     sairDosModosDeFerramenta();
     redesenharPontosRota();
     calcularRotaOSRM(function(sucesso){
-      if(sucesso){ mostrarAviso('Rota estendida a partir do ' + (estenderPeloInicio ? 'início' : 'fim') + '.', 'sucesso'); }
+      if(sucesso){ mostrarAviso('Rota estendida a partir do ponto marcado (' + ondeEstendeu + ').', 'sucesso'); }
       else { mostrarAviso('O ponto foi adicionado, mas não foi possível recalcular o caminho agora. Tente novamente em instantes.'); }
     });
   }
@@ -6326,7 +6371,14 @@
     pontosRotaAtual.forEach(function(p, i){
       L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
     });
-    if(mostrarEscolasNoMapaRotas){ renderizarEscolasNoMapa(mapaTemp); }
+    if(mostrarEscolasNoMapaRotas){
+      var nomesEscolasImpressao = escolasVinculadasRota.size ? Array.from(escolasVinculadasRota) : Object.keys(ESCOLAS_COORDENADAS);
+      nomesEscolasImpressao.forEach(function(nome){
+        var coords = ESCOLAS_COORDENADAS[nome];
+        if(!coords){ return; }
+        L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() }).addTo(mapaTemp);
+      });
+    }
     mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
 
     setTimeout(function(){
