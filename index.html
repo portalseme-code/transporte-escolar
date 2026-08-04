@@ -4841,18 +4841,45 @@
     }
   }
 
+  // encontra a posição mais próxima de um clique dentro do traçado real (linha detalhada), não dos poucos pontos marcados
+  function indicePathMaisProximo(latlng){
+    var trajeto = resumoRotaAtual.coordenadas;
+    var menorDist = Infinity, indice = 0;
+    for(var i = 0; i < trajeto.length; i++){
+      var d = distanciaMetros(trajeto[i][0], trajeto[i][1], latlng.lat, latlng.lng);
+      if(d < menorDist){ menorDist = d; indice = i; }
+    }
+    return indice;
+  }
+
   function confirmarCorteTrajeto(){
-    var idxA = encontrarIndiceInsercao(pontosCorteSelecionados[0]);
-    var idxB = encontrarIndiceInsercao(pontosCorteSelecionados[1]);
+    if(!resumoRotaAtual){ return; }
+    var idxA = indicePathMaisProximo(pontosCorteSelecionados[0]);
+    var idxB = indicePathMaisProximo(pontosCorteSelecionados[1]);
     var menor = Math.min(idxA, idxB), maior = Math.max(idxA, idxB);
-    if(maior <= menor){
-      mostrarAviso('As duas marcações precisam estar em trechos diferentes da linha. Tente marcar pontos mais afastados um do outro.');
+    if(maior - menor < 3){
+      mostrarAviso('As duas marcações estão praticamente no mesmo lugar. Tente marcar pontos um pouco mais afastados um do outro.');
       return;
     }
+
     salvarEstadoRotaParaUndo();
-    var novoPonto1 = { lat: pontosCorteSelecionados[0].lat, lng: pontosCorteSelecionados[0].lng, parada: false, nomeParada: '', alunos: [] };
-    var novoPonto2 = { lat: pontosCorteSelecionados[1].lat, lng: pontosCorteSelecionados[1].lng, parada: false, nomeParada: '', alunos: [] };
-    pontosRotaAtual.splice(menor, maior - menor, novoPonto1, novoPonto2);
+
+    // remove qualquer ponto marcado (parada, passagem etc.) que caia dentro do trecho cortado
+    var indicesParaRemover = [];
+    pontosRotaAtual.forEach(function(p, i){
+      var idxPonto = indicePathMaisProximo(p);
+      if(idxPonto > menor && idxPonto < maior){ indicesParaRemover.push(i); }
+    });
+    indicesParaRemover.sort(function(a, b){ return b - a; }).forEach(function(i){ pontosRotaAtual.splice(i, 1); });
+
+    // insere as duas marcações de corte, na ordem certa (a que vem primeiro no trajeto, primeiro)
+    var pontoA = { lat: pontosCorteSelecionados[0].lat, lng: pontosCorteSelecionados[0].lng, parada: false, nomeParada: '', alunos: [] };
+    var pontoB = { lat: pontosCorteSelecionados[1].lat, lng: pontosCorteSelecionados[1].lng, parada: false, nomeParada: '', alunos: [] };
+    var primeiroCorte = idxA <= idxB ? pontoA : pontoB;
+    var segundoCorte = idxA <= idxB ? pontoB : pontoA;
+    var indiceInsercao = encontrarIndiceInsercao(primeiroCorte);
+    pontosRotaAtual.splice(indiceInsercao, 0, primeiroCorte, segundoCorte);
+
     sairDosModosDeFerramenta();
     redesenharPontosRota();
     calcularRotaOSRM();
