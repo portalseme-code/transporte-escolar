@@ -4882,8 +4882,10 @@
 
     sairDosModosDeFerramenta();
     redesenharPontosRota();
-    calcularRotaOSRM();
-    mostrarAviso('Trecho cortado — trajeto recalculado sem passar mais por ali.', 'sucesso');
+    calcularRotaOSRM(function(sucesso){
+      if(sucesso){ mostrarAviso('Trecho cortado — trajeto recalculado sem passar mais por ali.', 'sucesso'); }
+      else { mostrarAviso('O trecho foi marcado, mas não foi possível recalcular o caminho agora. Tente novamente em instantes.'); }
+    });
   }
 
   function confirmarExtensaoAte(latlng){
@@ -4898,8 +4900,10 @@
     if(estenderPeloInicio){ pontosRotaAtual.unshift(novoPonto); } else { pontosRotaAtual.push(novoPonto); }
     sairDosModosDeFerramenta();
     redesenharPontosRota();
-    calcularRotaOSRM();
-    mostrarAviso('Rota estendida a partir do ' + (estenderPeloInicio ? 'início' : 'fim') + '.', 'sucesso');
+    calcularRotaOSRM(function(sucesso){
+      if(sucesso){ mostrarAviso('Rota estendida a partir do ' + (estenderPeloInicio ? 'início' : 'fim') + '.', 'sucesso'); }
+      else { mostrarAviso('O ponto foi adicionado, mas não foi possível recalcular o caminho agora. Tente novamente em instantes.'); }
+    });
   }
 
   var versaoCalculoRota = 0;
