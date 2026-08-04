@@ -1533,6 +1533,11 @@
       </svg>
     </button>
     <span class="badge-usuario-logado" id="badgeUsuarioLogado" style="display:none;"></span>
+    <button class="btn-admin" id="btnAbrirTrocarSenha" type="button" aria-label="Trocar minha senha" title="Trocar minha senha" style="display:none;">
+      <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+      </svg>
+    </button>
     <button class="btn-admin btn-sair-header" id="sairAdmin" type="button" aria-label="Sair da área da secretaria" title="Sair da área da secretaria" style="display:none;">
       <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M13 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path>
@@ -2506,6 +2511,33 @@
     </section>
 
     <!-- MODAL DE COMPARAÇÃO DE ROTAS -->
+    <!-- MODAL DE TROCAR SENHA -->
+    <div class="overlay-modal" id="modalTrocarSenha" style="display:none;">
+      <div class="caixa-modal">
+        <div class="cabecalho-modal-visualizar">
+          <p class="rotulo-secao" style="margin-bottom:0;">Trocar minha senha</p>
+          <button type="button" class="btn-fechar-raio-escola" id="fecharModalTrocarSenha" title="Fechar" aria-label="Fechar">✕</button>
+        </div>
+        <div class="campo-login" style="margin-top:14px;">
+          <label for="senhaAtualTrocar">Senha atual</label>
+          <input type="password" id="senhaAtualTrocar" autocomplete="current-password">
+        </div>
+        <div class="campo-login">
+          <label for="novaSenhaTrocar">Nova senha</label>
+          <input type="password" id="novaSenhaTrocar" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="campo-login">
+          <label for="confirmarNovaSenhaTrocar">Confirmar nova senha</label>
+          <input type="password" id="confirmarNovaSenhaTrocar" autocomplete="new-password">
+        </div>
+        <p class="aviso-erro" id="erroTrocarSenha" style="max-width:280px;margin:0 auto;"></p>
+        <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+          <button class="secundario" id="btnCancelarTrocarSenha" type="button">Cancelar</button>
+          <button class="principal" id="btnConfirmarTrocarSenha" type="button">Trocar senha</button>
+        </div>
+      </div>
+    </div>
+
     <div class="overlay-modal" id="modalComparacaoRotas" style="display:none;">
       <div class="caixa-modal caixa-modal-larga">
         <div class="cabecalho-modal-visualizar">
@@ -3646,6 +3678,7 @@
     document.getElementById('gateAdmin').style.display = 'none';
     document.getElementById('painelAdmin').style.display = 'block';
     document.getElementById('sairAdmin').style.display = 'flex';
+    document.getElementById('btnAbrirTrocarSenha').style.display = 'flex';
     aplicarRestricoesPorNivelAcesso();
     carregarRegistros();
   }
@@ -3771,6 +3804,7 @@
     document.getElementById('iconeOlhoAberto').style.display = '';
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('sairAdmin').style.display = 'none';
+    document.getElementById('btnAbrirTrocarSenha').style.display = 'none';
     document.getElementById('badgeUsuarioLogado').style.display = 'none';
     limparSessaoAdmin();
   }
@@ -3789,6 +3823,7 @@
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('btnAdmin').style.display = 'flex';
     document.getElementById('sairAdmin').style.display = 'none';
+    document.getElementById('btnAbrirTrocarSenha').style.display = 'none';
     document.getElementById('badgeUsuarioLogado').style.display = 'none';
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
     document.getElementById('subtituloTopo').textContent = '';
@@ -4813,6 +4848,7 @@
     if(e.key !== 'Escape'){ return; }
     if(document.getElementById('modalVisualizarRota').style.display !== 'none'){ document.getElementById('fecharModalVisualizarRota').click(); }
     else if(document.getElementById('modalComparacaoRotas').style.display !== 'none'){ document.getElementById('fecharModalComparacaoRotas').click(); }
+    else if(document.getElementById('modalTrocarSenha').style.display !== 'none'){ document.getElementById('fecharModalTrocarSenha').click(); }
     else if(document.getElementById('modalEditar').style.display !== 'none'){ document.getElementById('cancelarEdicao').click(); }
   });
 
@@ -6691,6 +6727,78 @@
     if(e.target === this){ document.getElementById('fecharModalComparacaoRotas').click(); }
   });
 
+  // ---------- TROCAR SENHA (já logado) ----------
+  function fecharModalTrocarSenha(){
+    document.getElementById('modalTrocarSenha').style.display = 'none';
+    ['senhaAtualTrocar', 'novaSenhaTrocar', 'confirmarNovaSenhaTrocar'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('erroTrocarSenha').classList.remove('mostrar');
+  }
+
+  document.getElementById('btnAbrirTrocarSenha').addEventListener('click', function(){
+    document.getElementById('modalTrocarSenha').style.display = 'flex';
+  });
+  document.getElementById('fecharModalTrocarSenha').addEventListener('click', fecharModalTrocarSenha);
+  document.getElementById('btnCancelarTrocarSenha').addEventListener('click', fecharModalTrocarSenha);
+  document.getElementById('modalTrocarSenha').addEventListener('click', function(e){
+    if(e.target === this){ fecharModalTrocarSenha(); }
+  });
+
+  document.getElementById('btnConfirmarTrocarSenha').addEventListener('click', function(){
+    var sessao = obterSessaoAdmin();
+    var senhaAtual = document.getElementById('senhaAtualTrocar').value;
+    var novaSenha = document.getElementById('novaSenhaTrocar').value;
+    var confirmarNovaSenha = document.getElementById('confirmarNovaSenhaTrocar').value;
+    var erro = document.getElementById('erroTrocarSenha');
+    erro.classList.remove('mostrar');
+
+    if(!sessao || !sessao.token){
+      erro.textContent = 'Sua sessão expirou. Saia e entre de novo.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    if(!senhaAtual || !novaSenha || !confirmarNovaSenha){
+      erro.textContent = 'Preencha todos os campos.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    if(novaSenha.length < 6){
+      erro.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    if(novaSenha !== confirmarNovaSenha){
+      erro.textContent = 'A confirmação não bate com a nova senha.';
+      erro.classList.add('mostrar');
+      return;
+    }
+
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Trocando...';
+    fetch(URL_PLANILHA, {
+      method: 'POST',
+      body: JSON.stringify({ acao: 'alterarSenha', token: sessao.token, senhaAtual: senhaAtual, novaSenha: novaSenha })
+    })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        botao.disabled = false;
+        botao.textContent = 'Trocar senha';
+        if(!dados.ok){
+          erro.textContent = dados.erro || 'Não foi possível trocar a senha.';
+          erro.classList.add('mostrar');
+          return;
+        }
+        fecharModalTrocarSenha();
+        mostrarAviso('Senha alterada com sucesso.', 'sucesso');
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = 'Trocar senha';
+        erro.textContent = 'Não foi possível conectar agora. Tente novamente.';
+        erro.classList.add('mostrar');
+      });
+  });
+
   // ---------- COPIAR / COLAR PARADAS ENTRE ROTAS ----------
   var CHAVE_PARADAS_COPIADAS = 'paradasCopiadasTransporteEscolarAnchieta';
 
@@ -7550,6 +7658,7 @@
     document.getElementById('subtituloTopo').textContent = 'Consulte os cadastros enviados pelos responsáveis e exporte os dados para montar as rotas.';
     document.getElementById('btnAdmin').style.display = 'none';
     document.getElementById('sairAdmin').style.display = 'flex';
+    document.getElementById('btnAbrirTrocarSenha').style.display = 'flex';
     document.getElementById('app').classList.add('modo-admin');
     aplicarRestricoesPorNivelAcesso();
     carregarRegistros();
