@@ -124,6 +124,16 @@
   }
   .badge-usuario-logado strong{color:var(--verde-escuro);}
 
+  /* esconde ações de edição/gestão de quem não tem permissão suficiente */
+  .nivel-consulta .somente-edicao-ou-mais{display:none !important;}
+  .nivel-consulta .somente-administrador,
+  .nivel-edicao .somente-administrador{display:none !important;}
+  .aviso-somente-consulta{
+    display:none;background:#FFF1E9;border:1px solid #EA580C;border-radius:var(--raio-sm);
+    padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#7C2D12;
+  }
+  .nivel-consulta .aviso-somente-consulta{display:block;}
+
   /* trilha de progresso */
   .trilha-wrapper{
     position:relative;
@@ -2009,6 +2019,7 @@
           <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
           <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
           <button class="aba-admin" id="abaRotas" type="button" data-aba="rotas">Rotas</button>
+          <button class="aba-admin somente-administrador" id="abaUsuarios" type="button" data-aba="usuarios">👤 Usuários</button>
         </div>
 
         <div id="painelResumo">
@@ -2073,6 +2084,8 @@
         </div>
 
         <div id="painelRotas" style="display:none;">
+          <div class="aviso-somente-consulta">👁️ Seu acesso é de <strong>Consulta</strong> — você pode visualizar e imprimir rotas, mas não criar, editar ou excluir.</div>
+
           <div class="banner-editando-rota" id="bannerEditandoRota" style="display:none;">
             <span>✏️</span>
             <div>Editando a rota <strong id="nomeRotaNoBanner"></strong> — as alterações ainda não foram salvas até você clicar em "Salvar".</div>
@@ -2217,8 +2230,8 @@
                     <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14 20 9l-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg>
                   </button>
                   <button type="button" class="toggle-escolas" id="btnAlternarLegenda" aria-pressed="false" title="Mostrar/ocultar legenda do mapa" aria-label="Mostrar/ocultar legenda do mapa">❓</button>
-                  <button type="button" class="toggle-escolas btn-cortar-trajeto" id="btnModoCortarTrajeto" aria-pressed="false" title="Cortar um trecho do trajeto: clique em 2 pontos da linha pra remover o que está entre eles" aria-label="Cortar trecho do trajeto">✂️</button>
-                  <button type="button" class="toggle-escolas btn-estender-trajeto" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique num ponto do trajeto já traçado e depois no destino" aria-label="Estender rota até aqui">↔️</button>
+                  <button type="button" class="toggle-escolas btn-cortar-trajeto somente-edicao-ou-mais" id="btnModoCortarTrajeto" aria-pressed="false" title="Cortar um trecho do trajeto: clique em 2 pontos da linha pra remover o que está entre eles" aria-label="Cortar trecho do trajeto">✂️</button>
+                  <button type="button" class="toggle-escolas btn-estender-trajeto somente-edicao-ou-mais" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique num ponto do trajeto já traçado e depois no destino" aria-label="Estender rota até aqui">↔️</button>
                 </div>
               </div>
 
@@ -2265,9 +2278,9 @@
                 <div class="barra-fixa-acoes-rota">
                   <p class="meta-rota-mapa" id="metaRotaMapa">Nenhum ponto ainda. Clique no mapa para começar.</p>
                   <div class="acoes-rota-mapa acoes-principais-rota">
-                    <button type="button" class="btn-mapa" id="btnLimparRota">Limpar rota</button>
-                    <button type="button" class="btn-mapa btn-cancelar-edicao-rota" id="btnCancelarEdicaoRota">↩️ Cancelar</button>
-                    <button type="button" class="btn-salvar-rota-destaque" id="btnSalvarRota">💾 Salvar rota</button>
+                    <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnLimparRota">Limpar rota</button>
+                    <button type="button" class="btn-mapa btn-cancelar-edicao-rota somente-edicao-ou-mais" id="btnCancelarEdicaoRota">↩️ Cancelar</button>
+                    <button type="button" class="btn-salvar-rota-destaque somente-edicao-ou-mais" id="btnSalvarRota">💾 Salvar rota</button>
                   </div>
                 </div>
 
@@ -2291,14 +2304,14 @@
                     <label for="raioSugestaoAlunos" class="rotulo-raio-sugestao">Raio de sugestão: <strong id="valorRaioSugestaoAlunos">300</strong> m</label>
                     <input type="range" id="raioSugestaoAlunos" min="50" max="1000" step="50" value="300">
 
-                    <button type="button" class="btn-sugerir-alunos-rota" id="btnSugerirAlunosRota">📍 Sugerir alunos próximos às paradas</button>
-                    <button type="button" class="btn-sugerir-alunos-rota btn-analisar-trajeto" id="btnAnalisarTrajeto">🔍 Analisar trajeto e sugerir novas paradas</button>
+                    <button type="button" class="btn-sugerir-alunos-rota somente-edicao-ou-mais" id="btnSugerirAlunosRota">📍 Sugerir alunos próximos às paradas</button>
+                    <button type="button" class="btn-sugerir-alunos-rota btn-analisar-trajeto somente-edicao-ou-mais" id="btnAnalisarTrajeto">🔍 Analisar trajeto e sugerir novas paradas</button>
                     <div id="sugestoesNovasParadas"></div>
 
-                    <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
+                    <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto somente-edicao-ou-mais" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
                     <div id="sugestoesOtimizacao"></div>
 
-                    <button type="button" class="btn-mapa" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;">🕐 Simular horários</button>
+                    <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;">🕐 Simular horários</button>
                     <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
                   </div>
                 </details>
@@ -2314,8 +2327,8 @@
                       </button>
                     </div>
                     <div class="acoes-rota-mapa">
-                      <button type="button" class="btn-mapa" id="btnCopiarParadasRota" title="Copiar as paradas desta rota">📋 Copiar paradas</button>
-                      <button type="button" class="btn-mapa" id="btnColarParadas" style="display:none;"></button>
+                      <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnCopiarParadasRota" title="Copiar as paradas desta rota">📋 Copiar paradas</button>
+                      <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnColarParadas" style="display:none;"></button>
                     </div>
                   </div>
                 </details>
@@ -2346,9 +2359,9 @@
             <div class="barra-backup-rotas">
               <div class="status-backup-rotas" id="statusBackupRotas">☁️ Backup automático: nunca rodou ainda</div>
               <div class="botoes-backup-rotas">
-                <button type="button" class="btn-mapa" id="btnBackupAgora">☁️ Fazer backup agora</button>
+                <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnBackupAgora">☁️ Fazer backup agora</button>
                 <button type="button" class="btn-mapa" id="btnExportarTodasRotas">💾 Exportar tudo (.json)</button>
-                <button type="button" class="btn-mapa" id="btnImportarTodasRotas">📂 Importar rotas</button>
+                <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnImportarTodasRotas">📂 Importar rotas</button>
                 <input type="file" id="inputImportarRotas" accept=".json" style="display:none;">
               </div>
             </div>
@@ -2410,6 +2423,55 @@
             <p class="contagem-filtro" id="contagemRotasCadastradas"></p>
             <button type="button" class="btn-comparar-rotas" id="btnCompararRotasSelecionadas" style="display:none;"></button>
             <div id="listaRotasCadastradas"></div>
+          </div>
+        </div>
+
+        <div id="painelUsuarios" style="display:none;">
+          <h3 class="titulo-rotas-cadastradas">👤 Cadastrar novo usuário</h3>
+          <div class="painel-dashboard-frota">
+            <div class="grade-cadastro-rota">
+              <div class="campo-filtro">
+                <label>Nome completo</label>
+                <input type="text" id="novoUsuarioNome" placeholder="Ex: Maria da Silva Santos">
+              </div>
+              <div class="campo-filtro">
+                <label>CPF</label>
+                <input type="text" id="novoUsuarioCpf" placeholder="000.000.000-00">
+              </div>
+              <div class="campo-filtro">
+                <label>Telefone</label>
+                <input type="text" id="novoUsuarioTelefone" placeholder="(00) 00000-0000">
+              </div>
+              <div class="campo-filtro">
+                <label>Cargo</label>
+                <input type="text" id="novoUsuarioCargo" placeholder="Ex: Assistente administrativo">
+              </div>
+              <div class="campo-filtro">
+                <label>E-mail</label>
+                <input type="email" id="novoUsuarioEmail" placeholder="nome@email.com">
+              </div>
+              <div class="campo-filtro">
+                <label>Nível de acesso</label>
+                <select id="novoUsuarioNivel">
+                  <option value="">Selecione</option>
+                  <option value="Consulta">Consulta — só visualizar e emitir relatórios</option>
+                  <option value="Edicao">Edição — pode editar cadastros e desenhar rotas</option>
+                  <option value="Administrador">Administrador — acesso total, inclusive gerenciar usuários</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn-salvar-rota-destaque" id="btnCriarUsuario" style="width:100%;">➕ Criar usuário</button>
+            <p class="aviso-erro" id="erroCriarUsuario" style="display:none;margin-top:10px;"></p>
+            <div class="aviso-rascunho-pendente" id="avisoUsuarioCriado" style="display:none;margin-top:10px;">
+              <span>✅</span>
+              <div id="textoUsuarioCriado"></div>
+            </div>
+          </div>
+
+          <h3 class="titulo-rotas-cadastradas">📋 Usuários cadastrados</h3>
+          <div class="painel-dashboard-frota">
+            <p class="contagem-filtro" id="contagemUsuarios"></p>
+            <div id="listaUsuariosCadastrados"></div>
           </div>
         </div>
 
@@ -3377,6 +3439,13 @@
 
   // aplica a classe de nível no <body> (usada pelo CSS pra esconder botões de edição/gestão
   // de quem não tem permissão) e mostra o badge com o nome/nível de quem está logado
+  // usado pra travar ações que não são botões (clique no mapa, arrastar pino) e não dependem só do CSS
+  function usuarioPodeEditar(){
+    var sessao = obterSessaoAdmin();
+    if(!sessao){ return true; } // modo antigo (sem login) — não trava, pra não quebrar quem ainda não migrou
+    return sessao.nivelAcesso === 'Edicao' || sessao.nivelAcesso === 'Administrador';
+  }
+
   function aplicarRestricoesPorNivelAcesso(){
     var sessao = obterSessaoAdmin();
     var nivel = sessao ? sessao.nivelAcesso : 'Consulta';
@@ -3391,6 +3460,150 @@
       badge.style.display = 'none';
     }
   }
+
+  // ---------- GERENCIAR USUÁRIOS (só Administrador) ----------
+  document.getElementById('btnCriarUsuario').addEventListener('click', function(){
+    var sessao = obterSessaoAdmin();
+    var erro = document.getElementById('erroCriarUsuario');
+    var avisoCriado = document.getElementById('avisoUsuarioCriado');
+    erro.style.display = 'none';
+    avisoCriado.style.display = 'none';
+
+    var nomeCompleto = document.getElementById('novoUsuarioNome').value.trim();
+    var cpf = document.getElementById('novoUsuarioCpf').value.trim();
+    var telefone = document.getElementById('novoUsuarioTelefone').value.trim();
+    var cargo = document.getElementById('novoUsuarioCargo').value.trim();
+    var email = document.getElementById('novoUsuarioEmail').value.trim();
+    var nivelAcesso = document.getElementById('novoUsuarioNivel').value;
+
+    if(!nomeCompleto || !email || !nivelAcesso){
+      erro.textContent = 'Preencha pelo menos nome completo, e-mail e nível de acesso.';
+      erro.style.display = 'block';
+      return;
+    }
+
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Criando...';
+    fetch(URL_PLANILHA, {
+      method: 'POST',
+      body: JSON.stringify({
+        acao: 'criarUsuario', token: sessao ? sessao.token : '',
+        nomeCompleto: nomeCompleto, cpf: cpf, telefone: telefone, cargo: cargo,
+        email: email, nivelAcesso: nivelAcesso
+      })
+    })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        botao.disabled = false;
+        botao.textContent = '➕ Criar usuário';
+        if(!dados.ok){
+          erro.textContent = dados.erro || 'Não foi possível criar o usuário.';
+          erro.style.display = 'block';
+          return;
+        }
+        document.getElementById('textoUsuarioCriado').innerHTML =
+          'Usuário criado! <strong>' + escapeHtml(dados.usuario) + '</strong> — a senha provisória (<strong>' + escapeHtml(dados.senhaGerada) + '</strong>) também foi enviada por e-mail pra ' + escapeHtml(email) + '.';
+        avisoCriado.style.display = 'flex';
+        ['novoUsuarioNome', 'novoUsuarioCpf', 'novoUsuarioTelefone', 'novoUsuarioCargo', 'novoUsuarioEmail'].forEach(function(id){
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('novoUsuarioNivel').value = '';
+        carregarListaUsuarios();
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = '➕ Criar usuário';
+        erro.textContent = 'Não foi possível conectar agora. Tente novamente.';
+        erro.style.display = 'block';
+      });
+  });
+
+  function carregarListaUsuarios(){
+    var sessao = obterSessaoAdmin();
+    var lista = document.getElementById('listaUsuariosCadastrados');
+    lista.innerHTML = '<p class="sem-dados-grafico">Carregando...</p>';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'listarUsuarios', token: sessao ? sessao.token : '' }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        if(!dados.ok){
+          lista.innerHTML = '<p class="sem-dados-grafico">' + escapeHtml(dados.erro || 'Não foi possível carregar os usuários.') + '</p>';
+          return;
+        }
+        var usuarios = dados.usuarios || [];
+        document.getElementById('contagemUsuarios').textContent = usuarios.length + ' usuário' + (usuarios.length === 1 ? '' : 's') + ' cadastrado' + (usuarios.length === 1 ? '' : 's') + '.';
+        if(!usuarios.length){
+          lista.innerHTML = '<p class="sem-dados-grafico">Nenhum usuário cadastrado ainda.</p>';
+          return;
+        }
+        lista.innerHTML = usuarios.map(function(u){
+          var ativo = u.ativo !== false && String(u.ativo).toUpperCase() !== 'FALSE';
+          return '<div class="card-rota-cadastrada">' +
+            '<div class="card-rota-topo"><strong>' + escapeHtml(u.nomeCompleto) + '</strong><span>' + escapeHtml(u.usuario) + '</span></div>' +
+            '<p class="card-rota-info">' + escapeHtml(u.cargo || '—') + ' · ' + escapeHtml(u.email || '—') + '</p>' +
+            '<p class="card-rota-info' + (!ativo ? ' card-rota-alerta' : '') + '">' + (ativo ? '✅ Ativo' : '⛔ Desativado') + '</p>' +
+            '<div class="campo-filtro" style="margin-top:8px;">' +
+              '<label>Nível de acesso</label>' +
+              '<select class="seletor-nivel-usuario" data-id="' + escapeHtml(u.id) + '">' +
+                '<option value="Consulta"' + (u.nivelAcesso === 'Consulta' ? ' selected' : '') + '>Consulta</option>' +
+                '<option value="Edicao"' + (u.nivelAcesso === 'Edicao' ? ' selected' : '') + '>Edição</option>' +
+                '<option value="Administrador"' + (u.nivelAcesso === 'Administrador' ? ' selected' : '') + '>Administrador</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="card-rota-acoes">' +
+              '<button type="button" class="btn-mapa" data-acao="alternar-ativo" data-id="' + escapeHtml(u.id) + '" data-ativo="' + ativo + '">' + (ativo ? '⛔ Desativar' : '✅ Reativar') + '</button>' +
+              '<button type="button" class="btn-mapa btn-excluir-rota" data-acao="excluir-usuario" data-id="' + escapeHtml(u.id) + '" data-nome="' + escapeHtml(u.nomeCompleto) + '">🗑️ Excluir</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      })
+      .catch(function(){
+        lista.innerHTML = '<p class="sem-dados-grafico">Não foi possível conectar agora. Tente novamente.</p>';
+      });
+  }
+
+  document.getElementById('listaUsuariosCadastrados').addEventListener('change', function(e){
+    if(!e.target.classList.contains('seletor-nivel-usuario')){ return; }
+    var sessao = obterSessaoAdmin();
+    var id = e.target.getAttribute('data-id');
+    var novoNivel = e.target.value;
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'alterarUsuario', token: sessao ? sessao.token : '', id: id, nivelAcesso: novoNivel }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        if(dados.ok){ mostrarAviso('Nível de acesso atualizado.', 'sucesso'); }
+        else { mostrarAviso(dados.erro || 'Não foi possível atualizar.'); carregarListaUsuarios(); }
+      })
+      .catch(function(){ mostrarAviso('Não foi possível conectar agora.'); carregarListaUsuarios(); });
+  });
+
+  document.getElementById('listaUsuariosCadastrados').addEventListener('click', function(e){
+    var sessao = obterSessaoAdmin();
+    var botaoAtivo = e.target.closest('[data-acao="alternar-ativo"]');
+    var botaoExcluir = e.target.closest('[data-acao="excluir-usuario"]');
+
+    if(botaoAtivo){
+      var ativoAtual = botaoAtivo.getAttribute('data-ativo') === 'true';
+      fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'alterarUsuario', token: sessao ? sessao.token : '', id: botaoAtivo.getAttribute('data-id'), ativo: !ativoAtual }) })
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(dados.ok){ mostrarAviso(ativoAtual ? 'Usuário desativado.' : 'Usuário reativado.', 'sucesso'); carregarListaUsuarios(); }
+          else { mostrarAviso(dados.erro || 'Não foi possível atualizar.'); }
+        })
+        .catch(function(){ mostrarAviso('Não foi possível conectar agora.'); });
+      return;
+    }
+
+    if(botaoExcluir){
+      if(!confirm('Excluir o usuário "' + botaoExcluir.getAttribute('data-nome') + '"? Essa ação não pode ser desfeita.')){ return; }
+      fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'excluirUsuario', token: sessao ? sessao.token : '', id: botaoExcluir.getAttribute('data-id') }) })
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(dados.ok){ mostrarAviso('Usuário excluído.', 'sucesso'); carregarListaUsuarios(); }
+          else { mostrarAviso(dados.erro || 'Não foi possível excluir.'); }
+        })
+        .catch(function(){ mostrarAviso('Não foi possível conectar agora.'); });
+    }
+  });
 
   function fazerLogin(){
     var usuario = document.getElementById('usuarioLogin').value.trim();
@@ -3697,10 +3910,12 @@
       document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
       if(aba !== 'mapa'){ document.getElementById('painelRaioEscola').style.display = 'none'; }
       document.getElementById('painelRotas').style.display = (aba === 'rotas') ? 'block' : 'none';
-      document.querySelector('.rodape-admin').style.display = (aba === 'rotas') ? 'none' : 'flex';
-      document.querySelector('.tabela-scroll').style.display = (aba === 'rotas') ? 'none' : 'block';
-      document.querySelector('.titulo-lista-recentes').style.display = (aba === 'rotas') ? 'none' : 'block';
-      document.getElementById('listaRecentes').style.display = (aba === 'rotas') ? 'none' : '';
+      document.getElementById('painelUsuarios').style.display = (aba === 'usuarios') ? 'block' : 'none';
+      var mostrarRodapePadrao = (aba === 'resumo' || aba === 'mapa');
+      document.querySelector('.rodape-admin').style.display = mostrarRodapePadrao ? 'flex' : 'none';
+      document.querySelector('.tabela-scroll').style.display = mostrarRodapePadrao ? 'block' : 'none';
+      document.querySelector('.titulo-lista-recentes').style.display = mostrarRodapePadrao ? 'block' : 'none';
+      document.getElementById('listaRecentes').style.display = mostrarRodapePadrao ? '' : 'none';
       document.getElementById('btnRelatorioResumo').style.display = (aba === 'resumo') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapa').style.display = (aba === 'mapa') ? 'flex' : 'none';
       document.getElementById('btnRelatorioMapaGeral').style.display = (aba === 'mapa') ? 'flex' : 'none';
@@ -3710,6 +3925,9 @@
       if(aba === 'rotas'){
         inicializarMapaRotas();
         setTimeout(function(){ if(mapaRotas){ mapaRotas.invalidateSize(); } }, 100);
+      }
+      if(aba === 'usuarios'){
+        carregarListaUsuarios();
       }
     });
   });
@@ -3929,8 +4147,8 @@
         '<div class="card-recente-linha"><span>Responsável</span><span>' + escapeHtml(r.nomeResp) + '</span></div>' +
         '<div class="card-recente-linha"><span>Preenchido em</span><span>' + formatarDataEnvio(r.dataEnvio) + '</span></div>' +
         '<div class="card-recente-acoes">' +
-          '<button class="btn-acao-cartao editar" data-id="' + idSeguro + '" type="button">Editar</button>' +
-          '<button class="btn-acao-cartao excluir" data-id="' + idSeguro + '" type="button">Excluir</button>' +
+          '<button class="btn-acao-cartao editar somente-edicao-ou-mais" data-id="' + idSeguro + '" type="button">Editar</button>' +
+          '<button class="btn-acao-cartao excluir somente-edicao-ou-mais" data-id="' + idSeguro + '" type="button">Excluir</button>' +
         '</div>' +
         '</div>';
     }
@@ -4657,6 +4875,7 @@
     adicionarControleCamadaBase(mapaRotas, camadaOsmRotas);
 
     mapaRotas.on('click', function(e){
+      if(!usuarioPodeEditar()){ return; }
       if(modoCortarTrajeto){ adicionarMarcaCorte(e.latlng); return; }
       if(modoEstenderTrajeto){ adicionarMarcaExtensao(e.latlng); return; }
       salvarEstadoRotaParaUndo();
@@ -4778,7 +4997,7 @@
     marcadoresRotaAtual = [];
     var total = pontosRotaAtual.length;
     pontosRotaAtual.forEach(function(p, i){
-      var marcador = L.marker([p.lat, p.lng], { draggable: true, icon: criarIconePonto(i, total, p) }).addTo(mapaRotas);
+      var marcador = L.marker([p.lat, p.lng], { draggable: usuarioPodeEditar(), icon: criarIconePonto(i, total, p) }).addTo(mapaRotas);
       marcador.on('dragstart', function(){ salvarEstadoRotaParaUndo(); });
       marcador.on('dragend', function(){
         var novaPos = marcador.getLatLng();
@@ -6372,11 +6591,11 @@
         '<label class="opcao-parada-checkbox"><input type="checkbox" class="check-comparar-rota" data-id-rota="' + escapeHtml(r.id) + '"' + (rotasSelecionadasParaComparar.has(r.id) ? ' checked' : '') + '> Selecionar para comparar no mapa</label>' +
         '<div class="card-rota-acoes">' +
           '<button type="button" class="btn-mapa" data-acao="visualizar" data-indice="' + x.indice + '">👁️ Visualizar</button>' +
-          '<button type="button" class="btn-mapa" data-acao="editar" data-indice="' + x.indice + '">✏️ Editar</button>' +
-          '<button type="button" class="btn-mapa" data-acao="duplicar" data-indice="' + x.indice + '">📄 Duplicar</button>' +
-          '<button type="button" class="btn-mapa" data-acao="copiar-paradas" data-indice="' + x.indice + '">📋 Copiar paradas</button>' +
+          '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="editar" data-indice="' + x.indice + '">✏️ Editar</button>' +
+          '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="duplicar" data-indice="' + x.indice + '">📄 Duplicar</button>' +
+          '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="copiar-paradas" data-indice="' + x.indice + '">📋 Copiar paradas</button>' +
           '<button type="button" class="btn-mapa" data-acao="imprimir" data-indice="' + x.indice + '">🖨️ Imprimir</button>' +
-          '<button type="button" class="btn-mapa btn-excluir-rota" data-acao="excluir" data-indice="' + x.indice + '">🗑️ Excluir</button>' +
+          '<button type="button" class="btn-mapa btn-excluir-rota somente-edicao-ou-mais" data-acao="excluir" data-indice="' + x.indice + '">🗑️ Excluir</button>' +
         '</div>' +
       '</div>';
     }).join('');
