@@ -117,6 +117,12 @@
     color:var(--erro);
   }
   .btn-sair-header:hover{background:var(--erro);color:#fff;}
+  .badge-usuario-logado{
+    font-size:11px;font-weight:600;color:var(--texto-suave);
+    background:var(--verde-suave);border:1px solid var(--verde);border-radius:99px;
+    padding:5px 10px;white-space:nowrap;
+  }
+  .badge-usuario-logado strong{color:var(--verde-escuro);}
 
   /* trilha de progresso */
   .trilha-wrapper{
@@ -509,6 +515,25 @@
     transition:border-color .15s ease,color .15s ease;
   }
   .btn-olho:hover{border-color:var(--verde);color:var(--verde-escuro);}
+
+  .campo-login{max-width:280px;margin:0 auto 12px;text-align:left;}
+  .campo-login label{
+    display:block;font-size:11px;font-weight:700;color:var(--texto-suave);
+    text-transform:uppercase;letter-spacing:.03em;margin-bottom:5px;
+  }
+  .campo-login input{
+    width:100%;max-width:none;margin:0;padding:11px 13px;border:1.5px solid var(--borda);
+    border-radius:var(--raio-sm);font-size:15px;text-align:left;background:#FCFCFA;
+    font-family:inherit;box-sizing:border-box;
+  }
+  .campo-login input:focus{outline:none;border-color:var(--verde);background:#fff;}
+  .campo-login .campo-senha{margin:0;max-width:none;}
+  .link-esqueci-senha{
+    text-align:center;font-size:12.5px;color:#2E6FDE;cursor:pointer;
+    text-decoration:underline;margin:2px 0 0;
+  }
+  .link-esqueci-senha:hover{color:#1d54b3;}
+
   table.registros{width:100%;border-collapse:collapse;font-size:12.5px;}
   table.registros th{
     text-align:left;background:var(--verde-escuro);color:#fff;padding:9px 10px;font-weight:600;
@@ -1497,6 +1522,7 @@
         <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
       </svg>
     </button>
+    <span class="badge-usuario-logado" id="badgeUsuarioLogado" style="display:none;"></span>
     <button class="btn-admin btn-sair-header" id="sairAdmin" type="button" aria-label="Sair da área da secretaria" title="Sair da área da secretaria" style="display:none;">
       <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M13 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"></path>
@@ -1847,18 +1873,63 @@
     <section id="areaAdmin" style="display:none;">
       <div class="cartao gate" id="gateAdmin">
         <p class="rotulo-secao" style="text-align:center;">Área da secretaria</p>
-        <p class="ajuda-secao">Digite a senha de acesso da equipe para ver os cadastros.</p>
-        <div class="campo-senha">
-          <input type="password" id="senhaAdmin" placeholder="Senha de acesso">
-          <button type="button" class="btn-olho" id="btnMostrarSenha" aria-label="Mostrar senha">
-            <svg id="iconeOlhoAberto" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            <svg id="iconeOlhoFechado" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
-          </button>
+        <p class="ajuda-secao">Entre com seu usuário e senha de acesso da equipe.</p>
+
+        <div id="telaLogin">
+          <div class="campo-login">
+            <label for="usuarioLogin">Usuário</label>
+            <input type="text" id="usuarioLogin" placeholder="NOME.ULTIMOSOBRENOME" autocomplete="username">
+          </div>
+          <div class="campo-login">
+            <label for="senhaAdmin">Senha</label>
+            <div class="campo-senha">
+              <input type="password" id="senhaAdmin" placeholder="Senha de acesso" autocomplete="current-password">
+              <button type="button" class="btn-olho" id="btnMostrarSenha" aria-label="Mostrar senha">
+                <svg id="iconeOlhoAberto" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg id="iconeOlhoFechado" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 5c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><path d="M1 1l22 22"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div class="aviso-erro" id="erroSenha" style="max-width:280px;margin:0 auto;"></div>
+          <p class="link-esqueci-senha" id="btnAbrirEsqueciSenha">Esqueci minha senha</p>
+          <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+            <button class="secundario" id="btnVoltarGate" type="button">Voltar</button>
+            <button class="principal" id="btnEntrarAdmin" type="button">Entrar</button>
+          </div>
         </div>
-        <div class="aviso-erro" id="erroSenha" style="max-width:260px;margin:0 auto;"></div>
-        <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
-          <button class="secundario" id="btnVoltarGate" type="button">Voltar</button>
-          <button class="principal" id="btnEntrarAdmin" type="button">Entrar</button>
+
+        <div id="telaEsqueciSenhaPasso1" style="display:none;">
+          <p class="ajuda-secao">Informe seu usuário e o e-mail cadastrado — vamos enviar um código de recuperação.</p>
+          <div class="campo-login">
+            <label for="usuarioRecuperar">Usuário</label>
+            <input type="text" id="usuarioRecuperar" placeholder="NOME.ULTIMOSOBRENOME">
+          </div>
+          <div class="campo-login">
+            <label for="emailRecuperar">E-mail cadastrado</label>
+            <input type="email" id="emailRecuperar" placeholder="seu@email.com">
+          </div>
+          <div class="aviso-erro" id="erroRecuperar1" style="max-width:280px;margin:0 auto;"></div>
+          <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+            <button class="secundario" id="btnCancelarRecuperar1" type="button">Cancelar</button>
+            <button class="principal" id="btnEnviarCodigoRecuperar" type="button">Enviar código</button>
+          </div>
+        </div>
+
+        <div id="telaEsqueciSenhaPasso2" style="display:none;">
+          <p class="ajuda-secao">Se o usuário e e-mail baterem, um código de 6 dígitos foi enviado. Ele vale por 1 hora.</p>
+          <div class="campo-login">
+            <label for="codigoRecuperar">Código recebido por e-mail</label>
+            <input type="text" id="codigoRecuperar" placeholder="000000" maxlength="6" inputmode="numeric">
+          </div>
+          <div class="campo-login">
+            <label for="novaSenhaRecuperar">Nova senha</label>
+            <input type="password" id="novaSenhaRecuperar" placeholder="Nova senha (mínimo 6 caracteres)">
+          </div>
+          <div class="aviso-erro" id="erroRecuperar2" style="max-width:280px;margin:0 auto;"></div>
+          <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+            <button class="secundario" id="btnCancelarRecuperar2" type="button">Cancelar</button>
+            <button class="principal" id="btnRedefinirSenha" type="button">Trocar senha</button>
+          </div>
         </div>
       </div>
 
@@ -2924,7 +2995,8 @@
   }
   ['nomeResp', 'nomeAluno', 'rua', 'numero', 'localidade', 'referencia', 'nomeAlunoExtra',
    'editNomeAluno', 'editRua', 'editNumero', 'editLocalidade', 'editReferencia', 'editNomeResp',
-   'nomeRotaAtual', 'empresaTerceirizadaRota', 'numeroLicitacaoRota'
+   'nomeRotaAtual', 'empresaTerceirizadaRota', 'numeroLicitacaoRota',
+   'usuarioLogin', 'usuarioRecuperar'
   ].forEach(aplicarMaiusculas);
   configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
 
@@ -3289,41 +3361,205 @@
     this.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
   });
 
-  function verificarSenhaAdmin(){
+  // ---------- SESSÃO DE LOGIN DA SECRETARIA ----------
+  var CHAVE_SESSAO_ADMIN = 'sessaoAdminTransporteEscolarAnchieta';
+
+  function obterSessaoAdmin(){
+    try { return JSON.parse(sessionStorage.getItem(CHAVE_SESSAO_ADMIN) || 'null'); }
+    catch(erro){ return null; }
+  }
+  function gravarSessaoAdmin(sessao){
+    try { sessionStorage.setItem(CHAVE_SESSAO_ADMIN, JSON.stringify(sessao)); } catch(erro){}
+  }
+  function limparSessaoAdmin(){
+    try { sessionStorage.removeItem(CHAVE_SESSAO_ADMIN); } catch(erro){}
+  }
+
+  // aplica a classe de nível no <body> (usada pelo CSS pra esconder botões de edição/gestão
+  // de quem não tem permissão) e mostra o badge com o nome/nível de quem está logado
+  function aplicarRestricoesPorNivelAcesso(){
+    var sessao = obterSessaoAdmin();
+    var nivel = sessao ? sessao.nivelAcesso : 'Consulta';
+    document.body.classList.remove('nivel-consulta', 'nivel-edicao', 'nivel-administrador');
+    document.body.classList.add('nivel-' + nivel.toLowerCase());
+
+    var badge = document.getElementById('badgeUsuarioLogado');
+    if(sessao){
+      badge.innerHTML = '<strong>' + escapeHtml(sessao.nomeCompleto) + '</strong> · ' + escapeHtml(nivel);
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function fazerLogin(){
+    var usuario = document.getElementById('usuarioLogin').value.trim();
     var senha = document.getElementById('senhaAdmin').value;
     var erro = document.getElementById('erroSenha');
-    if(senha !== SENHA_ADMIN){
-      erro.textContent = 'Senha incorreta.';
+    erro.classList.remove('mostrar');
+    if(!usuario || !senha){
+      erro.textContent = 'Preencha usuário e senha.';
       erro.classList.add('mostrar');
       return;
     }
-    erro.classList.remove('mostrar');
+    var botao = document.getElementById('btnEntrarAdmin');
+    botao.disabled = true;
+    botao.textContent = 'Entrando...';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'login', usuario: usuario, senha: senha }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        botao.disabled = false;
+        botao.textContent = 'Entrar';
+        if(!dados.ok){
+          erro.textContent = dados.erro || 'Usuário ou senha inválidos.';
+          erro.classList.add('mostrar');
+          return;
+        }
+        gravarSessaoAdmin({
+          token: dados.token, usuario: dados.usuario, nomeCompleto: dados.nomeCompleto,
+          cargo: dados.cargo, nivelAcesso: dados.nivelAcesso
+        });
+        entrarNoPainelAdmin();
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = 'Entrar';
+        erro.textContent = 'Não foi possível conectar agora. Verifique sua internet e tente de novo.';
+        erro.classList.add('mostrar');
+      });
+  }
+
+  function entrarNoPainelAdmin(){
     document.getElementById('gateAdmin').style.display = 'none';
     document.getElementById('painelAdmin').style.display = 'block';
     document.getElementById('sairAdmin').style.display = 'flex';
-    sessionStorage.setItem('adminLogado', 'true');
+    aplicarRestricoesPorNivelAcesso();
     carregarRegistros();
   }
 
-  document.getElementById('btnEntrarAdmin').addEventListener('click', verificarSenhaAdmin);
-  document.getElementById('senhaAdmin').addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      verificarSenhaAdmin();
-    }
+  document.getElementById('btnEntrarAdmin').addEventListener('click', fazerLogin);
+  ['usuarioLogin', 'senhaAdmin'].forEach(function(id){
+    document.getElementById(id).addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); fazerLogin(); }
+    });
   });
+
+  // ---------- ESQUECI MINHA SENHA ----------
+  function mostrarTelaLogin(){
+    document.getElementById('telaLogin').style.display = 'block';
+    document.getElementById('telaEsqueciSenhaPasso1').style.display = 'none';
+    document.getElementById('telaEsqueciSenhaPasso2').style.display = 'none';
+  }
+
+  document.getElementById('btnAbrirEsqueciSenha').addEventListener('click', function(){
+    document.getElementById('telaLogin').style.display = 'none';
+    document.getElementById('telaEsqueciSenhaPasso1').style.display = 'block';
+    document.getElementById('usuarioRecuperar').value = document.getElementById('usuarioLogin').value;
+    document.getElementById('erroRecuperar1').classList.remove('mostrar');
+  });
+  document.getElementById('btnCancelarRecuperar1').addEventListener('click', mostrarTelaLogin);
+  document.getElementById('btnCancelarRecuperar2').addEventListener('click', mostrarTelaLogin);
+
+  document.getElementById('btnEnviarCodigoRecuperar').addEventListener('click', function(){
+    var usuario = document.getElementById('usuarioRecuperar').value.trim();
+    var email = document.getElementById('emailRecuperar').value.trim();
+    var erro = document.getElementById('erroRecuperar1');
+    erro.classList.remove('mostrar');
+    if(!usuario || !email){
+      erro.textContent = 'Preencha usuário e e-mail.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Enviando...';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'solicitarRecuperacaoSenha', usuario: usuario, email: email }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(){
+        botao.disabled = false;
+        botao.textContent = 'Enviar código';
+        document.getElementById('telaEsqueciSenhaPasso1').style.display = 'none';
+        document.getElementById('telaEsqueciSenhaPasso2').style.display = 'block';
+        document.getElementById('erroRecuperar2').classList.remove('mostrar');
+        document.getElementById('usuarioRecuperar').setAttribute('data-usuario-confirmado', usuario);
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = 'Enviar código';
+        erro.textContent = 'Não foi possível conectar agora. Tente novamente.';
+        erro.classList.add('mostrar');
+      });
+  });
+
+  document.getElementById('btnRedefinirSenha').addEventListener('click', function(){
+    var usuario = document.getElementById('usuarioRecuperar').getAttribute('data-usuario-confirmado') || document.getElementById('usuarioRecuperar').value.trim();
+    var codigo = document.getElementById('codigoRecuperar').value.trim();
+    var novaSenha = document.getElementById('novaSenhaRecuperar').value;
+    var erro = document.getElementById('erroRecuperar2');
+    erro.classList.remove('mostrar');
+    if(!codigo || !novaSenha){
+      erro.textContent = 'Preencha o código e a nova senha.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    if(novaSenha.length < 6){
+      erro.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Trocando...';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'redefinirSenha', usuario: usuario, codigo: codigo, novaSenha: novaSenha }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        botao.disabled = false;
+        botao.textContent = 'Trocar senha';
+        if(!dados.ok){
+          erro.textContent = dados.erro || 'Não foi possível trocar a senha.';
+          erro.classList.add('mostrar');
+          return;
+        }
+        document.getElementById('usuarioLogin').value = usuario;
+        document.getElementById('codigoRecuperar').value = '';
+        document.getElementById('novaSenhaRecuperar').value = '';
+        mostrarTelaLogin();
+        mostrarAvisoLogin('Senha alterada! Já pode entrar com a senha nova.');
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = 'Trocar senha';
+        erro.textContent = 'Não foi possível conectar agora. Tente novamente.';
+        erro.classList.add('mostrar');
+      });
+  });
+
+  function mostrarAvisoLogin(texto){
+    var erro = document.getElementById('erroSenha');
+    erro.style.color = 'var(--verde-escuro)';
+    erro.textContent = texto;
+    erro.classList.add('mostrar');
+    setTimeout(function(){ erro.style.color = ''; }, 4000);
+  }
 
   // Sair (dentro do painel logado) volta para a tela de senha, sem sair da área da secretaria
   function sairParaTelaSenha(){
+    var sessao = obterSessaoAdmin();
+    if(sessao && sessao.token){
+      fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'logout', token: sessao.token }) }).catch(function(){});
+    }
     document.getElementById('painelAdmin').style.display = 'none';
     document.getElementById('gateAdmin').style.display = 'block';
+    mostrarTelaLogin();
+    document.getElementById('usuarioLogin').value = '';
     document.getElementById('senhaAdmin').value = '';
     document.getElementById('senhaAdmin').type = 'password';
     document.getElementById('erroSenha').classList.remove('mostrar');
     document.getElementById('iconeOlhoAberto').style.display = '';
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('sairAdmin').style.display = 'none';
-    sessionStorage.removeItem('adminLogado');
+    document.getElementById('badgeUsuarioLogado').style.display = 'none';
+    limparSessaoAdmin();
   }
 
   // Voltar (na tela de senha) sai de vez da área da secretaria, retornando ao formulário público
@@ -3331,6 +3567,8 @@
     document.getElementById('areaAdmin').style.display = 'none';
     document.getElementById('gateAdmin').style.display = 'block';
     document.getElementById('painelAdmin').style.display = 'none';
+    mostrarTelaLogin();
+    document.getElementById('usuarioLogin').value = '';
     document.getElementById('senhaAdmin').value = '';
     document.getElementById('senhaAdmin').type = 'password';
     document.getElementById('erroSenha').classList.remove('mostrar');
@@ -3338,11 +3576,12 @@
     document.getElementById('iconeOlhoFechado').style.display = 'none';
     document.getElementById('btnAdmin').style.display = 'flex';
     document.getElementById('sairAdmin').style.display = 'none';
+    document.getElementById('badgeUsuarioLogado').style.display = 'none';
     document.getElementById('tituloTopo').textContent = 'Mapeamento do transporte escolar';
     document.getElementById('subtituloTopo').textContent = '';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = ''; });
     document.getElementById('app').classList.remove('modo-admin');
-    sessionStorage.removeItem('adminLogado');
+    limparSessaoAdmin();
     if(document.getElementById('aceiteTermo').checked){
       document.getElementById('passoIntro').classList.remove('ativo');
       document.getElementById('trilhaWrapper').style.display = 'block';
@@ -3367,7 +3606,8 @@
       document.getElementById('corpoTabela').innerHTML = '<tr><td colspan="9">O formulário ainda não foi conectado à planilha. Configure a URL_PLANILHA no arquivo.</td></tr>';
       return;
     }
-    var url = URL_PLANILHA + '?action=listar&chave=' + encodeURIComponent(SENHA_ADMIN);
+    var sessaoParaListar = obterSessaoAdmin();
+    var url = URL_PLANILHA + '?action=listar&chave=' + encodeURIComponent(SENHA_ADMIN) + (sessaoParaListar && sessaoParaListar.token ? '&token=' + encodeURIComponent(sessaoParaListar.token) : '');
     fetch(url).then(function(resp){ return resp.json(); }).then(function(lista){
       if(lista && lista.erro){
         if(!registrosCache.length){
@@ -4196,9 +4436,10 @@
     if(!URL_PLANILHA){ return; }
     atualizarIndicadorStatusBackup(true);
     var rotasJson = JSON.stringify(obterRotasSalvas());
+    var sessaoBackupAtual = obterSessaoAdmin();
     fetch(URL_PLANILHA, {
       method: 'POST',
-      body: JSON.stringify({ acao: 'backupRotas', chaveAdmin: SENHA_ADMIN, rotasJson: rotasJson })
+      body: JSON.stringify({ acao: 'backupRotas', chaveAdmin: SENHA_ADMIN, token: sessaoBackupAtual ? sessaoBackupAtual.token : '', rotasJson: rotasJson })
     })
       .then(function(resp){ return resp.json(); })
       .then(function(dados){
@@ -4303,6 +4544,7 @@
       escolas: Array.from(escolasVinculadasRota),
       turnos: Array.from(turnosVinculadosRota),
       rotaEmEdicaoIndice: rotaEmEdicaoIndice,
+      idRotaEmEdicao: idRotaEmEdicao,
       salvoEm: new Date().toISOString()
     };
     try { localStorage.setItem(CHAVE_RASCUNHO_ROTA, JSON.stringify(rascunho)); } catch(erro){}
@@ -4483,9 +4725,13 @@
     popularOpcoesTurnosRota();
     redesenharPontosRota();
     calcularRotaOSRM();
-    if(rascunho.rotaEmEdicaoIndice !== null && rascunho.rotaEmEdicaoIndice !== undefined){
+    if(rascunho.idRotaEmEdicao){
       var rotas = obterRotasSalvas();
-      if(rotas[rascunho.rotaEmEdicaoIndice]){ marcarComoEditandoRotaExistente(rascunho.rotaEmEdicaoIndice, rotas[rascunho.rotaEmEdicaoIndice]); }
+      var indiceReal = rotas.findIndex(function(r){ return r.id === rascunho.idRotaEmEdicao; });
+      if(indiceReal !== -1){ marcarComoEditandoRotaExistente(indiceReal, rotas[indiceReal]); }
+    } else if(rascunho.rotaEmEdicaoIndice !== null && rascunho.rotaEmEdicaoIndice !== undefined){
+      var rotasAntigas = obterRotasSalvas();
+      if(rotasAntigas[rascunho.rotaEmEdicaoIndice]){ marcarComoEditandoRotaExistente(rascunho.rotaEmEdicaoIndice, rotasAntigas[rascunho.rotaEmEdicaoIndice]); }
     }
     document.getElementById('avisoRascunhoPendente').style.display = 'none';
     mostrarAviso('Rascunho restaurado.', 'sucesso');
@@ -5373,10 +5619,12 @@
   // ---------- ESCOLAS VINCULADAS À ROTA ----------
   var escolasVinculadasRota = new Set();
   var rotaEmEdicaoIndice = null;
+  var idRotaEmEdicao = null;
   var snapshotRotaEmEdicao = null;
 
   function marcarComoEditandoRotaExistente(indice, rota){
     rotaEmEdicaoIndice = indice;
+    idRotaEmEdicao = rota.id || null;
     snapshotRotaEmEdicao = JSON.parse(JSON.stringify(rota));
     document.getElementById('btnCancelarEdicaoRota').classList.add('mostrar');
     document.getElementById('nomeRotaNoBanner').textContent = '"' + rota.nome + '"';
@@ -5385,6 +5633,7 @@
 
   function sairDoModoEdicao(){
     rotaEmEdicaoIndice = null;
+    idRotaEmEdicao = null;
     snapshotRotaEmEdicao = null;
     document.getElementById('btnCancelarEdicaoRota').classList.remove('mostrar');
     document.getElementById('bannerEditandoRota').style.display = 'none';
@@ -5802,7 +6051,11 @@
     }
     var nome = document.getElementById('nomeRotaAtual').value.trim() || ('ROTA SEM NOME — ' + new Date().toLocaleDateString('pt-BR'));
     var rotas = obterRotasSalvas();
-    var editandoExistente = rotaEmEdicaoIndice !== null && rotas[rotaEmEdicaoIndice];
+    // reencontra a posição real da rota pelo ID (o índice guardado pode ter ficado desatualizado
+    // se a lista mudou de ordem/tamanho entre o "Editar" e o "Salvar")
+    var indiceReal = idRotaEmEdicao ? rotas.findIndex(function(r){ return r.id === idRotaEmEdicao; }) : -1;
+    var editandoExistente = indiceReal !== -1;
+    rotaEmEdicaoIndice = editandoExistente ? indiceReal : null;
 
     var nomeJaExisteEmOutraRota = rotas.some(function(r, i){
       return r.nome === nome && (!editandoExistente || i !== rotaEmEdicaoIndice);
@@ -6693,7 +6946,8 @@
       lat: registroEmEdicao.lat,
       lng: registroEmEdicao.lng,
       acao: 'editar',
-      chaveAdmin: SENHA_ADMIN
+      chaveAdmin: SENHA_ADMIN,
+      token: (obterSessaoAdmin() || {}).token || ''
     };
 
     enviarAcaoAdmin(registroAtualizado, function(){
@@ -6716,7 +6970,7 @@
   function confirmarExclusao(registro){
     var ok = window.confirm('Excluir o cadastro de "' + registro.nomeAluno + '"? Essa ação não pode ser desfeita.');
     if(!ok){ return; }
-    enviarAcaoAdmin({ acao: 'excluir', id: registro.id, chaveAdmin: SENHA_ADMIN }, function(){
+    enviarAcaoAdmin({ acao: 'excluir', id: registro.id, chaveAdmin: SENHA_ADMIN, token: (obterSessaoAdmin() || {}).token || '' }, function(){
       registrosCache = registrosCache.filter(function(r){ return String(r.id) !== String(registro.id); });
       popularFiltros();
       aplicarFiltros();
@@ -7066,7 +7320,7 @@
   });
 
   // ---------- RESTAURAR SESSÃO DA SECRETARIA AO RECARREGAR A PÁGINA ----------
-  if(sessionStorage.getItem('adminLogado') === 'true'){
+  if(obterSessaoAdmin() && obterSessaoAdmin().token){
     document.getElementById('trilhaWrapper').style.display = 'none';
     document.getElementById('main').querySelectorAll('.passo').forEach(function(p){ p.style.display = 'none'; });
     document.getElementById('passoIntro').classList.remove('ativo');
@@ -7078,6 +7332,7 @@
     document.getElementById('btnAdmin').style.display = 'none';
     document.getElementById('sairAdmin').style.display = 'flex';
     document.getElementById('app').classList.add('modo-admin');
+    aplicarRestricoesPorNivelAcesso();
     carregarRegistros();
   }
 
