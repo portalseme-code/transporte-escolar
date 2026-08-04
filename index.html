@@ -1907,6 +1907,7 @@
           </div>
           <div class="aviso-erro" id="erroSenha" style="max-width:280px;margin:0 auto;"></div>
           <p class="link-esqueci-senha" id="btnAbrirEsqueciSenha">Esqueci minha senha</p>
+          <p class="link-esqueci-senha" id="btnAbrirSolicitarCadastro">Não tenho acesso ainda — solicitar cadastro</p>
           <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
             <button class="secundario" id="btnVoltarGate" type="button">Voltar</button>
             <button class="principal" id="btnEntrarAdmin" type="button">Entrar</button>
@@ -1944,6 +1945,48 @@
           <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
             <button class="secundario" id="btnCancelarRecuperar2" type="button">Cancelar</button>
             <button class="principal" id="btnRedefinirSenha" type="button">Trocar senha</button>
+          </div>
+        </div>
+
+        <div id="telaSolicitarCadastro" style="display:none;">
+          <p class="rotulo-secao" style="text-align:center;">Solicitar cadastro</p>
+          <p class="ajuda-secao">Preencha seus dados — um administrador vai analisar e liberar seu acesso.</p>
+          <div class="campo-login">
+            <label for="solicitarNome">Nome completo</label>
+            <input type="text" id="solicitarNome">
+          </div>
+          <div class="linha-dupla" style="max-width:280px;margin:0 auto 12px;">
+            <div class="campo-login" style="margin:0;">
+              <label for="solicitarCpf">CPF</label>
+              <input type="text" id="solicitarCpf" placeholder="000.000.000-00">
+            </div>
+            <div class="campo-login" style="margin:0;">
+              <label for="solicitarTelefone">Telefone</label>
+              <input type="text" id="solicitarTelefone" placeholder="(00) 00000-0000">
+            </div>
+          </div>
+          <div class="campo-login">
+            <label for="solicitarCargo">Cargo</label>
+            <input type="text" id="solicitarCargo" placeholder="Ex: Assistente administrativo">
+          </div>
+          <div class="campo-login">
+            <label for="solicitarEmail">E-mail</label>
+            <input type="email" id="solicitarEmail" placeholder="seu@email.com">
+          </div>
+          <div class="campo-login">
+            <label for="solicitarNivel">Nível de acesso desejado</label>
+            <select id="solicitarNivel">
+              <option value="">Selecione</option>
+              <option value="Consulta">Consulta — só visualizar e emitir relatórios</option>
+              <option value="Edicao">Edição — editar cadastros e desenhar rotas</option>
+              <option value="Administrador">Administrador — acesso total</option>
+            </select>
+          </div>
+          <p class="ajuda-secao" style="max-width:280px;margin:0 auto 10px;font-size:11.5px;">O nível final de acesso é decidido pelo administrador na hora de aprovar.</p>
+          <div class="aviso-erro" id="erroSolicitarCadastro" style="max-width:280px;margin:0 auto;"></div>
+          <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+            <button class="secundario" id="btnCancelarSolicitarCadastro" type="button">Voltar ao login</button>
+            <button class="principal" id="btnEnviarSolicitacaoCadastro" type="button">Enviar solicitação</button>
           </div>
         </div>
       </div>
@@ -2432,6 +2475,12 @@
         </div>
 
         <div id="painelUsuarios" style="display:none;">
+          <h3 class="titulo-rotas-cadastradas">📥 Solicitações de cadastro pendentes</h3>
+          <div class="painel-alunos-sem-rota">
+            <p class="contagem-filtro" id="contagemSolicitacoes"></p>
+            <div id="listaSolicitacoesCadastro"></div>
+          </div>
+
           <h3 class="titulo-rotas-cadastradas">👤 Cadastrar novo usuário</h3>
           <div class="painel-dashboard-frota">
             <div class="grade-cadastro-rota">
@@ -3551,6 +3600,87 @@
       });
   });
 
+  function carregarSolicitacoesPendentes(){
+    var sessao = obterSessaoAdmin();
+    var lista = document.getElementById('listaSolicitacoesCadastro');
+    lista.innerHTML = '<p class="sem-dados-grafico">Carregando...</p>';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'listarSolicitacoes', token: sessao ? sessao.token : '' }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        if(!dados.ok){
+          lista.innerHTML = '<p class="sem-dados-grafico">' + escapeHtml(dados.erro || 'Não foi possível carregar as solicitações.') + '</p>';
+          return;
+        }
+        var solicitacoes = dados.solicitacoes || [];
+        document.getElementById('contagemSolicitacoes').textContent = solicitacoes.length + ' solicitação' + (solicitacoes.length === 1 ? '' : 'ões') + ' pendente' + (solicitacoes.length === 1 ? '' : 's') + '.';
+        if(!solicitacoes.length){
+          lista.innerHTML = '<p class="sem-dados-grafico">Nenhuma solicitação pendente no momento.</p>';
+          return;
+        }
+        lista.innerHTML = solicitacoes.map(function(s){
+          return '<div class="item-aluno-sem-rota" style="flex-direction:column;gap:4px;">' +
+            '<strong>' + escapeHtml(s.nomeCompleto) + '</strong>' +
+            '<span>' + escapeHtml(s.cargo || '—') + ' · ' + escapeHtml(s.email) + (s.telefone ? ' · ' + escapeHtml(s.telefone) : '') + '</span>' +
+            '<span>Nível desejado: <strong>' + escapeHtml(s.nivelAcessoDesejado) + '</strong></span>' +
+            '<div class="campo-filtro" style="margin-top:4px;">' +
+              '<label>Nível a conceder</label>' +
+              '<select class="seletor-nivel-conceder" data-id="' + escapeHtml(s.id) + '">' +
+                '<option value="Consulta"' + (s.nivelAcessoDesejado === 'Consulta' ? ' selected' : '') + '>Consulta</option>' +
+                '<option value="Edicao"' + (s.nivelAcessoDesejado === 'Edicao' ? ' selected' : '') + '>Edição</option>' +
+                '<option value="Administrador"' + (s.nivelAcessoDesejado === 'Administrador' ? ' selected' : '') + '>Administrador</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="card-rota-acoes" style="margin-top:6px;">' +
+              '<button type="button" class="btn-mapa" data-acao="aprovar-solicitacao" data-id="' + escapeHtml(s.id) + '">✅ Aprovar</button>' +
+              '<button type="button" class="btn-mapa btn-excluir-rota" data-acao="rejeitar-solicitacao" data-id="' + escapeHtml(s.id) + '" data-nome="' + escapeHtml(s.nomeCompleto) + '">❌ Rejeitar</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      })
+      .catch(function(){
+        lista.innerHTML = '<p class="sem-dados-grafico">Não foi possível conectar agora. Tente novamente.</p>';
+      });
+  }
+
+  document.getElementById('listaSolicitacoesCadastro').addEventListener('click', function(e){
+    var sessao = obterSessaoAdmin();
+    var botaoAprovar = e.target.closest('[data-acao="aprovar-solicitacao"]');
+    var botaoRejeitar = e.target.closest('[data-acao="rejeitar-solicitacao"]');
+
+    if(botaoAprovar){
+      var id = botaoAprovar.getAttribute('data-id');
+      var seletorNivel = document.querySelector('.seletor-nivel-conceder[data-id="' + id + '"]');
+      var nivelEscolhido = seletorNivel ? seletorNivel.value : '';
+      botaoAprovar.disabled = true;
+      botaoAprovar.textContent = 'Aprovando...';
+      fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'aprovarSolicitacao', token: sessao ? sessao.token : '', id: id, nivelAcesso: nivelEscolhido }) })
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(dados.ok){
+            mostrarAviso('Cadastro aprovado! Usuário: ' + dados.usuario + ' (as credenciais também foram enviadas por e-mail).', 'sucesso');
+            carregarSolicitacoesPendentes();
+            carregarListaUsuarios();
+          } else {
+            mostrarAviso(dados.erro || 'Não foi possível aprovar agora.');
+            carregarSolicitacoesPendentes();
+          }
+        })
+        .catch(function(){ mostrarAviso('Não foi possível conectar agora.'); });
+      return;
+    }
+
+    if(botaoRejeitar){
+      if(!confirm('Rejeitar a solicitação de "' + botaoRejeitar.getAttribute('data-nome') + '"? Essa ação não pode ser desfeita.')){ return; }
+      fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'rejeitarSolicitacao', token: sessao ? sessao.token : '', id: botaoRejeitar.getAttribute('data-id') }) })
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(dados.ok){ mostrarAviso('Solicitação rejeitada.', 'sucesso'); carregarSolicitacoesPendentes(); }
+          else { mostrarAviso(dados.erro || 'Não foi possível rejeitar agora.'); }
+        })
+        .catch(function(){ mostrarAviso('Não foi possível conectar agora.'); });
+    }
+  });
+
   function carregarListaUsuarios(){
     var sessao = obterSessaoAdmin();
     var lista = document.getElementById('listaUsuariosCadastrados');
@@ -3695,6 +3825,7 @@
     document.getElementById('telaLogin').style.display = 'block';
     document.getElementById('telaEsqueciSenhaPasso1').style.display = 'none';
     document.getElementById('telaEsqueciSenhaPasso2').style.display = 'none';
+    document.getElementById('telaSolicitarCadastro').style.display = 'none';
   }
 
   document.getElementById('btnAbrirEsqueciSenha').addEventListener('click', function(){
@@ -3705,6 +3836,63 @@
   });
   document.getElementById('btnCancelarRecuperar1').addEventListener('click', mostrarTelaLogin);
   document.getElementById('btnCancelarRecuperar2').addEventListener('click', mostrarTelaLogin);
+
+  document.getElementById('btnAbrirSolicitarCadastro').addEventListener('click', function(){
+    document.getElementById('telaLogin').style.display = 'none';
+    document.getElementById('telaSolicitarCadastro').style.display = 'block';
+    document.getElementById('erroSolicitarCadastro').classList.remove('mostrar');
+  });
+  document.getElementById('btnCancelarSolicitarCadastro').addEventListener('click', mostrarTelaLogin);
+
+  document.getElementById('btnEnviarSolicitacaoCadastro').addEventListener('click', function(){
+    var nomeCompleto = document.getElementById('solicitarNome').value.trim();
+    var cpf = document.getElementById('solicitarCpf').value.trim();
+    var telefone = document.getElementById('solicitarTelefone').value.trim();
+    var cargo = document.getElementById('solicitarCargo').value.trim();
+    var email = document.getElementById('solicitarEmail').value.trim();
+    var nivelAcessoDesejado = document.getElementById('solicitarNivel').value;
+    var erro = document.getElementById('erroSolicitarCadastro');
+    erro.classList.remove('mostrar');
+
+    if(!nomeCompleto || !email || !nivelAcessoDesejado){
+      erro.textContent = 'Preencha pelo menos nome completo, e-mail e nível de acesso desejado.';
+      erro.classList.add('mostrar');
+      return;
+    }
+
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Enviando...';
+    fetch(URL_PLANILHA, {
+      method: 'POST',
+      body: JSON.stringify({
+        acao: 'solicitarCadastro', nomeCompleto: nomeCompleto, cpf: cpf, telefone: telefone,
+        cargo: cargo, email: email, nivelAcessoDesejado: nivelAcessoDesejado
+      })
+    })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        botao.disabled = false;
+        botao.textContent = 'Enviar solicitação';
+        if(!dados.ok){
+          erro.textContent = dados.erro || 'Não foi possível enviar a solicitação agora.';
+          erro.classList.add('mostrar');
+          return;
+        }
+        ['solicitarNome', 'solicitarCpf', 'solicitarTelefone', 'solicitarCargo', 'solicitarEmail'].forEach(function(id){
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('solicitarNivel').value = '';
+        mostrarTelaLogin();
+        mostrarAvisoLogin('Solicitação enviada! Um administrador vai analisar e avisar quando liberar seu acesso.');
+      })
+      .catch(function(){
+        botao.disabled = false;
+        botao.textContent = 'Enviar solicitação';
+        erro.textContent = 'Não foi possível conectar agora. Tente novamente.';
+        erro.classList.add('mostrar');
+      });
+  });
 
   document.getElementById('btnEnviarCodigoRecuperar').addEventListener('click', function(){
     var usuario = document.getElementById('usuarioRecuperar').value.trim();
@@ -3962,6 +4150,7 @@
         setTimeout(function(){ if(mapaRotas){ mapaRotas.invalidateSize(); } }, 100);
       }
       if(aba === 'usuarios'){
+        carregarSolicitacoesPendentes();
         carregarListaUsuarios();
       }
     });
