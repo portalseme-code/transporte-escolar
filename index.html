@@ -538,11 +538,31 @@
   }
   .campo-login input:focus{outline:none;border-color:var(--verde);background:#fff;}
   .campo-login .campo-senha{margin:0;max-width:none;}
-  .link-esqueci-senha{
-    text-align:center;font-size:12.5px;color:#2E6FDE;cursor:pointer;
-    text-decoration:underline;margin:2px 0 0;
+
+  .icone-login-topo{
+    width:56px;height:56px;margin:0 auto 12px;border-radius:50%;
+    background:var(--verde-suave);border:2px solid var(--verde);
+    display:flex;align-items:center;justify-content:center;color:var(--verde-escuro);
   }
-  .link-esqueci-senha:hover{color:#1d54b3;}
+  .divisor-login{
+    max-width:280px;margin:18px auto 14px;border:none;border-top:1px solid var(--borda);
+  }
+  .links-auxiliares-login{
+    max-width:280px;margin:0 auto;display:flex;flex-direction:column;gap:8px;
+  }
+  .link-auxiliar-login{
+    display:flex;align-items:center;gap:10px;width:100%;
+    background:#FCFCFA;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    padding:10px 12px;font-size:12.5px;font-weight:600;color:var(--tinta);
+    cursor:pointer;font-family:inherit;text-align:left;line-height:1.3;
+  }
+  .link-auxiliar-login:hover{border-color:var(--verde);background:var(--verde-suave);color:var(--verde-escuro);}
+  .icone-link-auxiliar{
+    flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--borda);color:#2E6FDE;
+  }
+  .link-auxiliar-login:hover .icone-link-auxiliar{border-color:var(--verde);color:var(--verde-escuro);}
 
   table.registros{width:100%;border-collapse:collapse;font-size:12.5px;}
   table.registros th{
@@ -1887,6 +1907,9 @@
     <!-- ÁREA DA SECRETARIA -->
     <section id="areaAdmin" style="display:none;">
       <div class="cartao gate" id="gateAdmin">
+        <div class="icone-login-topo">
+          <svg viewBox="0 0 24 24" width="26" height="26" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path><circle cx="12" cy="16" r="1.5"></circle></svg>
+        </div>
         <p class="rotulo-secao" style="text-align:center;">Área da secretaria</p>
         <p class="ajuda-secao">Entre com seu usuário e senha de acesso da equipe.</p>
 
@@ -1906,11 +1929,26 @@
             </div>
           </div>
           <div class="aviso-erro" id="erroSenha" style="max-width:280px;margin:0 auto;"></div>
-          <p class="link-esqueci-senha" id="btnAbrirEsqueciSenha">Esqueci minha senha</p>
-          <p class="link-esqueci-senha" id="btnAbrirSolicitarCadastro">Não tenho acesso ainda — solicitar cadastro</p>
-          <div class="barra-botoes" style="max-width:280px;margin:10px auto 0;">
+          <div class="barra-botoes" style="max-width:280px;margin:14px auto 0;">
             <button class="secundario" id="btnVoltarGate" type="button">Voltar</button>
             <button class="principal" id="btnEntrarAdmin" type="button">Entrar</button>
+          </div>
+
+          <hr class="divisor-login">
+
+          <div class="links-auxiliares-login">
+            <button type="button" class="link-auxiliar-login" id="btnAbrirEsqueciSenha">
+              <span class="icone-link-auxiliar">
+                <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              </span>
+              <span>Esqueci minha senha</span>
+            </button>
+            <button type="button" class="link-auxiliar-login" id="btnAbrirSolicitarCadastro">
+              <span class="icone-link-auxiliar">
+                <svg viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>
+              </span>
+              <span>Não tenho acesso ainda — solicitar cadastro</span>
+            </button>
           </div>
         </div>
 
