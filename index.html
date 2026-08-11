@@ -939,12 +939,22 @@
   }
   .item-resultado-busca:hover{border-color:#2E6FDE;background:#EAF1FC;}
 
-  .btn-cortar-trajeto{color:var(--erro);border-color:var(--erro);}
-  .btn-cortar-trajeto:hover{background:var(--erro-bg);}
-  .btn-cortar-trajeto[aria-pressed="true"]{background:var(--erro);color:#fff;}
-  .btn-estender-trajeto{color:#2E6FDE;border-color:#2E6FDE;}
-  .btn-estender-trajeto:hover{background:#EAF1FC;}
-  .btn-estender-trajeto[aria-pressed="true"]{background:#2E6FDE;color:#fff;}
+  .menu-mais-ferramentas-wrapper{position:relative;}
+  .menu-mais-ferramentas{
+    position:absolute;top:calc(100% + 6px);right:0;z-index:30;
+    background:#fff;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
+    box-shadow:0 6px 20px rgba(20,30,20,.15);padding:6px;min-width:230px;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .menu-mais-ferramentas button{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    background:none;border:none;border-radius:8px;padding:9px 10px;
+    font-size:12.5px;font-weight:600;color:var(--tinta);cursor:pointer;font-family:inherit;
+  }
+  .menu-mais-ferramentas button span{font-size:15px;flex:0 0 auto;}
+  .menu-mais-ferramentas button:hover{background:var(--verde-suave);}
+  .menu-mais-ferramentas .btn-cortar-trajeto[aria-pressed="true"]{background:var(--erro-bg);color:var(--erro);}
+  .menu-mais-ferramentas .btn-estender-trajeto[aria-pressed="true"]{background:#EAF1FC;color:#1d54b3;}
 
   .painel-ferramenta-mapa-ativa{
     display:flex;gap:10px;align-items:center;flex-wrap:wrap;
@@ -2426,9 +2436,14 @@
                   <button type="button" class="toggle-escolas" id="btnRefazerRota" title="Refazer (Ctrl+Y)" aria-label="Refazer">
                     <svg viewBox="0 0 24 24" width="17" height="17" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14 20 9l-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg>
                   </button>
-                  <button type="button" class="toggle-escolas" id="btnAlternarLegenda" aria-pressed="false" title="Mostrar/ocultar legenda do mapa" aria-label="Mostrar/ocultar legenda do mapa">❓</button>
-                  <button type="button" class="toggle-escolas btn-cortar-trajeto somente-edicao-ou-mais" id="btnModoCortarTrajeto" aria-pressed="false" title="Cortar um trecho do trajeto: clique em 2 pontos da linha pra remover o que está entre eles" aria-label="Cortar trecho do trajeto">✂️</button>
-                  <button type="button" class="toggle-escolas btn-estender-trajeto somente-edicao-ou-mais" id="btnModoEstenderTrajeto" aria-pressed="false" title="Estender a rota: clique num ponto do trajeto já traçado e depois no destino" aria-label="Estender rota até aqui">↔️</button>
+                  <div class="menu-mais-ferramentas-wrapper">
+                    <button type="button" class="toggle-escolas" id="btnAbrirMaisFerramentas" aria-pressed="false" title="Mais ferramentas do mapa" aria-label="Mais ferramentas do mapa">⋯</button>
+                    <div class="menu-mais-ferramentas" id="menuMaisFerramentas" style="display:none;">
+                      <button type="button" id="btnAlternarLegenda" aria-pressed="false"><span>❓</span> Legenda do mapa</button>
+                      <button type="button" class="btn-cortar-trajeto somente-edicao-ou-mais" id="btnModoCortarTrajeto" aria-pressed="false"><span>✂️</span> Cortar trecho do trajeto</button>
+                      <button type="button" class="btn-estender-trajeto somente-edicao-ou-mais" id="btnModoEstenderTrajeto" aria-pressed="false"><span>↔️</span> Estender rota até aqui</button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -2474,19 +2489,13 @@
               <div class="painel-rota-mapa">
                 <div class="barra-fixa-acoes-rota">
                   <p class="meta-rota-mapa" id="metaRotaMapa">Nenhum ponto ainda. Clique no mapa para começar.</p>
+                  <div class="checklist-progresso-rota" id="checklistProgressoRota"></div>
                   <div class="acoes-rota-mapa acoes-principais-rota">
                     <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnLimparRota">Limpar rota</button>
                     <button type="button" class="btn-mapa btn-cancelar-edicao-rota somente-edicao-ou-mais" id="btnCancelarEdicaoRota">↩️ Cancelar</button>
                     <button type="button" class="btn-salvar-rota-destaque somente-edicao-ou-mais" id="btnSalvarRota">💾 Salvar rota</button>
                   </div>
                 </div>
-
-                <details class="grupo-recolhivel-rota">
-                  <summary>✅ Progresso da rota (o que falta preencher)</summary>
-                  <div class="conteudo-grupo-recolhivel">
-                    <div class="checklist-progresso-rota" id="checklistProgressoRota"></div>
-                  </div>
-                </details>
 
                 <details class="grupo-recolhivel-rota" id="detalhesListaPontos" open>
                   <summary id="resumoListaPontos">📍 Pontos do trajeto</summary>
@@ -2496,7 +2505,7 @@
                 </details>
 
                 <details class="grupo-recolhivel-rota">
-                  <summary>🛠️ Ferramentas de análise (sugerir/otimizar paradas)</summary>
+                  <summary>🤖 Sugestões automáticas (alunos e paradas)</summary>
                   <div class="conteudo-grupo-recolhivel">
                     <label for="raioSugestaoAlunos" class="rotulo-raio-sugestao">Raio de sugestão: <strong id="valorRaioSugestaoAlunos">300</strong> m</label>
                     <input type="range" id="raioSugestaoAlunos" min="50" max="1000" step="50" value="300">
@@ -2507,10 +2516,15 @@
 
                     <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto somente-edicao-ou-mais" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
                     <div id="sugestoesOtimizacao"></div>
+                  </div>
+                </details>
 
+                <details class="grupo-recolhivel-rota">
+                  <summary>🔧 Ajustes manuais (ordem e horários)</summary>
+                  <div class="conteudo-grupo-recolhivel">
                     <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSugerirOrdemParadas" title="Reordena as paradas do meio pelo caminho mais curto, mantendo início e fim" style="width:100%;">🔀 Sugerir melhor ordem das paradas</button>
 
-                    <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;">🕐 Simular horários</button>
+                    <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;margin-top:8px;">🕐 Simular horários</button>
                     <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
                   </div>
                 </details>
@@ -5664,7 +5678,25 @@
     var mostrar = painel.style.display === 'none';
     painel.style.display = mostrar ? 'block' : 'none';
     this.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
+    fecharMenuMaisFerramentas();
   });
+
+  function fecharMenuMaisFerramentas(){
+    document.getElementById('menuMaisFerramentas').style.display = 'none';
+    document.getElementById('btnAbrirMaisFerramentas').setAttribute('aria-pressed', 'false');
+  }
+  document.getElementById('btnAbrirMaisFerramentas').addEventListener('click', function(e){
+    e.stopPropagation();
+    var menu = document.getElementById('menuMaisFerramentas');
+    var mostrar = menu.style.display === 'none';
+    menu.style.display = mostrar ? 'flex' : 'none';
+    this.setAttribute('aria-pressed', mostrar ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.menu-mais-ferramentas-wrapper')){ fecharMenuMaisFerramentas(); }
+  });
+  document.getElementById('btnModoCortarTrajeto').addEventListener('click', fecharMenuMaisFerramentas);
+  document.getElementById('btnModoEstenderTrajeto').addEventListener('click', fecharMenuMaisFerramentas);
 
   function atualizarAvisoVagas(){
     var avisoEl = document.getElementById('avisoVagasInsuficientes');
