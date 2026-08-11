@@ -1548,6 +1548,23 @@
     display:block;font-size:20px;font-family:'Space Grotesk',sans-serif;color:var(--verde-escuro);
   }
 
+  .bloco-qrcode-rota{flex:0 0 auto;text-align:center;}
+  .bloco-qrcode-rota img{display:block;border:1px solid var(--borda);border-radius:6px;}
+  .bloco-qrcode-rota p{font-size:9.5px;color:var(--texto-suave);margin:4px 0 0;line-height:1.3;}
+
+  .lista-roteiro-motorista{margin-top:10px;}
+  .item-roteiro-motorista{
+    display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    padding:12px 4px;border-bottom:1.5px dashed var(--borda);font-size:17px;
+  }
+  .item-roteiro-motorista strong{
+    font-family:'Space Grotesk',sans-serif;color:#EA580C;font-size:19px;margin-right:6px;
+  }
+  .item-roteiro-motorista span{font-size:14px;color:var(--texto-suave);white-space:nowrap;font-weight:700;}
+  .item-roteiro-motorista-extremo{
+    font-weight:700;font-size:18px;color:var(--verde-escuro);border-bottom:2px solid var(--verde-escuro);
+  }
+
   .grade-impressao{
     display:grid;grid-template-columns:1fr 1fr;gap:0 28px;
   }
@@ -2181,7 +2198,7 @@
           <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
           <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
           <button class="aba-admin" id="abaRotas" type="button" data-aba="rotas">Rotas</button>
-          <button class="aba-admin somente-administrador" id="abaUsuarios" type="button" data-aba="usuarios">👤 Usuários</button>
+          <button class="aba-admin somente-administrador" id="abaUsuarios" type="button" data-aba="usuarios">Usuários</button>
         </div>
 
         <div id="painelResumo">
@@ -2491,6 +2508,8 @@
                     <button type="button" class="btn-sugerir-alunos-rota btn-otimizar-trajeto somente-edicao-ou-mais" id="btnOtimizarTrajeto">🎯 Otimizar trajeto (estender ou reduzir)</button>
                     <div id="sugestoesOtimizacao"></div>
 
+                    <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSugerirOrdemParadas" title="Reordena as paradas do meio pelo caminho mais curto, mantendo início e fim" style="width:100%;">🔀 Sugerir melhor ordem das paradas</button>
+
                     <button type="button" class="btn-mapa somente-edicao-ou-mais" id="btnSimularHorarios" title="Estimar horário em cada parada" style="width:100%;">🕐 Simular horários</button>
                     <div id="resultadoSimulacaoHorarios" class="resultado-simulacao-horarios" style="display:none;"></div>
                   </div>
@@ -2614,7 +2633,7 @@
             <div id="listaSolicitacoesCadastro"></div>
           </div>
 
-          <h3 class="titulo-rotas-cadastradas">👤 Cadastrar novo usuário</h3>
+          <h3 class="titulo-rotas-cadastradas">Cadastrar novo usuário</h3>
           <div class="painel-dashboard-frota">
             <div class="grade-cadastro-rota">
               <div class="campo-filtro">
@@ -6145,6 +6164,38 @@
     baixarArquivoTexto(kml, nomeArquivoRota('kml'), 'application/vnd.google-earth.kml+xml');
   });
 
+  // ---------- SUGERIR MELHOR ORDEM DAS PARADAS (vizinho mais próximo, mantendo início e fim) ----------
+  document.getElementById('btnSugerirOrdemParadas').addEventListener('click', function(){
+    if(!usuarioPodeEditar()){ return; }
+    if(pontosRotaAtual.length < 4){
+      mostrarAviso('Precisa de pelo menos 4 pontos (início, algumas paradas no meio e fim) pra reordenar.');
+      return;
+    }
+    var inicio = pontosRotaAtual[0];
+    var fim = pontosRotaAtual[pontosRotaAtual.length - 1];
+    var restantes = pontosRotaAtual.slice(1, pontosRotaAtual.length - 1);
+    var ordenados = [];
+    var atual = inicio;
+    while(restantes.length){
+      var menorDist = Infinity, indiceMenor = -1;
+      restantes.forEach(function(p, i){
+        var d = distanciaMetros(atual.lat, atual.lng, p.lat, p.lng);
+        if(d < menorDist){ menorDist = d; indiceMenor = i; }
+      });
+      var proximo = restantes.splice(indiceMenor, 1)[0];
+      ordenados.push(proximo);
+      atual = proximo;
+    }
+
+    salvarEstadoRotaParaUndo();
+    pontosRotaAtual = [inicio].concat(ordenados).concat([fim]);
+    redesenharPontosRota();
+    calcularRotaOSRM(function(sucesso){
+      if(sucesso){ mostrarAviso('Ordem das paradas reorganizada pelo caminho mais curto (início e fim mantidos).', 'sucesso'); }
+      else { mostrarAviso('A ordem foi alterada, mas não foi possível recalcular o caminho agora. Tente novamente.'); }
+    });
+  });
+
   // ---------- SIMULAR HORÁRIOS (com base no horário de início e na duração de cada trecho) ----------
   document.getElementById('btnSimularHorarios').addEventListener('click', function(){
     if(!resumoRotaAtual || !resumoRotaAtual.legs || !resumoRotaAtual.legs.length){
@@ -7145,6 +7196,7 @@
           '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="duplicar" data-indice="' + x.indice + '">📄 Duplicar</button>' +
           '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="copiar-paradas" data-indice="' + x.indice + '">📋 Copiar paradas</button>' +
           '<button type="button" class="btn-mapa" data-acao="imprimir" data-indice="' + x.indice + '">🖨️ Imprimir</button>' +
+          '<button type="button" class="btn-mapa" data-acao="imprimir-motorista" data-indice="' + x.indice + '" title="Roteiro simples, só a lista de paradas, pra imprimir e deixar no veículo">🚌 Roteiro do motorista</button>' +
           '<button type="button" class="btn-mapa btn-excluir-rota somente-edicao-ou-mais" data-acao="excluir" data-indice="' + x.indice + '">🗑️ Excluir</button>' +
         '</div>' +
       '</div>';
@@ -7436,8 +7488,62 @@
         if(sucesso){ executarImpressaoDaRotaAtual(); }
         else { mostrarAviso('Não foi possível recalcular o caminho para imprimir. Tente novamente.'); }
       });
+    } else if(acao === 'imprimir-motorista'){
+      imprimirRoteiroMotorista(rota);
     }
   });
+
+  function montarHtmlRoteiroMotorista(rota){
+    var c = rota.cadastro || {};
+    var total = rota.pontos.length;
+    var paradas = rota.pontos.map(function(p, i){ return { p: p, i: i }; }).filter(function(x){ return x.p.parada; });
+    var qtdAlunosTotal = rota.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
+
+    var infoLinha = [];
+    if(c.tipoVeiculo){ infoLinha.push(c.tipoVeiculo); }
+    if(c.horarioInicio || c.horarioFim){ infoLinha.push((c.horarioInicio || '—') + ' às ' + (c.horarioFim || '—')); }
+    if(c.sentido){ infoLinha.push(c.sentido === 'IDA' ? 'IDA (casa → escola)' : 'VOLTA (escola → casa)'); }
+
+    var html = '<tr class="linha-evitar-quebra"><td>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">' +
+        '<div style="flex:1;">' +
+          '<h2 class="titulo-secao-impressao" style="font-size:22px;">' + escapeHtml(rota.nome) + '</h2>' +
+          (infoLinha.length ? '<p style="font-size:15px;font-weight:700;color:var(--tinta);margin:0 0 6px;">' + escapeHtml(infoLinha.join(' · ')) + '</p>' : '') +
+          '<p style="font-size:13px;color:var(--texto-suave);margin:0;">' + paradas.length + ' parada' + (paradas.length === 1 ? '' : 's') + ' · ' + qtdAlunosTotal + ' aluno' + (qtdAlunosTotal === 1 ? '' : 's') + ' · ' + (rota.distanciaKm || 0).toFixed(1).replace(/\.0$/, '') + ' km</p>' +
+        '</div>' +
+        montarHtmlQrCodeRota(rota) +
+      '</div>' +
+      '<div class="lista-roteiro-motorista">' +
+        '<div class="item-roteiro-motorista item-roteiro-motorista-extremo"><span>▶ INÍCIO DA ROTA</span></div>' +
+        paradas.map(function(x, idx){
+          var qtd = (x.p.alunos || []).length;
+          var nomeParada = x.p.nomeParada || rotuloPapelPonto(x.i, total, true);
+          return '<div class="item-roteiro-motorista"><span><strong>' + (idx + 1) + '.</strong>' + escapeHtml(nomeParada) + '</span><span>' + qtd + ' aluno' + (qtd === 1 ? '' : 's') + '</span></div>';
+        }).join('') +
+        '<div class="item-roteiro-motorista item-roteiro-motorista-extremo"><span>🏁 FIM DA ROTA</span></div>' +
+      '</div>' +
+    '</td></tr>';
+
+    return html;
+  }
+
+  function imprimirRoteiroMotorista(rota){
+    document.getElementById('tbodyMapaImpressao').style.display = 'none';
+    document.getElementById('linhaResumoLocalidadeImpressao').style.display = 'none';
+    document.getElementById('tbodyPontosImpressao').style.display = 'none';
+    document.getElementById('tbodyResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').innerHTML = '';
+
+    preencherCabecalhoImpressao('Roteiro do Motorista — ' + rota.nome, listaFiltradaCache);
+    definirOrientacaoImpressao('portrait', '14mm');
+
+    document.getElementById('tbodyRotaImpressao').innerHTML = montarHtmlRoteiroMotorista(rota);
+    document.getElementById('tbodyRotaImpressao').style.display = 'table-row-group';
+
+    setTimeout(function(){ window.print(); }, 100);
+  }
 
   function montarMapaRotaParaImpressao(aoFinalizar){
     var LARGURA = 1000, ALTURA = 480;
@@ -7607,15 +7713,20 @@
     }
 
     var html = '<tr class="linha-evitar-quebra"><td>' +
-      '<h2 class="titulo-secao-impressao">Detalhamento da rota — ' + escapeHtml(nomeRota) + '</h2>' +
-      (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
-      '<div class="metricas-impressao" style="margin-bottom:10px;">' +
-        '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
-        '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
-        '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
-        '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
-        '<div class="item-metrica-impressao"><strong>' + tempoTexto + '</strong>Tempo estimado</div>' +
-        metricaVagas +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">' +
+        '<div style="flex:1;">' +
+          '<h2 class="titulo-secao-impressao">Detalhamento da rota — ' + escapeHtml(nomeRota) + '</h2>' +
+          (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
+          '<div class="metricas-impressao" style="margin-bottom:10px;">' +
+            '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
+            '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
+            '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
+            '<div class="item-metrica-impressao"><strong>' + resumoRotaAtual.distanciaKm.toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
+            '<div class="item-metrica-impressao"><strong>' + tempoTexto + '</strong>Tempo estimado</div>' +
+            metricaVagas +
+          '</div>' +
+        '</div>' +
+        montarHtmlQrCodeRota({ pontos: pontosRotaAtual }) +
       '</div>' +
     '</td></tr>';
 
@@ -7675,6 +7786,31 @@
   }
 
   // monta o HTML de impressão de UMA rota a partir dos dados salvos (não depende do editor estar aberto)
+  // monta um link do Google Maps com o trajeto (início, paradas, fim) pra abrir com navegação passo a passo
+  function construirUrlGoogleMapsRota(rota){
+    var pontos = rota.pontos;
+    if(!pontos || pontos.length < 2){ return ''; }
+    var origem = pontos[0];
+    var destino = pontos[pontos.length - 1];
+    var meio = pontos.slice(1, pontos.length - 1).filter(function(p){ return p.parada; }).slice(0, 23); // Google Maps aceita até ~23 pontos intermediários
+    var url = 'https://www.google.com/maps/dir/?api=1&travelmode=driving' +
+      '&origin=' + origem.lat + ',' + origem.lng +
+      '&destination=' + destino.lat + ',' + destino.lng;
+    if(meio.length){ url += '&waypoints=' + meio.map(function(p){ return p.lat + ',' + p.lng; }).join('|'); }
+    return url;
+  }
+
+  function montarHtmlQrCodeRota(rota, tamanho){
+    var url = construirUrlGoogleMapsRota(rota);
+    if(!url){ return ''; }
+    var px = tamanho || 130;
+    var srcQr = 'https://api.qrserver.com/v1/create-qr-code/?size=' + px + 'x' + px + '&data=' + encodeURIComponent(url);
+    return '<div class="bloco-qrcode-rota">' +
+      '<img src="' + srcQr + '" width="' + px + '" height="' + px + '" alt="QR Code do trajeto no Google Maps">' +
+      '<p>📱 Aponte a câmera<br>pra abrir a rota<br>no Google Maps</p>' +
+    '</div>';
+  }
+
   function montarHtmlResumoRotaImpressao(rota, primeiraRota){
     var c = rota.cadastro || {};
     var total = rota.pontos.length;
@@ -7699,16 +7835,21 @@
     }
 
     var html = '<tr class="linha-evitar-quebra"' + (primeiraRota ? '' : ' style="page-break-before:always;"') + '><td>' +
-      '<h2 class="titulo-secao-impressao">' + escapeHtml(rota.nome) + '</h2>' +
-      (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
-      '<div class="metricas-impressao" style="margin-bottom:10px;">' +
-        '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
-        '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
-        '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
-        '<div class="item-metrica-impressao"><strong>' + (rota.distanciaKm || 0).toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
-        metricaVagas +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">' +
+        '<div style="flex:1;">' +
+          '<h2 class="titulo-secao-impressao">' + escapeHtml(rota.nome) + '</h2>' +
+          (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
+          '<div class="metricas-impressao" style="margin-bottom:10px;">' +
+            '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
+            '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
+            '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
+            '<div class="item-metrica-impressao"><strong>' + (rota.distanciaKm || 0).toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
+            metricaVagas +
+          '</div>' +
+          (rota.escolas && rota.escolas.length ? '<p style="font-size:12px;margin:0 0 8px;"><strong>Escolas:</strong> ' + escapeHtml(rota.escolas.join(' · ')) + '</p>' : '') +
+        '</div>' +
+        montarHtmlQrCodeRota(rota) +
       '</div>' +
-      (rota.escolas && rota.escolas.length ? '<p style="font-size:12px;margin:0 0 8px;"><strong>Escolas:</strong> ' + escapeHtml(rota.escolas.join(' · ')) + '</p>' : '') +
     '</td></tr>';
 
     html += rota.pontos
