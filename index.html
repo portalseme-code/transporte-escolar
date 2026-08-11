@@ -753,6 +753,10 @@
   .item-parada-visualizar strong{color:#EA580C;}
 
   .card-recente-acoes{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--borda);}
+  .aviso-duplicata{
+    background:#FFF1E9;border:1px solid var(--erro);border-radius:8px;
+    padding:6px 10px;margin-top:8px;font-size:11.5px;color:#8a2818;font-weight:600;
+  }
   .btn-acao-cartao{
     flex:1;background:#fff;border:1.5px solid var(--borda);border-radius:8px;
     padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer;
@@ -1112,6 +1116,7 @@
     display:block;font-family:'Space Grotesk',sans-serif;font-size:22px;color:var(--verde-escuro);line-height:1.2;
   }
   .metrica-dashboard.alerta strong{color:var(--erro);}
+  .metrica-dashboard.aviso-amarelo strong{color:#B45309;}
   .metrica-dashboard span{font-size:11px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.02em;}
   .grade-repartição-dashboard{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;}
   .bloco-repartição-dashboard{background:#fff;border:1px solid var(--borda);border-radius:8px;padding:12px 14px;}
@@ -1120,6 +1125,20 @@
   }
   .linha-repartição{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;}
   .linha-repartição strong{color:var(--verde-escuro);}
+
+  .bloco-custo-frota{background:#fff;border:1px solid var(--borda);border-radius:8px;padding:12px 14px;margin-top:14px;}
+  .bloco-custo-frota h4{
+    font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--texto-suave);margin:0 0 8px;font-weight:700;
+  }
+  .linha-custo-frota{display:flex;align-items:center;gap:10px;}
+  .linha-custo-frota label{font-size:12.5px;color:var(--tinta);white-space:nowrap;}
+  .linha-custo-frota input{
+    width:120px;padding:7px 10px;border:1.5px solid var(--borda);border-radius:8px;font-size:13px;font-family:inherit;
+  }
+  .resultado-custo-frota{display:flex;gap:20px;margin-top:10px;flex-wrap:wrap;}
+  .resultado-custo-frota div{display:flex;flex-direction:column;}
+  .resultado-custo-frota strong{font-family:'Space Grotesk',sans-serif;font-size:18px;color:var(--verde-escuro);}
+  .resultado-custo-frota span{font-size:11px;color:var(--texto-suave);}
 
   .painel-alunos-sem-rota{
     background:var(--verde-suave);border:1.5px solid var(--verde);border-top:none;
@@ -1134,6 +1153,16 @@
   }
   .item-aluno-sem-rota strong{color:#9A3412;}
   .item-aluno-sem-rota span{color:var(--texto-suave);font-size:11.5px;}
+
+  .lista-log-auditoria{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+  .item-log-auditoria{
+    display:flex;gap:10px;align-items:baseline;background:#fff;border:1px solid var(--borda);
+    border-radius:8px;padding:8px 12px;font-size:12px;
+  }
+  .item-log-auditoria .log-hora{flex:0 0 auto;color:var(--texto-suave);font-family:'Space Grotesk',sans-serif;white-space:nowrap;}
+  .item-log-auditoria .log-usuario{flex:0 0 auto;font-weight:700;color:var(--verde-escuro);}
+  .item-log-auditoria .log-acao{flex:0 0 auto;background:var(--verde-suave);color:var(--verde-escuro);border-radius:99px;padding:2px 8px;font-size:11px;font-weight:600;}
+  .item-log-auditoria .log-detalhes{color:var(--tinta);}
 
   .card-rota-cadastrada{
     background:var(--superficie);border:1px solid var(--borda);border-radius:var(--raio-sm);
@@ -2143,6 +2172,7 @@
               <div class="lista-opcoes-multi" id="opcoesFiltroLocalidade"></div>
             </div>
           </div>
+          <button type="button" class="btn-filtro-problema" id="btnFiltroSoDuplicatas" aria-pressed="false" title="Mostrar só cadastros que parecem duplicados">⚠️ Só duplicatas</button>
           <button class="btn-mapa" id="btnLimparFiltros" type="button">Limpar filtros</button>
         </div>
         <p class="contagem-filtro" id="contagemFiltro"></p>
@@ -2569,6 +2599,7 @@
               </div>
               <button type="button" class="btn-filtro-problema" id="btnFiltroSoComProblema" aria-pressed="false" title="Mostrar só rotas superlotadas ou sem alunos">⚠️ Só com problema</button>
               <button class="btn-mapa" id="btnLimparFiltrosRotas" type="button">Limpar filtros</button>
+              <button class="btn-mapa" id="btnImprimirTodasRotas" type="button" title="Gerar um relatório único com todas as rotas cadastradas">🖨️ Imprimir todas as rotas</button>
             </div>
             <p class="contagem-filtro" id="contagemRotasCadastradas"></p>
             <button type="button" class="btn-comparar-rotas" id="btnCompararRotasSelecionadas" style="display:none;"></button>
@@ -2628,6 +2659,19 @@
           <div class="painel-dashboard-frota">
             <p class="contagem-filtro" id="contagemUsuarios"></p>
             <div id="listaUsuariosCadastrados"></div>
+          </div>
+
+          <h3 class="titulo-rotas-cadastradas">📜 Histórico de ações</h3>
+          <div class="painel-dashboard-frota">
+            <div class="barra-filtros" style="margin-top:0;">
+              <div class="campo-filtro">
+                <label>Buscar</label>
+                <input type="text" id="filtroLogBusca" placeholder="Usuário, ação ou detalhe...">
+              </div>
+              <button class="btn-mapa" id="btnAtualizarLog" type="button">🔄 Atualizar</button>
+            </div>
+            <p class="contagem-filtro" id="contagemLog"></p>
+            <div id="listaLogAuditoria" class="lista-log-auditoria"></div>
           </div>
         </div>
 
@@ -3620,6 +3664,14 @@
     try { sessionStorage.removeItem(CHAVE_SESSAO_ADMIN); } catch(erro){}
   }
 
+  // registra uma ação no histórico de auditoria (usado sobretudo pra ações de rotas,
+  // que só existem no navegador — cadastros/usuários já são logados direto no servidor)
+  function registrarAcaoLog(acaoLog, detalhes){
+    var sessao = obterSessaoAdmin();
+    if(!sessao || !sessao.token || !URL_PLANILHA){ return; }
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'registrarAcaoLog', token: sessao.token, acaoLog: acaoLog, detalhes: detalhes || '' }) }).catch(function(){});
+  }
+
   // aplica a classe de nível no <body> (usada pelo CSS pra esconder botões de edição/gestão
   // de quem não tem permissão) e mostra o badge com o nome/nível de quem está logado
   // usado pra travar ações que não são botões (clique no mapa, arrastar pino) e não dependem só do CSS
@@ -3870,6 +3922,66 @@
         lista.innerHTML = '<p class="sem-dados-grafico">Não foi possível conectar agora. Tente novamente.</p>';
       });
   }
+
+  // ---------- HISTÓRICO DE AÇÕES (log de auditoria — só Administrador) ----------
+  var registrosLogCache = [];
+  var RESUMOS_ACAO_LOG = {
+    login: '🔓 Login', login_falhou: '❌ Login falhou', login_bloqueado: '🔒 Bloqueado',
+    logout: '🚪 Saiu', criar_usuario: '➕ Criou usuário', alterar_usuario: '✏️ Alterou usuário',
+    excluir_usuario: '🗑️ Excluiu usuário', editar_cadastro: '✏️ Editou cadastro',
+    excluir_cadastro: '🗑️ Excluiu cadastro', aprovar_solicitacao: '✅ Aprovou solicitação',
+    rejeitar_solicitacao: '❌ Rejeitou solicitação', alterar_senha: '🔑 Trocou senha',
+    status_formulario: '📋 Status do formulário', criar_rota: '➕ Criou rota',
+    editar_rota: '✏️ Editou rota', excluir_rota: '🗑️ Excluiu rota'
+  };
+
+  function carregarLogAuditoria(){
+    var sessao = obterSessaoAdmin();
+    var lista = document.getElementById('listaLogAuditoria');
+    lista.innerHTML = '<p class="sem-dados-grafico">Carregando...</p>';
+    fetch(URL_PLANILHA, { method: 'POST', body: JSON.stringify({ acao: 'listarLog', token: sessao ? sessao.token : '' }) })
+      .then(function(resp){ return resp.json(); })
+      .then(function(dados){
+        if(!dados.ok){
+          lista.innerHTML = '<p class="sem-dados-grafico">' + escapeHtml(dados.erro || 'Não foi possível carregar o histórico.') + '</p>';
+          return;
+        }
+        registrosLogCache = dados.registros || [];
+        renderizarLogAuditoria();
+      })
+      .catch(function(){
+        lista.innerHTML = '<p class="sem-dados-grafico">Não foi possível conectar agora. Tente novamente.</p>';
+      });
+  }
+
+  function renderizarLogAuditoria(){
+    var termo = document.getElementById('filtroLogBusca').value.trim().toLowerCase();
+    var filtrados = registrosLogCache.filter(function(r){
+      if(!termo){ return true; }
+      return (r.usuario || '').toLowerCase().indexOf(termo) !== -1 ||
+        (r.acao || '').toLowerCase().indexOf(termo) !== -1 ||
+        (r.detalhes || '').toLowerCase().indexOf(termo) !== -1;
+    });
+    document.getElementById('contagemLog').textContent = filtrados.length + ' registro' + (filtrados.length === 1 ? '' : 's') + ' de ' + registrosLogCache.length + ' no total (mantemos os 1000 mais recentes).';
+    var lista = document.getElementById('listaLogAuditoria');
+    if(!filtrados.length){
+      lista.innerHTML = '<p class="sem-dados-grafico">Nenhum registro encontrado.</p>';
+      return;
+    }
+    lista.innerHTML = filtrados.slice(0, 300).map(function(r){
+      var hora = r.dataHora ? new Date(r.dataHora).toLocaleString('pt-BR') : '—';
+      var rotuloAcao = RESUMOS_ACAO_LOG[r.acao] || r.acao;
+      return '<div class="item-log-auditoria">' +
+        '<span class="log-hora">' + escapeHtml(hora) + '</span>' +
+        '<span class="log-usuario">' + escapeHtml(r.usuario || '—') + '</span>' +
+        '<span class="log-acao">' + escapeHtml(rotuloAcao) + '</span>' +
+        '<span class="log-detalhes">' + escapeHtml(r.detalhes || '') + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('btnAtualizarLog').addEventListener('click', carregarLogAuditoria);
+  document.getElementById('filtroLogBusca').addEventListener('input', renderizarLogAuditoria);
 
   document.getElementById('listaUsuariosCadastrados').addEventListener('change', function(e){
     if(!e.target.classList.contains('seletor-nivel-usuario')){ return; }
@@ -4300,6 +4412,7 @@
       if(aba === 'usuarios'){
         carregarSolicitacoesPendentes();
         carregarListaUsuarios();
+        carregarLogAuditoria();
       }
     });
   });
@@ -4475,6 +4588,13 @@
       document.querySelectorAll('#opcoesFiltro' + capitalizar(campo) + ' input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
       atualizarRotuloBotaoFiltro(campo);
     });
+    document.getElementById('btnFiltroSoDuplicatas').setAttribute('aria-pressed', 'false');
+    aplicarFiltros();
+  });
+
+  document.getElementById('btnFiltroSoDuplicatas').addEventListener('click', function(){
+    var ativo = this.getAttribute('aria-pressed') === 'true';
+    this.setAttribute('aria-pressed', ativo ? 'false' : 'true');
     aplicarFiltros();
   });
 
@@ -4491,10 +4611,31 @@
   }
 
   // ---------- LISTA DE CADASTROS (com ações) ----------
+  function normalizarNomeParaDuplicata(nome){
+    return String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase().replace(/\s+/g, ' ');
+  }
+
+  function calcularIdsDuplicados(){
+    var grupos = {};
+    registrosCache.forEach(function(r){
+      var chave = normalizarNomeParaDuplicata(r.nomeAluno) + '|' + normalizarNomeParaDuplicata(r.escola);
+      if(!grupos[chave]){ grupos[chave] = []; }
+      grupos[chave].push(r.id);
+    });
+    var idsDuplicados = new Set();
+    Object.keys(grupos).forEach(function(chave){
+      if(grupos[chave].length > 1){ grupos[chave].forEach(function(id){ idsDuplicados.add(id); }); }
+    });
+    return idsDuplicados;
+  }
+
   function renderizarListaRecentes(lista){
     var container = document.getElementById('listaRecentes');
+    var somenteDuplicatas = document.getElementById('btnFiltroSoDuplicatas').getAttribute('aria-pressed') === 'true';
+    var idsDuplicados = calcularIdsDuplicados();
+    if(somenteDuplicatas){ lista = lista.filter(function(r){ return idsDuplicados.has(r.id); }); }
     if(!lista.length){
-      container.innerHTML = '<p class="sem-dados-grafico">Nenhum cadastro encontrado.</p>';
+      container.innerHTML = '<p class="sem-dados-grafico">' + (somenteDuplicatas ? 'Nenhuma possível duplicata encontrada com os filtros atuais.' : 'Nenhum cadastro encontrado.') + '</p>';
       return;
     }
     var ordenados = lista.slice().sort(function(a, b){
@@ -4518,6 +4659,7 @@
         '<div class="card-recente-linha"><span>Endereço</span><span>' + endereco + '</span></div>' +
         '<div class="card-recente-linha"><span>Responsável</span><span>' + escapeHtml(r.nomeResp) + '</span></div>' +
         '<div class="card-recente-linha"><span>Preenchido em</span><span>' + formatarDataEnvio(r.dataEnvio) + '</span></div>' +
+        (idsDuplicados.has(r.id) ? '<div class="aviso-duplicata">⚠️ Possível duplicata — já existe outro cadastro com esse nome nessa escola.</div>' : '') +
         '<div class="card-recente-acoes">' +
           '<button class="btn-acao-cartao editar somente-edicao-ou-mais" data-id="' + idSeguro + '" type="button">Editar</button>' +
           '<button class="btn-acao-cartao excluir somente-edicao-ou-mais" data-id="' + idSeguro + '" type="button">Excluir</button>' +
@@ -6685,6 +6827,7 @@
     atualizarSeletorRotasSalvas();
     if(document.getElementById('painelRotasCadastradas').style.display !== 'none'){ renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota(); }
     mostrarAviso((editandoExistente ? 'Rota "' + nome + '" atualizada.' : 'Rota "' + nome + '" salva neste navegador.'), 'sucesso');
+    registrarAcaoLog(editandoExistente ? 'editar_rota' : 'criar_rota', 'Rota "' + nome + '"');
     enviarBackupParaDrive();
 
     // depois de salvar, limpa o mapa e os campos pra começar uma rota nova do zero
@@ -6816,6 +6959,14 @@
   }
 
   // ---------- DASHBOARD GERAL DA FROTA ----------
+  var CHAVE_CUSTO_KM = 'custoPorKmTransporteEscolarAnchieta';
+  function obterCustoPorKm(){
+    try { return parseFloat(localStorage.getItem(CHAVE_CUSTO_KM)) || 0; } catch(erro){ return 0; }
+  }
+  function gravarCustoPorKm(valor){
+    try { localStorage.setItem(CHAVE_CUSTO_KM, String(valor)); } catch(erro){}
+  }
+
   function renderizarDashboardFrota(){
     var rotas = obterRotasSalvas();
     var totalRotas = rotas.length;
@@ -6829,6 +6980,7 @@
     var porTurno = {};
     var totalVagas = 0;
     var rotasSuperlotadas = 0;
+    var rotasQuaseLotadas = 0;
 
     rotas.forEach(function(r){
       var c = r.cadastro || {};
@@ -6840,6 +6992,7 @@
         totalVagas += vagasNum;
         var qtdAlunosRota = r.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
         if(qtdAlunosRota > vagasNum){ rotasSuperlotadas++; }
+        else if(vagasNum > 0 && (qtdAlunosRota / vagasNum) >= 0.85){ rotasQuaseLotadas++; }
       }
     });
 
@@ -6858,6 +7011,7 @@
       '<div class="metrica-dashboard' + (alunosSemRota > 0 ? ' alerta' : '') + '"><strong>' + alunosSemRota + '</strong><span>Alunos sem rota</span></div>' +
       '<div class="metrica-dashboard"><strong>' + totalVagas + '</strong><span>Vagas ofertadas</span></div>' +
       '<div class="metrica-dashboard' + (rotasSuperlotadas > 0 ? ' alerta' : '') + '"><strong>' + rotasSuperlotadas + '</strong><span>Rotas superlotadas</span></div>' +
+      '<div class="metrica-dashboard' + (rotasQuaseLotadas > 0 ? ' aviso-amarelo' : '') + '"><strong>' + rotasQuaseLotadas + '</strong><span>Quase lotadas (85%+)</span></div>' +
     '</div>';
 
     var blocos = montarBlocoRepartição('Por tipo de veículo', porTipoVeiculo) +
@@ -6868,11 +7022,34 @@
       html += '<div class="grade-repartição-dashboard">' + blocos + '</div>';
     }
 
+    var custoKm = obterCustoPorKm();
+    var custoDiario = totalKm * custoKm;
+    html += '<div class="bloco-custo-frota">' +
+      '<h4>💰 Estimativa de custo (opcional)</h4>' +
+      '<div class="linha-custo-frota">' +
+        '<label for="custoPorKmInput">R$ por km rodado</label>' +
+        '<input type="number" id="custoPorKmInput" min="0" step="0.01" placeholder="Ex: 3,50" value="' + (custoKm || '') + '">' +
+      '</div>' +
+      (custoKm > 0
+        ? '<div class="resultado-custo-frota">' +
+            '<div><strong>R$ ' + custoDiario.toFixed(2).replace('.', ',') + '</strong><span>por dia (' + totalKm.toFixed(1).replace(/\.0$/, '') + ' km × R$ ' + custoKm.toFixed(2).replace('.', ',') + ')</span></div>' +
+            '<div><strong>R$ ' + (custoDiario * 22).toFixed(2).replace('.', ',') + '</strong><span>estimativa mensal (22 dias letivos)</span></div>' +
+          '</div>'
+        : '<p class="ajuda-secao" style="margin:6px 0 0;">Informe o valor pago por km rodado pra ver uma estimativa de custo diário/mensal de toda a frota.</p>') +
+    '</div>';
+
     if(!totalRotas){
       html = '<p class="sem-dados-grafico">Nenhuma rota cadastrada ainda — os números aparecem aqui assim que você salvar a primeira rota.</p>';
     }
 
     document.getElementById('painelDashboardFrota').innerHTML = html;
+    var inputCusto = document.getElementById('custoPorKmInput');
+    if(inputCusto){
+      inputCusto.addEventListener('change', function(){
+        gravarCustoPorKm(parseFloat(this.value) || 0);
+        renderizarDashboardFrota();
+      });
+    }
   }
 
   function renderizarListaRotasCadastradas(){
@@ -7224,6 +7401,7 @@
       rotasSelecionadasParaComparar.delete(rota.id);
       atualizarSeletorRotasSalvas();
       renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
+      registrarAcaoLog('excluir_rota', 'Rota "' + rota.nome + '"');
     } else if(acao === 'duplicar'){
       var copia = JSON.parse(JSON.stringify(rota));
       copia.id = gerarIdRota();
@@ -7496,6 +7674,84 @@
     document.getElementById('tbodyRotaImpressao').style.display = 'table-row-group';
   }
 
+  // monta o HTML de impressão de UMA rota a partir dos dados salvos (não depende do editor estar aberto)
+  function montarHtmlResumoRotaImpressao(rota, primeiraRota){
+    var c = rota.cadastro || {};
+    var total = rota.pontos.length;
+    var qtdParadas = rota.pontos.filter(function(p){ return p.parada; }).length;
+    var qtdAlunosTotal = rota.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
+
+    var linhaCadastro = [];
+    if(c.tipoVeiculo){ linhaCadastro.push('Veículo: ' + c.tipoVeiculo + (c.propriedade ? ' (' + c.propriedade + ')' : '')); }
+    if(c.propriedade === 'TERCEIRIZADO' && c.empresaTerceirizada){ linhaCadastro.push('Empresa: ' + c.empresaTerceirizada + (c.numeroLicitacao ? ' — ' + c.numeroLicitacao : '')); }
+    if(c.vagas){ linhaCadastro.push('Vagas: ' + c.vagas); }
+    if(c.turno){ linhaCadastro.push('Turno: ' + c.turno); }
+    if(c.sentido){ linhaCadastro.push('Sentido: ' + (c.sentido === 'IDA' ? 'Ida' : 'Volta')); }
+    if(c.horarioInicio || c.horarioFim){ linhaCadastro.push('Horário: ' + (c.horarioInicio || '—') + ' às ' + (c.horarioFim || '—')); }
+
+    var metricaVagas = '';
+    if(c.vagas){
+      var vagasNum = parseInt(c.vagas, 10);
+      var restantes = vagasNum - qtdAlunosTotal;
+      var estourou = restantes < 0;
+      var valorVagas = estourou ? ('⚠️ ' + Math.abs(restantes) + ' acima!') : (restantes + ' restante' + (restantes === 1 ? '' : 's'));
+      metricaVagas = '<div class="item-metrica-impressao"' + (estourou ? ' style="color:#C2331A;"' : '') + '><strong>' + valorVagas + '</strong>de ' + vagasNum + ' vagas</div>';
+    }
+
+    var html = '<tr class="linha-evitar-quebra"' + (primeiraRota ? '' : ' style="page-break-before:always;"') + '><td>' +
+      '<h2 class="titulo-secao-impressao">' + escapeHtml(rota.nome) + '</h2>' +
+      (linhaCadastro.length ? '<p style="font-size:12.5px;color:var(--texto-suave);margin:-6px 0 10px;">' + escapeHtml(linhaCadastro.join(' · ')) + '</p>' : '') +
+      '<div class="metricas-impressao" style="margin-bottom:10px;">' +
+        '<div class="item-metrica-impressao"><strong>' + total + '</strong>Pontos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + qtdParadas + '</strong>Paradas</div>' +
+        '<div class="item-metrica-impressao"><strong>' + qtdAlunosTotal + '</strong>Alunos</div>' +
+        '<div class="item-metrica-impressao"><strong>' + (rota.distanciaKm || 0).toFixed(1).replace(/\.0$/, '') + ' km</strong>Distância</div>' +
+        metricaVagas +
+      '</div>' +
+      (rota.escolas && rota.escolas.length ? '<p style="font-size:12px;margin:0 0 8px;"><strong>Escolas:</strong> ' + escapeHtml(rota.escolas.join(' · ')) + '</p>' : '') +
+    '</td></tr>';
+
+    html += rota.pontos
+      .map(function(p, i){ return { p: p, i: i }; })
+      .filter(function(x){ return papelDoPonto(x.i, total) !== 'meio' || x.p.parada; })
+      .map(function(x){
+        var p = x.p, i = x.i;
+        var qtdAlunosPonto = (p.alunos || []).length;
+        var rotulo = rotuloPapelPonto(i, total, p.parada) + (p.parada && p.nomeParada ? ' — ' + p.nomeParada : '') + (qtdAlunosPonto ? ' (' + qtdAlunosPonto + ' aluno' + (qtdAlunosPonto === 1 ? '' : 's') + ')' : '');
+        var nomesAlunos = p.parada && qtdAlunosPonto
+          ? registrosCache.filter(function(r){ return (p.alunos || []).indexOf(r.id) !== -1; }).map(function(r){ return r.nomeAluno; }).join(', ')
+          : '';
+        return '<tr class="linha-evitar-quebra"><td><div class="ponto-impressao">' +
+          '<div class="ponto-impressao-topo"><span>' + escapeHtml(rotulo) + '</span></div>' +
+          (nomesAlunos ? '<p style="font-size:11.5px;color:var(--texto-suave);margin:2px 0 0;">' + escapeHtml(nomesAlunos) + '</p>' : '') +
+          '</div></td></tr>';
+      }).join('');
+
+    return html;
+  }
+
+  function imprimirTodasAsRotas(){
+    var rotas = obterRotasSalvas();
+    if(!rotas.length){ mostrarAviso('Não há rotas salvas pra exportar.'); return; }
+
+    document.getElementById('tbodyMapaImpressao').style.display = 'none';
+    document.getElementById('linhaResumoLocalidadeImpressao').style.display = 'none';
+    document.getElementById('tbodyPontosImpressao').style.display = 'none';
+    document.getElementById('tbodyResumoImpressao').style.display = 'none';
+    document.getElementById('tbodyListaCompletaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').style.display = 'none';
+    document.getElementById('tbodyRaioEscolaImpressao').innerHTML = '';
+
+    preencherCabecalhoImpressao('Geral — Todas as Rotas (' + rotas.length + ')', listaFiltradaCache);
+    definirOrientacaoImpressao('landscape', '10mm');
+
+    var htmlTotal = rotas.map(function(rota, indice){ return montarHtmlResumoRotaImpressao(rota, indice === 0); }).join('');
+    document.getElementById('tbodyRotaImpressao').innerHTML = htmlTotal;
+    document.getElementById('tbodyRotaImpressao').style.display = 'table-row-group';
+
+    setTimeout(function(){ window.print(); }, 100);
+  }
+
   function executarImpressaoDaRotaAtual(){
     if(pontosRotaAtual.length < 2 || !resumoRotaAtual){
       mostrarAviso('Marque pelo menos 2 pontos e aguarde o caminho calcular antes de imprimir.');
@@ -7520,6 +7776,7 @@
   }
 
   document.getElementById('btnImprimirRota').addEventListener('click', executarImpressaoDaRotaAtual);
+  document.getElementById('btnImprimirTodasRotas').addEventListener('click', imprimirTodasAsRotas);
 
   document.getElementById('raioCluster').addEventListener('input', function(){
     document.getElementById('valorRaioCluster').textContent = this.value;
