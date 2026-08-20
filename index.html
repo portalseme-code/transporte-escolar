@@ -954,6 +954,7 @@
   .menu-mais-ferramentas button span{font-size:15px;flex:0 0 auto;}
   .menu-mais-ferramentas button:hover{background:var(--verde-suave);}
   .menu-mais-ferramentas .btn-cortar-trajeto[aria-pressed="true"]{background:var(--erro-bg);color:var(--erro);}
+  .menu-mais-ferramentas .btn-manobra-manual[aria-pressed="true"]{background:#F3E8FF;color:#7C3AED;}
   .menu-mais-ferramentas .btn-estender-trajeto[aria-pressed="true"]{background:#EAF1FC;color:#1d54b3;}
 
   .painel-ferramenta-mapa-ativa{
@@ -976,6 +977,11 @@
     width:22px;height:22px;border-radius:50%;background:#2E6FDE;border:2.5px solid #fff;
     box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
   }
+  .pino-marca-manobra{
+    width:22px;height:22px;border-radius:50%;background:#7C3AED;border:2.5px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
+  }
+  .painel-ferramenta-mapa-ativa.tema-manobra{background:#F3E8FF;border-color:#7C3AED;color:#4C1D95;}
 
   .painel-legenda-atalhos{
     background:#FCFCFA;border:1.5px solid var(--borda);border-radius:var(--raio-sm);
@@ -2442,6 +2448,7 @@
                       <button type="button" id="btnAlternarLegenda" aria-pressed="false"><span>❓</span> Legenda do mapa</button>
                       <button type="button" class="btn-cortar-trajeto somente-edicao-ou-mais" id="btnModoCortarTrajeto" aria-pressed="false"><span>✂️</span> Cortar trecho do trajeto</button>
                       <button type="button" class="btn-estender-trajeto somente-edicao-ou-mais" id="btnModoEstenderTrajeto" aria-pressed="false"><span>↔️</span> Estender rota até aqui</button>
+                      <button type="button" class="btn-manobra-manual somente-edicao-ou-mais" id="btnModoManobraManual" aria-pressed="false" title="Pra manobras/contornos dentro de terrenos, que não existem no mapa de ruas"><span>🔄</span> Forçar retorno manual</button>
                     </div>
                   </div>
                 </div>
@@ -2461,6 +2468,7 @@
                     <div class="item-legenda"><span class="pino-aluno-vinculado" style="position:static;"></span> Aluno vinculado a esta rota</div>
                     <div class="item-legenda"><span class="pino-todos-alunos-rota" style="position:static;"></span> Aluno cadastrado (qualquer rota)</div>
                     <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">▲</span> Sentido do percurso</div>
+                    <div class="item-legenda"><span style="width:22px;height:3px;background:repeating-linear-gradient(90deg,#7C3AED 0 6px,transparent 6px 12px);display:inline-block;"></span> Manobra manual (fora de rua mapeada)</div>
                     <div class="item-legenda"><span class="pino-previa-sugestao" style="position:static;width:20px;height:20px;font-size:11px;">➕</span> Prévia de nova parada sugerida</div>
                   </div>
                   <div>
@@ -5426,6 +5434,7 @@
       if(!usuarioPodeEditar()){ return; }
       if(modoCortarTrajeto){ adicionarMarcaCorte(e.latlng); return; }
       if(modoEstenderTrajeto){ adicionarMarcaExtensao(e.latlng); return; }
+      if(modoManobraManual){ adicionarPontoManobra(e.latlng); return; }
       salvarEstadoRotaParaUndo();
       pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, parada: false, nomeParada: '' });
       redesenharPontosRota();
@@ -5773,7 +5782,7 @@
   function habilitarEdicaoDaLinha(){
     if(!linhaRotaAtual){ return; }
     linhaRotaAtual.on('mousedown', function(e){
-      if(modoCortarTrajeto || modoEstenderTrajeto){ return; } // deixa o clique passar pro handler da ferramenta ativa
+      if(modoCortarTrajeto || modoEstenderTrajeto || modoManobraManual){ return; } // deixa o clique passar pro handler da ferramenta ativa
       L.DomEvent.stopPropagation(e);
       mapaRotas.dragging.disable();
 
@@ -5800,13 +5809,18 @@
     });
   }
 
-  // ---------- CORTAR TRAJETO / ESTENDER ROTA (ferramentas de mapa) ----------
+  // ---------- CORTAR TRAJETO / ESTENDER ROTA / MANOBRA MANUAL (ferramentas de mapa) ----------
   var modoCortarTrajeto = false;
   var modoEstenderTrajeto = false;
+  var modoManobraManual = false;
   var pontosCorteSelecionados = [];
   var marcadoresCorteAtual = [];
   var pontosExtensaoSelecionados = [];
   var marcadoresExtensaoAtual = [];
+  var pontosManobraSelecionados = [];
+  var marcadoresManobraAtual = [];
+  var camadaPreviaCorte = null;
+  var linhaPreviaManobra = null;
 
   function limparMarcadoresExtensao(){
     marcadoresExtensaoAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
@@ -5818,18 +5832,31 @@
     marcadoresCorteAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
     marcadoresCorteAtual = [];
     pontosCorteSelecionados = [];
+    if(camadaPreviaCorte && mapaRotas){ mapaRotas.removeLayer(camadaPreviaCorte); }
+    camadaPreviaCorte = null;
+  }
+
+  function limparMarcadoresManobra(){
+    marcadoresManobraAtual.forEach(function(m){ if(mapaRotas){ mapaRotas.removeLayer(m); } });
+    marcadoresManobraAtual = [];
+    pontosManobraSelecionados = [];
+    if(linhaPreviaManobra && mapaRotas){ mapaRotas.removeLayer(linhaPreviaManobra); }
+    linhaPreviaManobra = null;
   }
 
   function sairDosModosDeFerramenta(){
     modoCortarTrajeto = false;
     modoEstenderTrajeto = false;
+    modoManobraManual = false;
     document.getElementById('btnModoCortarTrajeto').setAttribute('aria-pressed', 'false');
     document.getElementById('btnModoEstenderTrajeto').setAttribute('aria-pressed', 'false');
+    document.getElementById('btnModoManobraManual').setAttribute('aria-pressed', 'false');
     var painel = document.getElementById('painelFerramentaMapaAtiva');
     painel.style.display = 'none';
     painel.className = 'painel-ferramenta-mapa-ativa';
     limparMarcadoresCorte();
     limparMarcadoresExtensao();
+    limparMarcadoresManobra();
   }
 
   document.getElementById('btnModoCortarTrajeto').addEventListener('click', function(){
@@ -5864,6 +5891,23 @@
     painel.style.display = 'flex';
   });
 
+  document.getElementById('btnModoManobraManual').addEventListener('click', function(){
+    var vaiAtivar = this.getAttribute('aria-pressed') !== 'true';
+    sairDosModosDeFerramenta();
+    if(!vaiAtivar){ return; }
+    if(!usuarioPodeEditar()){ return; }
+    if(pontosRotaAtual.length < 2){
+      mostrarAviso('Trace pelo menos o início e o fim da rota antes de inserir uma manobra manual.');
+      return;
+    }
+    modoManobraManual = true;
+    this.setAttribute('aria-pressed', 'true');
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.className = 'painel-ferramenta-mapa-ativa tema-manobra';
+    painel.innerHTML = '<span>🔄</span><div>Clique nos pontos, em ordem, desenhando o caminho real da manobra (pode entrar no terreno particular e voltar). Marque pelo menos <strong>2 pontos</strong> e depois finalize.</div>';
+    painel.style.display = 'flex';
+  });
+
   function adicionarMarcaCorte(latlng){
     pontosCorteSelecionados.push({ lat: latlng.lat, lng: latlng.lng });
     var marcador = L.marker(latlng, {
@@ -5871,14 +5915,7 @@
     }).addTo(mapaRotas);
     marcadoresCorteAtual.push(marcador);
 
-    if(pontosCorteSelecionados.length === 2){
-      var painel = document.getElementById('painelFerramentaMapaAtiva');
-      painel.innerHTML = '<span>✂️</span><div>Pronto pra cortar o trecho entre as 2 marcações.</div>' +
-        '<button type="button" class="btn-confirmar-ferramenta" id="btnConfirmarCorte">🔪 Recalcular sem esse trecho</button>' +
-        '<button type="button" id="btnCancelarFerramentaCorte">Cancelar</button>';
-      document.getElementById('btnConfirmarCorte').addEventListener('click', confirmarCorteTrajeto);
-      document.getElementById('btnCancelarFerramentaCorte').addEventListener('click', sairDosModosDeFerramenta);
-    }
+    if(pontosCorteSelecionados.length === 2){ mostrarPreviaCorte(); }
   }
 
   // encontra a posição mais próxima de um clique dentro do traçado real (linha detalhada), não dos poucos pontos marcados
@@ -5890,6 +5927,37 @@
       if(d < menorDist){ menorDist = d; indice = i; }
     }
     return indice;
+  }
+
+  // mostra em vermelho, no mapa, exatamente o trecho que será removido — só depois disso o usuário confirma
+  function mostrarPreviaCorte(){
+    var idxA = indicePathMaisProximo(pontosCorteSelecionados[0]);
+    var idxB = indicePathMaisProximo(pontosCorteSelecionados[1]);
+    var menor = Math.min(idxA, idxB), maior = Math.max(idxA, idxB);
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+
+    if(maior - menor < 3){
+      painel.innerHTML = '<span>✂️</span><div>As duas marcações estão praticamente no mesmo lugar. Tente marcar pontos um pouco mais afastados um do outro.</div>' +
+        '<button type="button" id="btnCancelarFerramentaCorte">Cancelar e tentar de novo</button>';
+      document.getElementById('btnCancelarFerramentaCorte').addEventListener('click', function(){
+        limparMarcadoresCorte();
+        painel.innerHTML = '<span>✂️</span><div>Clique em <strong>2 pontos da linha laranja</strong> pra marcar o início e o fim do trecho que você quer cortar.</div>';
+      });
+      return;
+    }
+
+    if(camadaPreviaCorte){ mapaRotas.removeLayer(camadaPreviaCorte); }
+    var trechoDestacado = resumoRotaAtual.coordenadas.slice(menor, maior + 1);
+    camadaPreviaCorte = L.polyline(trechoDestacado, { color: '#DC2626', weight: 8, opacity: 0.85, lineCap: 'round' }).addTo(mapaRotas);
+
+    painel.innerHTML = '<span>✂️</span><div>O trecho <strong>destacado em vermelho</strong> no mapa é exatamente o que vai ser removido. Confira antes de confirmar — se não for o que você queria, tente de novo.</div>' +
+      '<button type="button" class="btn-confirmar-ferramenta" id="btnConfirmarCorte">🔪 Confirmar — remover o trecho vermelho</button>' +
+      '<button type="button" id="btnTentarDeNovoCorte">Não é esse — tentar de novo</button>';
+    document.getElementById('btnConfirmarCorte').addEventListener('click', confirmarCorteTrajeto);
+    document.getElementById('btnTentarDeNovoCorte').addEventListener('click', function(){
+      limparMarcadoresCorte();
+      painel.innerHTML = '<span>✂️</span><div>Clique em <strong>2 pontos da linha laranja</strong> pra marcar o início e o fim do trecho que você quer cortar.</div>';
+    });
   }
 
   function confirmarCorteTrajeto(){
@@ -5925,6 +5993,43 @@
     calcularRotaOSRM(function(sucesso){
       if(sucesso){ mostrarAviso('Trecho cortado — trajeto recalculado sem passar mais por ali.', 'sucesso'); }
       else { mostrarAviso('O trecho foi marcado, mas não foi possível recalcular o caminho agora. Tente novamente em instantes.'); }
+    });
+  }
+
+  function adicionarPontoManobra(latlng){
+    pontosManobraSelecionados.push({ lat: latlng.lat, lng: latlng.lng });
+    var numero = pontosManobraSelecionados.length;
+    var marcador = L.marker(latlng, {
+      icon: L.divIcon({ html: '<div class="pino-marca-manobra">' + numero + '</div>', className: '', iconSize: [22, 22], iconAnchor: [11, 11] })
+    }).addTo(mapaRotas);
+    marcadoresManobraAtual.push(marcador);
+
+    if(linhaPreviaManobra){ mapaRotas.removeLayer(linhaPreviaManobra); linhaPreviaManobra = null; }
+    if(pontosManobraSelecionados.length >= 2){
+      linhaPreviaManobra = L.polyline(pontosManobraSelecionados.map(function(p){ return [p.lat, p.lng]; }), { color: '#7C3AED', weight: 4, opacity: 0.85, dashArray: '4,8' }).addTo(mapaRotas);
+      var painel = document.getElementById('painelFerramentaMapaAtiva');
+      painel.innerHTML = '<span>🔄</span><div>' + numero + ' ponto(s) marcados. Clique em mais pontos se precisar ajustar a manobra, ou finalize.</div>' +
+        '<button type="button" class="btn-confirmar-ferramenta" id="btnFinalizarManobra">✅ Finalizar manobra aqui</button>' +
+        '<button type="button" id="btnCancelarManobra">Cancelar</button>';
+      document.getElementById('btnFinalizarManobra').addEventListener('click', confirmarManobraManual);
+      document.getElementById('btnCancelarManobra').addEventListener('click', sairDosModosDeFerramenta);
+    }
+  }
+
+  function confirmarManobraManual(){
+    if(pontosManobraSelecionados.length < 2){ return; }
+    salvarEstadoRotaParaUndo();
+    var novosPontos = pontosManobraSelecionados.map(function(p, i){
+      return { lat: p.lat, lng: p.lng, parada: false, nomeParada: '', alunos: [], viaManual: i > 0 };
+    });
+    var indiceInsercao = encontrarIndiceInsercao(pontosManobraSelecionados[0]);
+    pontosRotaAtual.splice.apply(pontosRotaAtual, [indiceInsercao, 0].concat(novosPontos));
+
+    sairDosModosDeFerramenta();
+    redesenharPontosRota();
+    calcularRotaOSRM(function(sucesso){
+      if(sucesso){ mostrarAviso('Manobra manual inserida (linha tracejada roxa) — esse trecho não recalcula mais pelas ruas.', 'sucesso'); }
+      else { mostrarAviso('A manobra foi inserida, mas não foi possível recalcular o restante do trajeto agora.'); }
     });
   }
 
@@ -6018,12 +6123,33 @@
   var rotasAlternativasAtuais = [];
   var indiceRotaEscolhida = 0;
 
+  // divide os pontos em "trechos": sequências normais (calculadas pelas ruas) e
+  // trechos manuais (retas, desenhadas à mão — usadas pra manobras fora do mapa de ruas)
+  function classificarSegmentosRota(pontos){
+    var segmentos = [];
+    var chunkAtual = [pontos[0]];
+    for(var i = 1; i < pontos.length; i++){
+      if(pontos[i].viaManual){
+        if(chunkAtual.length >= 2){ segmentos.push({ tipo: 'osrm', pontos: chunkAtual }); }
+        segmentos.push({ tipo: 'manual', de: pontos[i - 1], para: pontos[i] });
+        chunkAtual = [pontos[i]];
+      } else {
+        chunkAtual.push(pontos[i]);
+      }
+    }
+    if(chunkAtual.length >= 2){ segmentos.push({ tipo: 'osrm', pontos: chunkAtual }); }
+    return segmentos;
+  }
+
+  var VELOCIDADE_MANOBRA_MANUAL_KMH = 15; // estimativa de velocidade num trecho manual (fora de rua mapeada)
+
   function calcularRotaOSRM(aoConcluir){
     versaoCalculoRota++;
     var minhaVersao = versaoCalculoRota;
 
     if(linhaRotaAtual){ mapaRotas.removeLayer(linhaRotaAtual); linhaRotaAtual = null; }
     if(camadaSetasRota){ mapaRotas.removeLayer(camadaSetasRota); camadaSetasRota = null; }
+    if(camadaSegmentosManuais){ mapaRotas.removeLayer(camadaSegmentosManuais); camadaSegmentosManuais = null; }
     resumoRotaAtual = null;
     rotasAlternativasAtuais = [];
     indiceRotaEscolhida = 0;
@@ -6039,38 +6165,140 @@
     document.getElementById('metaRotaMapa').textContent = 'Calculando o caminho pelas ruas...';
     document.getElementById('indicadorCarregamentoRota').style.display = 'flex';
 
-    var coordsStr = pontosRotaAtual.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
-    var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson&alternatives=true&steps=false';
+    var temTrechoManual = pontosRotaAtual.some(function(p){ return p.viaManual; });
 
-    fetch(url)
-      .then(function(resp){ return resp.json(); })
-      .then(function(dados){
-        if(minhaVersao !== versaoCalculoRota){ return; } // a rota mudou ou foi limpa enquanto isso calculava — ignora esta resposta atrasada
-        if(dados.code !== 'Ok' || !dados.routes || !dados.routes.length){
-          throw new Error('OSRM não retornou uma rota válida');
-        }
-        rotasAlternativasAtuais = dados.routes.slice(0, 3).map(function(r){
-          return {
-            distanciaKm: r.distance / 1000,
-            tempoMin: r.duration / 60,
-            coordenadas: r.geometry.coordinates.map(function(c){ return [c[1], c[0]]; }),
-            legs: r.legs || []
-          };
+    if(!temTrechoManual){
+      // caminho simples (sem trechos manuais): um único pedido ao OSRM, com rotas alternativas
+      var coordsStr = pontosRotaAtual.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+      var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson&alternatives=true&steps=false';
+
+      fetch(url)
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(minhaVersao !== versaoCalculoRota){ return; } // a rota mudou ou foi limpa enquanto isso calculava — ignora esta resposta atrasada
+          if(dados.code !== 'Ok' || !dados.routes || !dados.routes.length){
+            throw new Error('OSRM não retornou uma rota válida');
+          }
+          rotasAlternativasAtuais = dados.routes.slice(0, 3).map(function(r){
+            return {
+              distanciaKm: r.distance / 1000,
+              tempoMin: r.duration / 60,
+              coordenadas: r.geometry.coordinates.map(function(c){ return [c[1], c[0]]; }),
+              legs: r.legs || []
+            };
+          });
+          indiceRotaEscolhida = 0;
+          aplicarRotaAlternativaEscolhida();
+          atualizarSeletorRotasAlternativas();
+          atualizarMetaRota();
+          document.getElementById('indicadorCarregamentoRota').style.display = 'none';
+          if(aoConcluir){ aoConcluir(true); }
+        })
+        .catch(function(erro){
+          if(minhaVersao !== versaoCalculoRota){ return; }
+          console.error('Erro ao calcular rota via OSRM:', erro);
+          document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular o caminho pelas ruas agora. Tente novamente em instantes.';
+          document.getElementById('indicadorCarregamentoRota').style.display = 'none';
+          if(aoConcluir){ aoConcluir(false); }
         });
-        indiceRotaEscolhida = 0;
-        aplicarRotaAlternativaEscolhida();
-        atualizarSeletorRotasAlternativas();
-        atualizarMetaRota();
-        document.getElementById('indicadorCarregamentoRota').style.display = 'none';
-        if(aoConcluir){ aoConcluir(true); }
-      })
-      .catch(function(erro){
-        if(minhaVersao !== versaoCalculoRota){ return; }
-        console.error('Erro ao calcular rota via OSRM:', erro);
-        document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular o caminho pelas ruas agora. Tente novamente em instantes.';
-        document.getElementById('indicadorCarregamentoRota').style.display = 'none';
-        if(aoConcluir){ aoConcluir(false); }
-      });
+      return;
+    }
+
+    // tem trecho(s) manual(is): calcula cada pedaço separadamente e costura tudo no final
+    var segmentos = classificarSegmentosRota(pontosRotaAtual);
+    var resultadosSegmentos = new Array(segmentos.length);
+
+    function processarSegmento(indice){
+      if(minhaVersao !== versaoCalculoRota){ return; }
+      if(indice >= segmentos.length){
+        finalizarCalculoComSegmentos(resultadosSegmentos, minhaVersao, aoConcluir);
+        return;
+      }
+      var seg = segmentos[indice];
+      if(seg.tipo === 'manual'){
+        var distManual = distanciaMetros(seg.de.lat, seg.de.lng, seg.para.lat, seg.para.lng);
+        resultadosSegmentos[indice] = {
+          tipo: 'manual',
+          coordenadas: [[seg.de.lat, seg.de.lng], [seg.para.lat, seg.para.lng]],
+          distanciaKm: distManual / 1000,
+          tempoMin: (distManual / 1000) / VELOCIDADE_MANOBRA_MANUAL_KMH * 60,
+          legs: [{ distance: distManual, duration: (distManual / 1000) / VELOCIDADE_MANOBRA_MANUAL_KMH * 3600 }]
+        };
+        processarSegmento(indice + 1);
+        return;
+      }
+      var coordsStrSeg = seg.pontos.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+      var urlSeg = 'https://router.project-osrm.org/route/v1/driving/' + coordsStrSeg + '?overview=full&geometries=geojson&steps=false';
+      fetch(urlSeg)
+        .then(function(resp){ return resp.json(); })
+        .then(function(dados){
+          if(minhaVersao !== versaoCalculoRota){ return; }
+          if(dados.code !== 'Ok' || !dados.routes || !dados.routes.length){
+            throw new Error('OSRM não retornou uma rota válida pra um trecho');
+          }
+          var rota = dados.routes[0];
+          resultadosSegmentos[indice] = {
+            tipo: 'osrm',
+            coordenadas: rota.geometry.coordinates.map(function(c){ return [c[1], c[0]]; }),
+            distanciaKm: rota.distance / 1000,
+            tempoMin: rota.duration / 60,
+            legs: rota.legs || []
+          };
+          processarSegmento(indice + 1);
+        })
+        .catch(function(erro){
+          if(minhaVersao !== versaoCalculoRota){ return; }
+          console.error('Erro ao calcular trecho da rota via OSRM:', erro);
+          document.getElementById('metaRotaMapa').textContent = 'Não foi possível calcular um trecho do caminho agora. Tente novamente em instantes.';
+          document.getElementById('indicadorCarregamentoRota').style.display = 'none';
+          if(aoConcluir){ aoConcluir(false); }
+        });
+    }
+
+    processarSegmento(0);
+  }
+
+  function finalizarCalculoComSegmentos(resultadosSegmentos, minhaVersao, aoConcluir){
+    if(minhaVersao !== versaoCalculoRota){ return; }
+    var coordenadasTotais = [];
+    var distanciaTotal = 0;
+    var tempoTotal = 0;
+    var legsTotais = [];
+    var trechosManuaisCoords = [];
+
+    resultadosSegmentos.forEach(function(res, idx){
+      var coords = res.coordenadas;
+      if(idx > 0 && coordenadasTotais.length && coords.length){
+        coordenadasTotais = coordenadasTotais.concat(coords.slice(1));
+      } else {
+        coordenadasTotais = coordenadasTotais.concat(coords);
+      }
+      distanciaTotal += res.distanciaKm;
+      tempoTotal += res.tempoMin;
+      legsTotais = legsTotais.concat(res.legs);
+      if(res.tipo === 'manual'){ trechosManuaisCoords.push(coords); }
+    });
+
+    rotasAlternativasAtuais = [{ distanciaKm: distanciaTotal, tempoMin: tempoTotal, coordenadas: coordenadasTotais, legs: legsTotais }];
+    indiceRotaEscolhida = 0;
+    aplicarRotaAlternativaEscolhida();
+    desenharTrechosManuaisNoMapa(trechosManuaisCoords);
+    atualizarSeletorRotasAlternativas();
+    atualizarMetaRota();
+    document.getElementById('indicadorCarregamentoRota').style.display = 'none';
+    if(aoConcluir){ aoConcluir(true); }
+  }
+
+  var camadaSegmentosManuais = null;
+  function desenharTrechosManuaisNoMapa(listaCoords){
+    if(camadaSegmentosManuais){ mapaRotas.removeLayer(camadaSegmentosManuais); camadaSegmentosManuais = null; }
+    if(!listaCoords.length){ return; }
+    var grupo = L.layerGroup();
+    listaCoords.forEach(function(coords){
+      L.polyline(coords, { color: '#7C3AED', weight: 6, opacity: 0.9, dashArray: '2,10', lineCap: 'round' }).addTo(grupo);
+    });
+    grupo.addTo(mapaRotas);
+    camadaSegmentosManuais = grupo;
   }
 
   function aplicarRotaAlternativaEscolhida(){
