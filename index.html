@@ -1067,10 +1067,10 @@
     box-shadow:0 1px 3px rgba(0,0,0,.35);
   }
   .seta-direcao-rota{
-    color:#7C2D12;font-size:16px;line-height:1;
-    text-shadow:0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff, 1px 1px 1px rgba(0,0,0,.4);
-    pointer-events:none;
+    color:#7C2D12;pointer-events:none;
+    filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff) drop-shadow(1px 1px 1px rgba(0,0,0,.45));
   }
+  .seta-direcao-rota path{fill:currentColor;}
 
   .pino-ponto-wrapper{ position:relative; width:34px; height:40px; }
   .pino-ponto-wrapper .pino-parada-rota{ position:absolute; top:12px; left:3px; }
@@ -2467,7 +2467,7 @@
                     <div class="item-legenda"><span class="selo-legenda" style="background:#F0B429;">3</span> Quantidade de alunos na parada</div>
                     <div class="item-legenda"><span class="pino-aluno-vinculado" style="position:static;"></span> Aluno vinculado a esta rota</div>
                     <div class="item-legenda"><span class="pino-todos-alunos-rota" style="position:static;"></span> Aluno cadastrado (qualquer rota)</div>
-                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">▲</span> Sentido do percurso</div>
+                    <div class="item-legenda"><svg class="seta-direcao-rota" viewBox="0 0 24 24" width="16" height="16" style="position:static;"><path d="M12 2 L20 21 L12 16.5 L4 21 Z"></path></svg> Sentido do percurso</div>
                     <div class="item-legenda"><span style="width:22px;height:3px;background:repeating-linear-gradient(90deg,#7C3AED 0 6px,transparent 6px 12px);display:inline-block;"></span> Manobra manual (fora de rua mapeada)</div>
                     <div class="item-legenda"><span class="pino-previa-sugestao" style="position:static;width:20px;height:20px;font-size:11px;">➕</span> Prévia de nova parada sugerida</div>
                   </div>
@@ -6126,21 +6126,41 @@
 
   function criarIconeSetaDirecao(anguloGraus){
     return L.divIcon({
-      html: '<div class="seta-direcao-rota" style="transform:rotate(' + anguloGraus + 'deg);">▲</div>',
-      className: '', iconSize: [18, 18], iconAnchor: [9, 9]
+      html: '<svg class="seta-direcao-rota" viewBox="0 0 24 24" width="20" height="20" style="transform:rotate(' + anguloGraus + 'deg);"><path d="M12 2 L20 21 L12 16.5 L4 21 Z"></path></svg>',
+      className: '', iconSize: [20, 20], iconAnchor: [10, 10]
     });
   }
 
   function desenharSetasDirecaoRota(coordenadas, mapa){
     if(!coordenadas || coordenadas.length < 2){ return null; }
     var grupo = L.layerGroup();
-    var qtdSetas = Math.min(10, Math.max(3, Math.floor(coordenadas.length / 20)));
-    var passo = Math.max(1, Math.floor(coordenadas.length / (qtdSetas + 1)));
-    for(var i = passo; i < coordenadas.length - 1; i += passo){
-      var p1 = coordenadas[i];
-      var p2 = coordenadas[i + 1];
+
+    // distância acumulada ao longo do trajeto, pra espalhar as setas de forma uniforme (por metro), não por índice
+    // (índice não funciona bem porque o OSRM retorna muito mais pontos nos trechos com curva do que nos retos)
+    var distanciasAcumuladas = [0];
+    for(var i = 1; i < coordenadas.length; i++){
+      distanciasAcumuladas.push(distanciasAcumuladas[i - 1] + distanciaMetros(coordenadas[i - 1][0], coordenadas[i - 1][1], coordenadas[i][0], coordenadas[i][1]));
+    }
+    var distanciaTotal = distanciasAcumuladas[distanciasAcumuladas.length - 1];
+    if(distanciaTotal < 60){ return grupo; }
+
+    var qtdSetas = Math.min(12, Math.max(3, Math.round(distanciaTotal / 350))); // ~1 seta a cada 350m
+    var espacamento = distanciaTotal / (qtdSetas + 1);
+
+    for(var s = 1; s <= qtdSetas; s++){
+      var alvo = espacamento * s;
+      var idx = 0;
+      while(idx < distanciasAcumuladas.length - 1 && distanciasAcumuladas[idx] < alvo){ idx++; }
+
+      // usa pontos um pouco antes/depois do alvo pra suavizar a direção (evita seta "tremendo" por causa
+      // de pequenas variações do traçado bem de perto)
+      var idxAntes = Math.max(0, idx - 3);
+      var idxDepois = Math.min(coordenadas.length - 1, idx + 3);
+      if(idxDepois <= idxAntes){ continue; }
+      var p1 = coordenadas[idxAntes];
+      var p2 = coordenadas[idxDepois];
       var angulo = calcularRumo(p1[0], p1[1], p2[0], p2[1]);
-      L.marker(p1, { icon: criarIconeSetaDirecao(angulo), interactive: false }).addTo(grupo);
+      L.marker(coordenadas[idx], { icon: criarIconeSetaDirecao(angulo), interactive: false }).addTo(grupo);
     }
     grupo.addTo(mapa);
     return grupo;
@@ -7856,6 +7876,9 @@
     desenharSetasDirecaoRota(resumoRotaAtual.coordenadas, mapaTemp);
     var total = pontosRotaAtual.length;
     pontosRotaAtual.forEach(function(p, i){
+      // só mostra início, fim e paradas reais — os pontos de passagem (que só guiam o traçado) ficam de fora,
+      // pra não poluir o mapa impresso com uma bolinha pra cada um
+      if(papelDoPonto(i, total) === 'meio' && !p.parada){ return; }
       L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
     });
     if(mostrarEscolasNoMapaRotas){
@@ -7939,6 +7962,7 @@
       var limites = L.latLngBounds(pontosLatLng);
 
       rota.pontos.forEach(function(p, i){
+        if(papelDoPonto(i, total) === 'meio' && !p.parada){ return; }
         L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
       });
       mapaVisualizarRotaInstancia.fitBounds(limites, { padding: [24, 24] });
@@ -8078,7 +8102,20 @@
     if(!pontos || pontos.length < 2){ return ''; }
     var origem = pontos[0];
     var destino = pontos[pontos.length - 1];
-    var meio = pontos.slice(1, pontos.length - 1).filter(function(p){ return p.parada; }).slice(0, 23); // Google Maps aceita até ~23 pontos intermediários
+    var meioTodos = pontos.slice(1, pontos.length - 1);
+    var LIMITE_WAYPOINTS = 23; // Google Maps aceita até ~23 pontos intermediários no link
+    var meio;
+    if(meioTodos.length <= LIMITE_WAYPOINTS){
+      meio = meioTodos; // poucos pontos — usa todos, mantendo o formato exato do trajeto desenhado
+    } else {
+      // muitos pontos — escolhe uma amostra espalhada uniformemente por todo o trajeto,
+      // em vez de só as "paradas" (senão uma rota sem nenhuma parada marcada perderia o desenho inteiro)
+      meio = [];
+      var passo = meioTodos.length / LIMITE_WAYPOINTS;
+      for(var i = 0; i < LIMITE_WAYPOINTS; i++){
+        meio.push(meioTodos[Math.min(meioTodos.length - 1, Math.round(i * passo))]);
+      }
+    }
     var url = 'https://www.google.com/maps/dir/?api=1&travelmode=driving' +
       '&origin=' + origem.lat + ',' + origem.lng +
       '&destination=' + destino.lat + ',' + destino.lng;
