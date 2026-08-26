@@ -5988,11 +5988,37 @@
     var indiceInsercao = encontrarIndiceInsercao(primeiroCorte);
     pontosRotaAtual.splice(indiceInsercao, 0, primeiroCorte, segundoCorte);
 
-    sairDosModosDeFerramenta();
+    limparMarcadoresCorte();
     redesenharPontosRota();
-    calcularRotaOSRM(function(sucesso){
-      if(sucesso){ mostrarAviso('Trecho cortado — trajeto recalculado sem passar mais por ali.', 'sucesso'); }
-      else { mostrarAviso('O trecho foi marcado, mas não foi possível recalcular o caminho agora. Tente novamente em instantes.'); }
+    mostrarEscolhaPosCorte(segundoCorte);
+  }
+
+  // depois de remover o trecho, pergunta como ligar os 2 pontos que sobraram — porque se a rua não tiver
+  // um caminho mais direto, o cálculo normal (pela rua) pode acabar recriando o mesmo trecho removido
+  function mostrarEscolhaPosCorte(pontoFinalDoCorte){
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.className = 'painel-ferramenta-mapa-ativa';
+    painel.innerHTML = '<span>✂️</span><div>Trecho removido. Como você quer ligar os 2 pontos que ficaram?<br><span style="font-size:11px;font-weight:400;">Se não existir uma rua mais direta ali, "recalcular pela rua" pode acabar recriando o mesmo caminho de antes.</span></div>' +
+      '<button type="button" class="btn-confirmar-ferramenta" id="btnCortePorRua">🛣️ Recalcular pela rua (padrão)</button>' +
+      '<button type="button" id="btnCortePorManual">✏️ Desenhar manualmente (garante que não volta a passar por ali)</button>';
+    painel.style.display = 'flex';
+
+    document.getElementById('btnCortePorRua').addEventListener('click', function(){
+      sairDosModosDeFerramenta();
+      calcularRotaOSRM(function(sucesso){
+        if(sucesso){ mostrarAviso('Trecho recalculado pela rua.', 'sucesso'); }
+        else { mostrarAviso('Não foi possível recalcular agora. Tente novamente.'); }
+      });
+    });
+
+    document.getElementById('btnCortePorManual').addEventListener('click', function(){
+      pontoFinalDoCorte.viaManual = true;
+      sairDosModosDeFerramenta();
+      redesenharPontosRota();
+      calcularRotaOSRM(function(sucesso){
+        if(sucesso){ mostrarAviso('Trecho ligado manualmente (linha reta tracejada) — não recalcula mais pela rua ali.', 'sucesso'); }
+        else { mostrarAviso('O trecho manual foi marcado, mas não foi possível recalcular o restante agora.'); }
+      });
     });
   }
 
