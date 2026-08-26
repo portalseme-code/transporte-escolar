@@ -2466,9 +2466,7 @@
                     <div class="item-legenda"><span class="selo-legenda" style="background:#F0B429;">3</span> Quantidade de alunos na parada</div>
                     <div class="item-legenda"><span class="pino-aluno-vinculado" style="position:static;"></span> Aluno vinculado a esta rota</div>
                     <div class="item-legenda"><span class="pino-todos-alunos-rota" style="position:static;"></span> Aluno cadastrado (qualquer rota)</div>
-                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">🠖</span> Trecho reto</div>
-                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">⮎</span><span class="seta-direcao-rota" style="position:static;">⮏</span> Curva suave (direita/esquerda)</div>
-                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">⮌</span><span class="seta-direcao-rota" style="position:static;">⮍</span> Curva fechada (direita/esquerda)</div>
+                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">🠖</span> Sentido do percurso</div>
                     <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">🠔</span> Retorno</div>
                     <div class="item-legenda"><span style="width:22px;height:3px;background:repeating-linear-gradient(90deg,#7C3AED 0 6px,transparent 6px 12px);display:inline-block;"></span> Manobra manual (fora de rua mapeada)</div>
                     <div class="item-legenda"><span class="pino-previa-sugestao" style="position:static;width:20px;height:20px;font-size:11px;">➕</span> Prévia de nova parada sugerida</div>
@@ -6132,20 +6130,8 @@
       // quase uma volta completa (retorno) — usa a seta de "voltar", virada pro sentido de saída
       caractere = '🠔';
       rotacao = anguloGeral - 90;
-    } else if(diferencaCurva > 110){
-      caractere = '⮌'; // curva fechada pra direita
-      rotacao = anguloGeral - 90;
-    } else if(diferencaCurva < -110){
-      caractere = '⮍'; // curva fechada pra esquerda
-      rotacao = anguloGeral - 90;
-    } else if(diferencaCurva > 45){
-      caractere = '⮎'; // curva suave pra direita
-      rotacao = anguloGeral - 90;
-    } else if(diferencaCurva < -45){
-      caractere = '⮏'; // curva suave pra esquerda
-      rotacao = anguloGeral - 90;
     } else {
-      caractere = '🠖'; // trecho reto
+      caractere = '🠖'; // trecho reto (inclusive curvas leves/moderadas)
       rotacao = anguloGeral - 90;
     }
     return L.divIcon({
@@ -6167,7 +6153,7 @@
     var distanciaTotal = distanciasAcumuladas[distanciasAcumuladas.length - 1];
     if(distanciaTotal < 40){ return grupo; }
 
-    var qtdSetas = Math.min(30, Math.max(3, Math.round(distanciaTotal / 180))); // mais denso: ~1 seta a cada 180m
+    var qtdSetas = Math.min(24, Math.max(3, Math.round(distanciaTotal / 260))); // ~1 seta a cada 260m
     var espacamento = distanciaTotal / (qtdSetas + 1);
 
     for(var s = 1; s <= qtdSetas; s++){
@@ -6176,7 +6162,7 @@
       while(idx < distanciasAcumuladas.length - 1 && distanciasAcumuladas[idx] < alvo){ idx++; }
 
       // usa pontos um pouco antes/depois do alvo pra suavizar a direção (evita seta "tremendo" por causa
-      // de pequenas variações do traçado bem de perto), e compara entrada x saída pra detectar curva/retorno
+      // de pequenas variações do traçado bem de perto), e compara entrada x saída pra detectar retorno
       var idxAntes = Math.max(0, idx - 4);
       var idxDepois = Math.min(coordenadas.length - 1, idx + 4);
       if(idxDepois <= idxAntes){ continue; }
@@ -8131,7 +8117,9 @@
     var origem = pontos[0];
     var destino = pontos[pontos.length - 1];
     var meioTodos = pontos.slice(1, pontos.length - 1);
-    var LIMITE_WAYPOINTS = 23; // Google Maps aceita até ~23 pontos intermediários no link
+    // limite baixo de propósito: o Google Maps aceita até ~23, mas quanto mais pontos, maior (e mais denso)
+    // fica o QR Code — acima de ~8 ele passa a ficar difícil de ler quando impresso pequeno
+    var LIMITE_WAYPOINTS = 8;
     var meio;
     if(meioTodos.length <= LIMITE_WAYPOINTS){
       meio = meioTodos; // poucos pontos — usa todos, mantendo o formato exato do trajeto desenhado
@@ -8144,18 +8132,21 @@
         meio.push(meioTodos[Math.min(meioTodos.length - 1, Math.round(i * passo))]);
       }
     }
+    // arredonda pra 5 casas decimais (~1m de precisão) — o suficiente, e deixa a URL bem mais curta
+    function coord(n){ return Math.round(n * 100000) / 100000; }
     var url = 'https://www.google.com/maps/dir/?api=1&travelmode=driving' +
-      '&origin=' + origem.lat + ',' + origem.lng +
-      '&destination=' + destino.lat + ',' + destino.lng;
-    if(meio.length){ url += '&waypoints=' + meio.map(function(p){ return p.lat + ',' + p.lng; }).join('|'); }
+      '&origin=' + coord(origem.lat) + ',' + coord(origem.lng) +
+      '&destination=' + coord(destino.lat) + ',' + coord(destino.lng);
+    if(meio.length){ url += '&waypoints=' + meio.map(function(p){ return coord(p.lat) + ',' + coord(p.lng); }).join('|'); }
     return url;
   }
 
   function montarHtmlQrCodeRota(rota, tamanho){
     var url = construirUrlGoogleMapsRota(rota);
     if(!url){ return ''; }
-    var px = tamanho || 130;
-    var srcQr = 'https://api.qrserver.com/v1/create-qr-code/?size=' + px + 'x' + px + '&data=' + encodeURIComponent(url);
+    var px = tamanho || 170;
+    // ecc=L (correção de erro baixa) deixa o QR Code menos denso pro mesmo tanto de dado — mais fácil de ler impresso
+    var srcQr = 'https://api.qrserver.com/v1/create-qr-code/?size=' + px + 'x' + px + '&ecc=L&data=' + encodeURIComponent(url);
     return '<div class="bloco-qrcode-rota">' +
       '<img src="' + srcQr + '" width="' + px + '" height="' + px + '" alt="QR Code do trajeto no Google Maps">' +
       '<p>📱 Aponte a câmera<br>pra abrir a rota<br>no Google Maps</p>' +
