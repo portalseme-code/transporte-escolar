@@ -1067,8 +1067,8 @@
     box-shadow:0 1px 3px rgba(0,0,0,.35);
   }
   .seta-direcao-rota{
-    color:#333;pointer-events:none;
-    filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff);
+    color:#222;pointer-events:none;font-size:19px;line-height:1;font-weight:700;
+    text-shadow:0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 3px #fff;
   }
 
   .pino-ponto-wrapper{ position:relative; width:34px; height:40px; }
@@ -2466,7 +2466,10 @@
                     <div class="item-legenda"><span class="selo-legenda" style="background:#F0B429;">3</span> Quantidade de alunos na parada</div>
                     <div class="item-legenda"><span class="pino-aluno-vinculado" style="position:static;"></span> Aluno vinculado a esta rota</div>
                     <div class="item-legenda"><span class="pino-todos-alunos-rota" style="position:static;"></span> Aluno cadastrado (qualquer rota)</div>
-                    <div class="item-legenda"><svg class="seta-direcao-rota" viewBox="0 0 24 24" width="16" height="16" style="position:static;transform:rotate(45deg);"><path d="M6 16 L12 6 L18 16" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg> Sentido do percurso</div>
+                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">🠖</span> Trecho reto</div>
+                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">⮎</span><span class="seta-direcao-rota" style="position:static;">⮏</span> Curva suave (direita/esquerda)</div>
+                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">⮌</span><span class="seta-direcao-rota" style="position:static;">⮍</span> Curva fechada (direita/esquerda)</div>
+                    <div class="item-legenda"><span class="seta-direcao-rota" style="position:static;">🠔</span> Retorno</div>
                     <div class="item-legenda"><span style="width:22px;height:3px;background:repeating-linear-gradient(90deg,#7C3AED 0 6px,transparent 6px 12px);display:inline-block;"></span> Manobra manual (fora de rua mapeada)</div>
                     <div class="item-legenda"><span class="pino-previa-sugestao" style="position:static;width:20px;height:20px;font-size:11px;">➕</span> Prévia de nova parada sugerida</div>
                   </div>
@@ -6123,10 +6126,31 @@
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
-  function criarIconeSetaDirecao(anguloGraus){
+  function criarIconeSetaDirecao(anguloGeral, diferencaCurva){
+    var caractere, rotacao;
+    if(diferencaCurva > 160 || diferencaCurva < -160){
+      // quase uma volta completa (retorno) — usa a seta de "voltar", virada pro sentido de saída
+      caractere = '🠔';
+      rotacao = anguloGeral - 90;
+    } else if(diferencaCurva > 110){
+      caractere = '⮌'; // curva fechada pra direita
+      rotacao = anguloGeral - 90;
+    } else if(diferencaCurva < -110){
+      caractere = '⮍'; // curva fechada pra esquerda
+      rotacao = anguloGeral - 90;
+    } else if(diferencaCurva > 45){
+      caractere = '⮎'; // curva suave pra direita
+      rotacao = anguloGeral - 90;
+    } else if(diferencaCurva < -45){
+      caractere = '⮏'; // curva suave pra esquerda
+      rotacao = anguloGeral - 90;
+    } else {
+      caractere = '🠖'; // trecho reto
+      rotacao = anguloGeral - 90;
+    }
     return L.divIcon({
-      html: '<svg class="seta-direcao-rota" viewBox="0 0 24 24" width="16" height="16" style="transform:rotate(' + anguloGraus + 'deg);"><path d="M6 16 L12 6 L18 16" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
-      className: '', iconSize: [16, 16], iconAnchor: [8, 8]
+      html: '<div class="seta-direcao-rota" style="transform:rotate(' + rotacao + 'deg);">' + caractere + '</div>',
+      className: '', iconSize: [20, 20], iconAnchor: [10, 10]
     });
   }
 
@@ -6141,9 +6165,9 @@
       distanciasAcumuladas.push(distanciasAcumuladas[i - 1] + distanciaMetros(coordenadas[i - 1][0], coordenadas[i - 1][1], coordenadas[i][0], coordenadas[i][1]));
     }
     var distanciaTotal = distanciasAcumuladas[distanciasAcumuladas.length - 1];
-    if(distanciaTotal < 60){ return grupo; }
+    if(distanciaTotal < 40){ return grupo; }
 
-    var qtdSetas = Math.min(12, Math.max(3, Math.round(distanciaTotal / 350))); // ~1 seta a cada 350m
+    var qtdSetas = Math.min(30, Math.max(3, Math.round(distanciaTotal / 180))); // mais denso: ~1 seta a cada 180m
     var espacamento = distanciaTotal / (qtdSetas + 1);
 
     for(var s = 1; s <= qtdSetas; s++){
@@ -6152,14 +6176,19 @@
       while(idx < distanciasAcumuladas.length - 1 && distanciasAcumuladas[idx] < alvo){ idx++; }
 
       // usa pontos um pouco antes/depois do alvo pra suavizar a direção (evita seta "tremendo" por causa
-      // de pequenas variações do traçado bem de perto)
-      var idxAntes = Math.max(0, idx - 3);
-      var idxDepois = Math.min(coordenadas.length - 1, idx + 3);
+      // de pequenas variações do traçado bem de perto), e compara entrada x saída pra detectar curva/retorno
+      var idxAntes = Math.max(0, idx - 4);
+      var idxDepois = Math.min(coordenadas.length - 1, idx + 4);
       if(idxDepois <= idxAntes){ continue; }
-      var p1 = coordenadas[idxAntes];
-      var p2 = coordenadas[idxDepois];
-      var angulo = calcularRumo(p1[0], p1[1], p2[0], p2[1]);
-      L.marker(coordenadas[idx], { icon: criarIconeSetaDirecao(angulo), interactive: false }).addTo(grupo);
+      var pAntes = coordenadas[idxAntes];
+      var pMeio = coordenadas[idx];
+      var pDepois = coordenadas[idxDepois];
+      var anguloGeral = calcularRumo(pAntes[0], pAntes[1], pDepois[0], pDepois[1]);
+      var anguloEntrada = calcularRumo(pAntes[0], pAntes[1], pMeio[0], pMeio[1]);
+      var anguloSaida = calcularRumo(pMeio[0], pMeio[1], pDepois[0], pDepois[1]);
+      var diferenca = ((anguloSaida - anguloEntrada + 540) % 360) - 180; // normaliza pra -180..180 (+ direita, - esquerda)
+
+      L.marker(pMeio, { icon: criarIconeSetaDirecao(anguloGeral, diferenca), interactive: false }).addTo(grupo);
     }
     grupo.addTo(mapa);
     return grupo;
