@@ -1564,6 +1564,13 @@
   }
 
   .bloco-qrcode-rota{flex:0 0 auto;text-align:center;}
+  .rotulo-impressao-ponto, .rotulo-impressao-escola{
+    background:#fff;border:1.5px solid var(--verde-escuro);border-radius:6px;
+    padding:2px 7px;font-size:12px;font-weight:700;color:var(--verde-escuro);
+    box-shadow:0 1px 4px rgba(0,0,0,.3);white-space:nowrap;
+  }
+  .rotulo-impressao-escola{border-color:#2E6FDE;color:#1d54b3;}
+  .rotulo-impressao-ponto::before, .rotulo-impressao-escola::before{border-top-color:#fff !important;}
   .bloco-qrcode-rota img{display:block;border:1px solid var(--borda);border-radius:6px;}
   .bloco-qrcode-rota p{font-size:9.5px;color:var(--texto-suave);margin:4px 0 0;line-height:1.3;}
 
@@ -7893,14 +7900,20 @@
       // só mostra início, fim e paradas reais — os pontos de passagem (que só guiam o traçado) ficam de fora,
       // pra não poluir o mapa impresso com uma bolinha pra cada um
       if(papelDoPonto(i, total) === 'meio' && !p.parada){ return; }
-      L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
+      var papel = papelDoPonto(i, total);
+      var marcadorPonto = L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
+      // rótulo de texto sempre visível — sem isso, os ícones (pequenos) somem quando ficam perto uns dos outros
+      var rotuloTexto = papel === 'inicio' ? 'Início' : papel === 'fim' ? 'Fim' : (p.nomeParada || rotuloPapelPonto(i, total, p.parada));
+      marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: 'top', offset: [0, -20], className: 'rotulo-impressao-ponto' });
     });
     if(mostrarEscolasNoMapaRotas){
       var nomesEscolasImpressao = escolasVinculadasRota.size ? Array.from(escolasVinculadasRota) : Object.keys(ESCOLAS_COORDENADAS);
       nomesEscolasImpressao.forEach(function(nome){
         var coords = ESCOLAS_COORDENADAS[nome];
         if(!coords){ return; }
-        L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() }).addTo(mapaTemp);
+        L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() })
+          .addTo(mapaTemp)
+          .bindTooltip(nome, { permanent: true, direction: 'right', offset: [10, 0], className: 'rotulo-impressao-escola' });
       });
     }
     mapaTemp.fitBounds(linhaRota.getBounds(), { padding: [30, 30] });
@@ -7977,8 +7990,20 @@
 
       rota.pontos.forEach(function(p, i){
         if(papelDoPonto(i, total) === 'meio' && !p.parada){ return; }
-        L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
+        var papel = papelDoPonto(i, total);
+        var marcadorPonto = L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
+        var rotuloTexto = papel === 'inicio' ? 'Início' : papel === 'fim' ? 'Fim' : (p.nomeParada || rotuloPapelPonto(i, total, p.parada));
+        marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: 'top', offset: [0, -20], className: 'rotulo-impressao-ponto' });
       });
+      if(rota.escolas && rota.escolas.length){
+        rota.escolas.forEach(function(nome){
+          var coords = ESCOLAS_COORDENADAS[nome];
+          if(!coords){ return; }
+          L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() })
+            .addTo(mapaVisualizarRotaInstancia)
+            .bindTooltip(nome, { permanent: true, direction: 'right', offset: [10, 0], className: 'rotulo-impressao-escola' });
+        });
+      }
       mapaVisualizarRotaInstancia.fitBounds(limites, { padding: [24, 24] });
       setTimeout(function(){ if(mapaVisualizarRotaInstancia){ mapaVisualizarRotaInstancia.invalidateSize(); } }, 80);
 
