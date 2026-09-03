@@ -955,6 +955,8 @@
   .menu-mais-ferramentas button:hover{background:var(--verde-suave);}
   .menu-mais-ferramentas .btn-cortar-trajeto[aria-pressed="true"]{background:var(--erro-bg);color:var(--erro);}
   .menu-mais-ferramentas .btn-manobra-manual[aria-pressed="true"]{background:#F3E8FF;color:#7C3AED;}
+  .menu-mais-ferramentas .btn-inserir-ponto[aria-pressed="true"]{background:var(--verde-suave);color:var(--verde-escuro);}
+  .painel-ferramenta-mapa-ativa.tema-inserir{background:var(--verde-suave);border-color:var(--verde);color:var(--verde-escuro);}
   .menu-mais-ferramentas .btn-estender-trajeto[aria-pressed="true"]{background:#EAF1FC;color:#1d54b3;}
 
   .painel-ferramenta-mapa-ativa{
@@ -2455,6 +2457,7 @@
                     <button type="button" class="toggle-escolas" id="btnAbrirMaisFerramentas" aria-pressed="false" title="Mais ferramentas do mapa" aria-label="Mais ferramentas do mapa">⋯</button>
                     <div class="menu-mais-ferramentas" id="menuMaisFerramentas" style="display:none;">
                       <button type="button" id="btnAlternarLegenda" aria-pressed="false"><span>❓</span> Legenda do mapa</button>
+                      <button type="button" class="btn-inserir-ponto somente-edicao-ou-mais" id="btnModoInserirPonto" aria-pressed="false" title="Adiciona um ponto no meio do trajeto já traçado, sem mexer no início/fim"><span>➕</span> Inserir ponto no trajeto</button>
                       <button type="button" class="btn-cortar-trajeto somente-edicao-ou-mais" id="btnModoCortarTrajeto" aria-pressed="false"><span>✂️</span> Cortar trecho do trajeto</button>
                       <button type="button" class="btn-estender-trajeto somente-edicao-ou-mais" id="btnModoEstenderTrajeto" aria-pressed="false"><span>↔️</span> Estender rota até aqui</button>
                       <button type="button" class="btn-manobra-manual somente-edicao-ou-mais" id="btnModoManobraManual" aria-pressed="false" title="Pra manobras/contornos dentro de terrenos, que não existem no mapa de ruas"><span>🔄</span> Forçar retorno manual</button>
@@ -5453,6 +5456,7 @@
       if(modoCortarTrajeto){ adicionarMarcaCorte(e.latlng); return; }
       if(modoEstenderTrajeto){ adicionarMarcaExtensao(e.latlng); return; }
       if(modoManobraManual){ adicionarPontoManobra(e.latlng); return; }
+      if(modoInserirPonto){ inserirPontoNoTrajeto(e.latlng); return; }
       salvarEstadoRotaParaUndo();
       pontosRotaAtual.push({ lat: e.latlng.lat, lng: e.latlng.lng, parada: false, nomeParada: '' });
       redesenharPontosRota();
@@ -5800,7 +5804,7 @@
   function habilitarEdicaoDaLinha(){
     if(!linhaRotaAtual){ return; }
     linhaRotaAtual.on('mousedown', function(e){
-      if(modoCortarTrajeto || modoEstenderTrajeto || modoManobraManual){ return; } // deixa o clique passar pro handler da ferramenta ativa
+      if(modoCortarTrajeto || modoEstenderTrajeto || modoManobraManual || modoInserirPonto){ return; } // deixa o clique passar pro handler da ferramenta ativa
       L.DomEvent.stopPropagation(e);
       mapaRotas.dragging.disable();
 
@@ -5827,10 +5831,11 @@
     });
   }
 
-  // ---------- CORTAR TRAJETO / ESTENDER ROTA / MANOBRA MANUAL (ferramentas de mapa) ----------
+  // ---------- CORTAR TRAJETO / ESTENDER ROTA / MANOBRA MANUAL / INSERIR PONTO (ferramentas de mapa) ----------
   var modoCortarTrajeto = false;
   var modoEstenderTrajeto = false;
   var modoManobraManual = false;
+  var modoInserirPonto = false;
   var pontosCorteSelecionados = [];
   var marcadoresCorteAtual = [];
   var pontosExtensaoSelecionados = [];
@@ -5866,9 +5871,11 @@
     modoCortarTrajeto = false;
     modoEstenderTrajeto = false;
     modoManobraManual = false;
+    modoInserirPonto = false;
     document.getElementById('btnModoCortarTrajeto').setAttribute('aria-pressed', 'false');
     document.getElementById('btnModoEstenderTrajeto').setAttribute('aria-pressed', 'false');
     document.getElementById('btnModoManobraManual').setAttribute('aria-pressed', 'false');
+    document.getElementById('btnModoInserirPonto').setAttribute('aria-pressed', 'false');
     var painel = document.getElementById('painelFerramentaMapaAtiva');
     painel.style.display = 'none';
     painel.className = 'painel-ferramenta-mapa-ativa';
@@ -5924,6 +5931,25 @@
     painel.className = 'painel-ferramenta-mapa-ativa tema-manobra';
     painel.innerHTML = '<span>🔄</span><div>Clique nos pontos, em ordem, desenhando o caminho real da manobra (pode entrar no terreno particular e voltar). Marque pelo menos <strong>2 pontos</strong> e depois finalize.</div>';
     painel.style.display = 'flex';
+  });
+
+  document.getElementById('btnModoInserirPonto').addEventListener('click', function(){
+    var vaiAtivar = this.getAttribute('aria-pressed') !== 'true';
+    sairDosModosDeFerramenta();
+    if(!vaiAtivar){ return; }
+    if(!usuarioPodeEditar()){ return; }
+    if(pontosRotaAtual.length < 2){
+      mostrarAviso('Trace pelo menos o início e o fim da rota antes de inserir pontos no meio do trajeto.');
+      return;
+    }
+    modoInserirPonto = true;
+    this.setAttribute('aria-pressed', 'true');
+    var painel = document.getElementById('painelFerramentaMapaAtiva');
+    painel.className = 'painel-ferramenta-mapa-ativa tema-inserir';
+    painel.innerHTML = '<span>➕</span><div>Clique em qualquer lugar do mapa pra inserir um ponto <strong>ali mesmo, no meio do trajeto</strong> — sem mexer no início/fim da rota. Pode clicar quantas vezes precisar.</div>' +
+      '<button type="button" class="btn-confirmar-ferramenta" id="btnSairInserirPonto">✅ Concluir</button>';
+    painel.style.display = 'flex';
+    document.getElementById('btnSairInserirPonto').addEventListener('click', sairDosModosDeFerramenta);
   });
 
   function adicionarMarcaCorte(latlng){
@@ -6074,6 +6100,19 @@
     calcularRotaOSRM(function(sucesso){
       if(sucesso){ mostrarAviso('Manobra manual inserida (linha tracejada roxa) — esse trecho não recalcula mais pelas ruas.', 'sucesso'); }
       else { mostrarAviso('A manobra foi inserida, mas não foi possível recalcular o restante do trajeto agora.'); }
+    });
+  }
+
+  // insere um novo ponto no meio do trajeto (na posição geográfica certa, não no fim da lista),
+  // pra corrigir/ajustar um trecho já traçado sem estender a rota inteira
+  function inserirPontoNoTrajeto(latlng){
+    var novoPonto = { lat: latlng.lat, lng: latlng.lng, parada: false, nomeParada: '', alunos: [] };
+    var indiceInsercao = encontrarIndiceInsercao(latlng);
+    salvarEstadoRotaParaUndo();
+    pontosRotaAtual.splice(indiceInsercao, 0, novoPonto);
+    redesenharPontosRota();
+    calcularRotaOSRM(function(sucesso){
+      if(!sucesso){ mostrarAviso('O ponto foi inserido, mas não foi possível recalcular o trajeto agora. Tente novamente.'); }
     });
   }
 
