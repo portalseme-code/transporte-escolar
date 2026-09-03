@@ -1570,7 +1570,10 @@
     box-shadow:0 1px 4px rgba(0,0,0,.3);white-space:nowrap;
   }
   .rotulo-impressao-escola{border-color:#2E6FDE;color:#1d54b3;}
-  .rotulo-impressao-ponto::before, .rotulo-impressao-escola::before{border-top-color:#fff !important;}
+  .leaflet-tooltip-top.rotulo-impressao-ponto::before, .leaflet-tooltip-top.rotulo-impressao-escola::before{border-top-color:#fff !important;}
+  .leaflet-tooltip-bottom.rotulo-impressao-ponto::before, .leaflet-tooltip-bottom.rotulo-impressao-escola::before{border-bottom-color:#fff !important;}
+  .leaflet-tooltip-left.rotulo-impressao-ponto::before, .leaflet-tooltip-left.rotulo-impressao-escola::before{border-left-color:#fff !important;}
+  .leaflet-tooltip-right.rotulo-impressao-ponto::before, .leaflet-tooltip-right.rotulo-impressao-escola::before{border-right-color:#fff !important;}
   .bloco-qrcode-rota img{display:block;border:1px solid var(--borda);border-radius:6px;}
   .bloco-qrcode-rota p{font-size:9.5px;color:var(--texto-suave);margin:4px 0 0;line-height:1.3;}
 
@@ -5380,6 +5383,14 @@
   });
 
   // ----- papel de cada ponto: início / fim / parada / passagem -----
+  // cada tipo de marcador "nasce" numa direção diferente, pra não sobrepor quando dois pontos ficam bem próximos
+  // (ex: início e fim da rota no mesmo lugar, ou uma parada bem colada na escola)
+  function obterConfigRotuloPonto(papel){
+    if(papel === 'inicio'){ return { direction: 'left', offset: [-16, 0] }; }
+    if(papel === 'fim'){ return { direction: 'bottom', offset: [0, 14] }; }
+    return { direction: 'top', offset: [0, -20] };
+  }
+
   function papelDoPonto(indice, total){
     if(indice === 0){ return 'inicio'; }
     if(total > 1 && indice === total - 1){ return 'fim'; }
@@ -7904,7 +7915,8 @@
       var marcadorPonto = L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaTemp);
       // rótulo de texto sempre visível — sem isso, os ícones (pequenos) somem quando ficam perto uns dos outros
       var rotuloTexto = papel === 'inicio' ? 'Início' : papel === 'fim' ? 'Fim' : (p.nomeParada || rotuloPapelPonto(i, total, p.parada));
-      marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: 'top', offset: [0, -20], className: 'rotulo-impressao-ponto' });
+      var configRotulo = obterConfigRotuloPonto(papel);
+      marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: configRotulo.direction, offset: configRotulo.offset, className: 'rotulo-impressao-ponto' });
     });
     if(mostrarEscolasNoMapaRotas){
       var nomesEscolasImpressao = escolasVinculadasRota.size ? Array.from(escolasVinculadasRota) : Object.keys(ESCOLAS_COORDENADAS);
@@ -7993,7 +8005,8 @@
         var papel = papelDoPonto(i, total);
         var marcadorPonto = L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaVisualizarRotaInstancia);
         var rotuloTexto = papel === 'inicio' ? 'Início' : papel === 'fim' ? 'Fim' : (p.nomeParada || rotuloPapelPonto(i, total, p.parada));
-        marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: 'top', offset: [0, -20], className: 'rotulo-impressao-ponto' });
+        var configRotulo = obterConfigRotuloPonto(papel);
+        marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: configRotulo.direction, offset: configRotulo.offset, className: 'rotulo-impressao-ponto' });
       });
       if(rota.escolas && rota.escolas.length){
         rota.escolas.forEach(function(nome){
