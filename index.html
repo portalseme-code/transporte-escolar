@@ -1144,6 +1144,14 @@
   .linha-repartição strong{color:var(--verde-escuro);}
 
   .bloco-custo-frota{background:#fff;border:1px solid var(--borda);border-radius:8px;padding:12px 14px;margin-top:14px;}
+  .legenda-malha-viaria{display:flex;flex-wrap:wrap;gap:8px 16px;max-height:140px;overflow-y:auto;}
+  .item-legenda-malha{
+    display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;user-select:none;
+    background:#fff;border:1px solid var(--borda);border-radius:99px;padding:4px 10px 4px 8px;
+  }
+  .item-legenda-malha input{margin:0;}
+  .ponto-cor-malha{width:12px;height:12px;border-radius:50%;flex:0 0 auto;}
+  .km-legenda-malha{color:var(--texto-suave);}
   .bloco-custo-frota h4{
     font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--texto-suave);margin:0 0 8px;font-weight:700;
   }
@@ -2225,6 +2233,7 @@
           <button class="aba-admin ativa" id="abaResumo" type="button" data-aba="resumo">Resumo</button>
           <button class="aba-admin" id="abaMapa" type="button" data-aba="mapa">Mapa</button>
           <button class="aba-admin" id="abaRotas" type="button" data-aba="rotas">Rotas</button>
+          <button class="aba-admin" id="abaMalhaViaria" type="button" data-aba="malha">Malha viária</button>
           <button class="aba-admin somente-administrador" id="abaUsuarios" type="button" data-aba="usuarios">Usuários</button>
         </div>
 
@@ -2661,6 +2670,14 @@
           </div>
         </div>
 
+        <div id="painelMalhaViaria" style="display:none;">
+          <div class="painel-dashboard-frota" style="margin-bottom:14px;">
+            <p class="ajuda-secao" style="margin:0 0 10px;">Todas as rotas cadastradas, sobrepostas no mesmo mapa — cada uma com uma cor. Desmarque na lista pra esconder alguma.</p>
+            <div id="legendaMalhaViaria" class="legenda-malha-viaria"></div>
+          </div>
+          <div id="mapaMalhaViaria" style="height:600px;border-radius:var(--raio-sm);overflow:hidden;border:1px solid var(--borda);"></div>
+        </div>
+
         <div id="painelUsuarios" style="display:none;">
           <h3 class="titulo-rotas-cadastradas">📥 Solicitações de cadastro pendentes</h3>
           <div class="painel-alunos-sem-rota">
@@ -2795,6 +2812,23 @@
         </div>
         <div id="legendaComparacaoRotas" class="legenda-comparacao-rotas"></div>
         <div id="mapaComparacaoRotas" style="width:100%;height:380px;border-radius:10px;border:1.5px solid var(--borda);margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- MODAL DE EXPORTAR MAPA DA ROTA COMO IMAGEM -->
+    <div class="overlay-modal" id="modalExportarImagemRota" style="display:none;">
+      <div class="caixa-modal caixa-modal-larga">
+        <div class="cabecalho-modal-visualizar">
+          <p class="rotulo-secao" id="tituloModalExportarImagem" style="margin-bottom:0;">Exportar mapa como imagem</p>
+          <button type="button" class="btn-fechar-raio-escola" id="fecharModalExportarImagem" title="Fechar" aria-label="Fechar">✕</button>
+        </div>
+        <p class="ajuda-secao">Mova e dê zoom no mapa até deixar exatamente do jeito que você quer, depois clique em "Capturar".</p>
+        <div id="mapaExportarImagem" style="width:100%;height:460px;border-radius:10px;border:1.5px solid var(--borda);"></div>
+        <div class="barra-botoes" style="max-width:none;margin-top:14px;">
+          <button class="secundario" id="btnCancelarExportarImagem" type="button">Cancelar</button>
+          <button class="principal" id="btnCapturarImagemRota" type="button">📸 Capturar e baixar imagem</button>
+        </div>
+        <p class="aviso-erro" id="erroExportarImagem" style="max-width:none;"></p>
       </div>
     </div>
 
@@ -3003,6 +3037,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 (function(){
   var CENTRO_ANCHIETA = [-20.8028, -40.6444];
@@ -4447,6 +4482,7 @@
       document.getElementById('controleCluster').style.display = (aba === 'mapa') ? 'flex' : 'none';
       if(aba !== 'mapa'){ document.getElementById('painelRaioEscola').style.display = 'none'; }
       document.getElementById('painelRotas').style.display = (aba === 'rotas') ? 'block' : 'none';
+      document.getElementById('painelMalhaViaria').style.display = (aba === 'malha') ? 'block' : 'none';
       document.getElementById('painelUsuarios').style.display = (aba === 'usuarios') ? 'block' : 'none';
       var mostrarRodapePadrao = (aba === 'resumo' || aba === 'mapa');
       document.querySelector('.rodape-admin').style.display = mostrarRodapePadrao ? 'flex' : 'none';
@@ -4462,6 +4498,9 @@
       if(aba === 'rotas'){
         inicializarMapaRotas();
         setTimeout(function(){ if(mapaRotas){ mapaRotas.invalidateSize(); } }, 100);
+      }
+      if(aba === 'malha'){
+        renderizarMalhaViaria();
       }
       if(aba === 'usuarios'){
         carregarSolicitacoesPendentes();
@@ -5381,6 +5420,7 @@
     if(e.key !== 'Escape'){ return; }
     if(document.getElementById('modalVisualizarRota').style.display !== 'none'){ document.getElementById('fecharModalVisualizarRota').click(); }
     else if(document.getElementById('modalComparacaoRotas').style.display !== 'none'){ document.getElementById('fecharModalComparacaoRotas').click(); }
+    else if(document.getElementById('modalExportarImagemRota').style.display !== 'none'){ document.getElementById('fecharModalExportarImagem').click(); }
     else if(document.getElementById('modalTrocarSenha').style.display !== 'none'){ document.getElementById('fecharModalTrocarSenha').click(); }
     else if(document.getElementById('modalEditar').style.display !== 'none'){ document.getElementById('cancelarEdicao').click(); }
   });
@@ -7574,6 +7614,7 @@
           '<button type="button" class="btn-mapa somente-edicao-ou-mais" data-acao="copiar-paradas" data-indice="' + x.indice + '">📋 Copiar paradas</button>' +
           '<button type="button" class="btn-mapa" data-acao="imprimir" data-indice="' + x.indice + '">🖨️ Imprimir</button>' +
           '<button type="button" class="btn-mapa" data-acao="imprimir-motorista" data-indice="' + x.indice + '" title="Roteiro simples, só a lista de paradas, pra imprimir e deixar no veículo">🚌 Roteiro do motorista</button>' +
+          '<button type="button" class="btn-mapa" data-acao="exportar-imagem" data-indice="' + x.indice + '" title="Escolher o zoom/área e salvar o mapa como arquivo de imagem">📷 Exportar como imagem</button>' +
           '<button type="button" class="btn-mapa btn-excluir-rota somente-edicao-ou-mais" data-acao="excluir" data-indice="' + x.indice + '">🗑️ Excluir</button>' +
         '</div>' +
       '</div>';
@@ -7626,6 +7667,66 @@
     var selecionadas = idsSelecionados.map(function(id){ return rotas.filter(function(r){ return r.id === id; })[0]; }).filter(Boolean);
     if(selecionadas.length < 2){ return; }
     abrirModalComparacaoRotas(selecionadas);
+  });
+
+  // ---------- MALHA VIÁRIA (todas as rotas sobrepostas no mesmo mapa) ----------
+  var CORES_MALHA_VIARIA = ['#EA580C', '#2E6FDE', '#16A34A', '#DC2626', '#7C3AED', '#D97706', '#0891B2', '#DB2777', '#65A30D', '#4F46E5', '#B91C1C', '#0D9488'];
+  var mapaMalhaViariaInstancia = null;
+  var camadasMalhaViaria = {};
+
+  function renderizarMalhaViaria(){
+    var rotas = obterRotasSalvas();
+    var legenda = document.getElementById('legendaMalhaViaria');
+
+    if(mapaMalhaViariaInstancia){ mapaMalhaViariaInstancia.remove(); mapaMalhaViariaInstancia = null; }
+    camadasMalhaViaria = {};
+
+    if(!rotas.length){
+      legenda.innerHTML = '<p class="sem-dados-grafico">Nenhuma rota cadastrada ainda.</p>';
+      return;
+    }
+
+    legenda.innerHTML = rotas.map(function(rota, i){
+      var cor = CORES_MALHA_VIARIA[i % CORES_MALHA_VIARIA.length];
+      return '<label class="item-legenda-malha">' +
+        '<input type="checkbox" checked data-id-rota-malha="' + escapeHtml(rota.id) + '">' +
+        '<span class="ponto-cor-malha" style="background:' + cor + ';"></span>' +
+        escapeHtml(rota.nome) + ' <span class="km-legenda-malha">(' + (rota.distanciaKm || 0).toFixed(1).replace(/\.0$/, '') + ' km)</span>' +
+      '</label>';
+    }).join('');
+
+    mapaMalhaViariaInstancia = L.map('mapaMalhaViaria', { scrollWheelZoom: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapaMalhaViariaInstancia);
+
+    var todasCoords = [];
+    var promessas = rotas.map(function(rota, i){
+      var cor = CORES_MALHA_VIARIA[i % CORES_MALHA_VIARIA.length];
+      var coordsStr = rota.pontos.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+      var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson';
+      return fetch(url).then(function(resp){ return resp.json(); }).then(function(dados){
+        if(!mapaMalhaViariaInstancia || dados.code !== 'Ok' || !dados.routes || !dados.routes.length){ return; }
+        var coords = dados.routes[0].geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+        var linha = L.polyline(coords, { color: cor, weight: 4, opacity: 0.8 }).addTo(mapaMalhaViariaInstancia);
+        linha.bindTooltip(rota.nome, { sticky: true });
+        camadasMalhaViaria[rota.id] = linha;
+        todasCoords = todasCoords.concat(coords);
+      }).catch(function(erro){ console.error('Erro ao carregar rota pra malha viária:', erro); });
+    });
+
+    Promise.all(promessas).then(function(){
+      if(!mapaMalhaViariaInstancia){ return; }
+      if(todasCoords.length){ mapaMalhaViariaInstancia.fitBounds(L.latLngBounds(todasCoords), { padding: [20, 20] }); }
+      setTimeout(function(){ if(mapaMalhaViariaInstancia){ mapaMalhaViariaInstancia.invalidateSize(); } }, 80);
+    });
+  }
+
+  document.getElementById('legendaMalhaViaria').addEventListener('change', function(e){
+    if(!e.target.matches('input[type="checkbox"]')){ return; }
+    var id = e.target.getAttribute('data-id-rota-malha');
+    var camada = camadasMalhaViaria[id];
+    if(!camada || !mapaMalhaViariaInstancia){ return; }
+    if(e.target.checked){ mapaMalhaViariaInstancia.addLayer(camada); }
+    else { mapaMalhaViariaInstancia.removeLayer(camada); }
   });
 
   var CORES_COMPARACAO_ROTAS = ['#EA580C', '#2E6FDE', '#16A34A'];
@@ -7867,6 +7968,8 @@
       });
     } else if(acao === 'imprimir-motorista'){
       imprimirRoteiroMotorista(rota);
+    } else if(acao === 'exportar-imagem'){
+      abrirModalExportarImagem(rota);
     }
   });
 
@@ -7921,6 +8024,100 @@
 
     setTimeout(function(){ window.print(); }, 100);
   }
+
+  // ---------- EXPORTAR MAPA DA ROTA COMO IMAGEM (com zoom/posição escolhidos pelo usuário) ----------
+  var mapaExportarImagemInstancia = null;
+  var rotaAtualParaExportarImagem = null;
+
+  function abrirModalExportarImagem(rota){
+    rotaAtualParaExportarImagem = rota;
+    document.getElementById('tituloModalExportarImagem').textContent = 'Exportar "' + rota.nome + '" como imagem';
+    document.getElementById('erroExportarImagem').classList.remove('mostrar');
+    document.getElementById('modalExportarImagemRota').style.display = 'flex';
+
+    setTimeout(function(){
+      if(mapaExportarImagemInstancia){ mapaExportarImagemInstancia.remove(); mapaExportarImagemInstancia = null; }
+      mapaExportarImagemInstancia = L.map('mapaExportarImagem');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap', crossOrigin: true }).addTo(mapaExportarImagemInstancia);
+
+      var total = rota.pontos.length;
+      var pontosLatLng = rota.pontos.map(function(p){ return [p.lat, p.lng]; });
+      var linhaProvisoria = L.polyline(pontosLatLng, { color: '#EA580C', weight: 3, opacity: 0.5, dashArray: '2,8' }).addTo(mapaExportarImagemInstancia);
+
+      rota.pontos.forEach(function(p, i){
+        if(papelDoPonto(i, total) === 'meio' && !p.parada){ return; }
+        var papel = papelDoPonto(i, total);
+        var marcadorPonto = L.marker([p.lat, p.lng], { icon: criarIconePonto(i, total, p) }).addTo(mapaExportarImagemInstancia);
+        var rotuloTexto = papel === 'inicio' ? 'Início' : papel === 'fim' ? 'Fim' : (p.nomeParada || rotuloPapelPonto(i, total, p.parada));
+        var configRotulo = obterConfigRotuloPonto(papel);
+        marcadorPonto.bindTooltip(rotuloTexto, { permanent: true, direction: configRotulo.direction, offset: configRotulo.offset, className: 'rotulo-impressao-ponto' });
+      });
+      if(rota.escolas && rota.escolas.length){
+        rota.escolas.forEach(function(nome){
+          var coords = ESCOLAS_COORDENADAS[nome];
+          if(!coords){ return; }
+          L.marker([coords.lat, coords.lng], { icon: criarIconeEscola() })
+            .addTo(mapaExportarImagemInstancia)
+            .bindTooltip(nome, { permanent: true, direction: 'right', offset: [10, 0], className: 'rotulo-impressao-escola' });
+        });
+      }
+
+      mapaExportarImagemInstancia.fitBounds(L.latLngBounds(pontosLatLng), { padding: [20, 20] });
+      setTimeout(function(){ if(mapaExportarImagemInstancia){ mapaExportarImagemInstancia.invalidateSize(); } }, 80);
+
+      var coordsStr = rota.pontos.map(function(p){ return p.lng + ',' + p.lat; }).join(';');
+      var url = 'https://router.project-osrm.org/route/v1/driving/' + coordsStr + '?overview=full&geometries=geojson';
+      fetch(url).then(function(resp){ return resp.json(); }).then(function(dados){
+        if(!mapaExportarImagemInstancia || dados.code !== 'Ok' || !dados.routes || !dados.routes.length){ return; }
+        var coordenadas = dados.routes[0].geometry.coordinates.map(function(c){ return [c[1], c[0]]; });
+        mapaExportarImagemInstancia.removeLayer(linhaProvisoria);
+        L.polyline(coordenadas, { color: '#EA580C', weight: 5, opacity: 0.9 }).addTo(mapaExportarImagemInstancia);
+        desenharSetasDirecaoRota(coordenadas, mapaExportarImagemInstancia);
+      }).catch(function(erro){ console.error('Não foi possível carregar o traçado real para exportar imagem:', erro); });
+    }, 60);
+  }
+
+  function fecharModalExportarImagem(){
+    document.getElementById('modalExportarImagemRota').style.display = 'none';
+    if(mapaExportarImagemInstancia){ mapaExportarImagemInstancia.remove(); mapaExportarImagemInstancia = null; }
+  }
+  document.getElementById('fecharModalExportarImagem').addEventListener('click', fecharModalExportarImagem);
+  document.getElementById('btnCancelarExportarImagem').addEventListener('click', fecharModalExportarImagem);
+  document.getElementById('modalExportarImagemRota').addEventListener('click', function(e){
+    if(e.target === this){ fecharModalExportarImagem(); }
+  });
+
+  document.getElementById('btnCapturarImagemRota').addEventListener('click', function(){
+    var erro = document.getElementById('erroExportarImagem');
+    erro.classList.remove('mostrar');
+    if(!mapaExportarImagemInstancia || typeof html2canvas === 'undefined'){
+      erro.textContent = 'Não foi possível gerar a imagem agora. Tente novamente.';
+      erro.classList.add('mostrar');
+      return;
+    }
+    var botao = this;
+    botao.disabled = true;
+    botao.textContent = 'Gerando imagem...';
+    var alvo = document.getElementById('mapaExportarImagem');
+    html2canvas(alvo, { useCORS: true, allowTaint: false, imageTimeout: 15000 })
+      .then(function(canvas){
+        botao.disabled = false;
+        botao.textContent = '📸 Capturar e baixar imagem';
+        var nomeArquivo = (rotaAtualParaExportarImagem ? rotaAtualParaExportarImagem.nome : 'rota').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        var link = document.createElement('a');
+        link.download = (nomeArquivo || 'rota') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        mostrarAviso('Imagem baixada.', 'sucesso');
+      })
+      .catch(function(erroCanvas){
+        botao.disabled = false;
+        botao.textContent = '📸 Capturar e baixar imagem';
+        console.error('Erro ao gerar imagem do mapa:', erroCanvas);
+        erro.textContent = 'Não foi possível gerar a imagem — alguns provedores de mapa bloqueiam esse tipo de captura. Se persistir, use "Imprimir" e salve como PDF.';
+        erro.classList.add('mostrar');
+      });
+  });
 
   function montarMapaRotaParaImpressao(aoFinalizar){
     var LARGURA = 1000, ALTURA = 480;
