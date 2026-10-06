@@ -448,10 +448,10 @@
     font-weight:600;font-size:15px;padding:13px 18px;border-radius:var(--raio-sm);cursor:pointer;
   }
   button.secundario:hover{border-color:var(--verde);color:var(--verde-escuro);}
-  #btnEditarRevisao{
+  .btn-editar-amarelo{
     background:var(--dourado);border:1.5px solid var(--dourado-escuro);color:var(--verde-escuro);
   }
-  #btnEditarRevisao:hover{background:var(--dourado-escuro);border-color:var(--dourado-escuro);color:#fff;}
+  .btn-editar-amarelo:hover{background:var(--dourado-escuro);border-color:var(--dourado-escuro);color:#fff;}
 
   .confirmacao{text-align:center;padding:14px 4px 4px;}
   .confirmacao .icone-ok{
@@ -1933,7 +1933,7 @@
       <div id="revisaoLeitura">
         <div class="resumo" id="resumoRevisao"></div>
         <div class="barra-botoes">
-          <button class="secundario" id="btnEditarRevisao" type="button">Editar</button>
+          <button class="secundario btn-editar-amarelo" id="btnEditarRevisao" type="button">Editar</button>
           <button class="principal" id="btnConfirmarEnvio" type="button">Confirmar e enviar</button>
         </div>
       </div>
@@ -2080,6 +2080,8 @@
 
       <div class="aviso-erro" id="erroAlunoExtra"></div>
 
+      <!-- MODO EDIÇÃO (preenchimento) -->
+      <div id="alunoExtraEdicao">
       <div class="campo">
         <label for="nomeAlunoExtra">Nome do aluno</label>
         <input type="text" id="nomeAlunoExtra" placeholder="Nome completo do aluno">
@@ -2153,7 +2155,17 @@
 
       <div class="barra-botoes">
         <span></span>
-        <button class="principal" id="salvarAlunoExtra" type="button">Salvar aluno</button>
+        <button class="principal" id="irRevisaoAlunoExtra" type="button">Continuar</button>
+      </div>
+      </div>
+
+      <!-- MODO LEITURA (revisão) -->
+      <div id="alunoExtraLeitura" style="display:none;">
+        <div class="resumo" id="resumoAlunoExtra"></div>
+        <div class="barra-botoes">
+          <button class="secundario btn-editar-amarelo" id="btnEditarAlunoExtra" type="button">Editar</button>
+          <button class="principal" id="salvarAlunoExtra" type="button">Confirmar e enviar</button>
+        </div>
       </div>
       </div>
     </section>
@@ -3898,6 +3910,8 @@
     document.getElementById('botaoEscolaExtra').classList.remove('tem-valor');
     atualizarTurnos('escolaExtra','turnoExtra','serieExtra');
     document.getElementById('erroAlunoExtra').classList.remove('mostrar');
+    document.getElementById('alunoExtraLeitura').style.display = 'none';
+    document.getElementById('alunoExtraEdicao').style.display = '';
     document.getElementById('passoAlunoExtra').classList.add('ativo');
     atualizarPreenchidosEm('#passoAlunoExtra');
     atualizarGuiaCampo('passoAlunoExtra', false);
@@ -3911,9 +3925,8 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  document.getElementById('salvarAlunoExtra').addEventListener('click', function(){
-    var btn = this;
-    if(btn.disabled){ return; }
+  // ---------- REVISÃO DO ALUNO EXTRA (editar antes de enviar) ----------
+  document.getElementById('irRevisaoAlunoExtra').addEventListener('click', function(){
     var erro = document.getElementById('erroAlunoExtra');
     var nomeAlunoExtra = document.getElementById('nomeAlunoExtra').value.trim();
     var escolaExtra = document.getElementById('escolaExtra').value;
@@ -3931,6 +3944,28 @@
       return;
     }
     erro.classList.remove('mostrar');
+    document.getElementById('resumoAlunoExtra').innerHTML =
+      '<div><span>Aluno</span><span>' + escapeHtml(nomeAlunoExtra) + '</span></div>' +
+      '<div><span>Escola</span><span>' + escapeHtml(escolaExtra) + '</span></div>' +
+      '<div><span>Turno</span><span>' + escapeHtml(turnoExtra) + '</span></div>' +
+      '<div><span>Série</span><span>' + escapeHtml(serieExtra) + '</span></div>';
+    document.getElementById('alunoExtraEdicao').style.display = 'none';
+    document.getElementById('alunoExtraLeitura').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('btnEditarAlunoExtra').addEventListener('click', function(){
+    document.getElementById('alunoExtraLeitura').style.display = 'none';
+    document.getElementById('alunoExtraEdicao').style.display = '';
+  });
+
+  document.getElementById('salvarAlunoExtra').addEventListener('click', function(){
+    var btn = this;
+    if(btn.disabled){ return; }
+    var nomeAlunoExtra = document.getElementById('nomeAlunoExtra').value.trim();
+    var escolaExtra = document.getElementById('escolaExtra').value;
+    var turnoExtra = document.getElementById('turnoExtra').value;
+    var serieExtra = document.getElementById('serieExtra').value.trim();
     btn.disabled = true;
     var textoOriginal = btn.textContent;
     btn.textContent = 'Enviando...';
