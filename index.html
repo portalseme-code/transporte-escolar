@@ -221,6 +221,7 @@
     transition:border-color .15s ease, background .15s ease;
   }
   .seletor-campo-publico.tem-valor{color:var(--tinta);}
+  .seletor-campo-publico:disabled{opacity:.6;cursor:not-allowed;}
   .seletor-campo-publico::after{
     content:'▾';position:absolute;right:13px;top:50%;transform:translateY(-50%);
     color:var(--texto-suave);font-size:12px;
@@ -1784,11 +1785,21 @@
         <input type="text" id="nomeAluno" placeholder="Nome completo do aluno">
       </div>
 
+      <div class="campo">
+        <label for="tipoUnidade">Tipo de Unidade</label>
+        <select id="tipoUnidade">
+          <option value="">Selecione o tipo de unidade</option>
+          <option value="ESTADUAL">ESTADUAL</option>
+          <option value="MUNICIPAL">MUNICIPAL</option>
+        </select>
+      </div>
+
       <div class="linha-dupla">
         <div class="campo">
           <label for="escola">Escola</label>
           <select id="escola" class="select-oculto-publico">
             <option value="">Selecione a escola</option>
+            <option value="CEEMTI PAULO FREIRE">CEEMTI PAULO FREIRE</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES">CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES</option>
@@ -1796,6 +1807,7 @@
             <option value="CMEI ENIDE CORRÊA GUAITOLINI">CMEI ENIDE CORRÊA GUAITOLINI</option>
             <option value="CMEI PADRE JOSE DE ANCHIETA">CMEI PADRE JOSE DE ANCHIETA</option>
             <option value="CMEI TIA IRENI AMARAL">CMEI TIA IRENI AMARAL</option>
+            <option value="EEEFM CORONEL GOMES DE OLIVEIRA">EEEFM CORONEL GOMES DE OLIVEIRA</option>
             <option value="EFA OLIVÂNIA">EFA OLIVÂNIA</option>
             <option value="EMEB ALCIDES CECCON">EMEB ALCIDES CECCON</option>
             <option value="EMEB AMARILIS FERNANDES GARCIA">EMEB AMARILIS FERNANDES GARCIA</option>
@@ -1945,11 +1957,21 @@
           <input type="text" id="revNomeAluno" placeholder="Nome completo do aluno">
         </div>
 
+        <div class="campo">
+          <label for="revTipoUnidade">Tipo de Unidade</label>
+          <select id="revTipoUnidade">
+            <option value="">Selecione o tipo de unidade</option>
+            <option value="ESTADUAL">ESTADUAL</option>
+            <option value="MUNICIPAL">MUNICIPAL</option>
+          </select>
+        </div>
+
         <div class="linha-dupla">
           <div class="campo">
             <label for="revEscola">Escola</label>
             <select id="revEscola" class="select-oculto-publico">
             <option value="">Selecione a escola</option>
+            <option value="CEEMTI PAULO FREIRE">CEEMTI PAULO FREIRE</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES">CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES</option>
@@ -1957,6 +1979,7 @@
             <option value="CMEI ENIDE CORRÊA GUAITOLINI">CMEI ENIDE CORRÊA GUAITOLINI</option>
             <option value="CMEI PADRE JOSE DE ANCHIETA">CMEI PADRE JOSE DE ANCHIETA</option>
             <option value="CMEI TIA IRENI AMARAL">CMEI TIA IRENI AMARAL</option>
+            <option value="EEEFM CORONEL GOMES DE OLIVEIRA">EEEFM CORONEL GOMES DE OLIVEIRA</option>
             <option value="EFA OLIVÂNIA">EFA OLIVÂNIA</option>
             <option value="EMEB ALCIDES CECCON">EMEB ALCIDES CECCON</option>
             <option value="EMEB AMARILIS FERNANDES GARCIA">EMEB AMARILIS FERNANDES GARCIA</option>
@@ -2087,11 +2110,21 @@
         <input type="text" id="nomeAlunoExtra" placeholder="Nome completo do aluno">
       </div>
 
+      <div class="campo">
+        <label for="tipoUnidadeExtra">Tipo de Unidade</label>
+        <select id="tipoUnidadeExtra">
+          <option value="">Selecione o tipo de unidade</option>
+          <option value="ESTADUAL">ESTADUAL</option>
+          <option value="MUNICIPAL">MUNICIPAL</option>
+        </select>
+      </div>
+
       <div class="linha-dupla">
         <div class="campo">
           <label for="escolaExtra">Escola</label>
           <select id="escolaExtra" class="select-oculto-publico">
             <option value="">Selecione a escola</option>
+            <option value="CEEMTI PAULO FREIRE">CEEMTI PAULO FREIRE</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES">CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES</option>
@@ -2099,6 +2132,7 @@
             <option value="CMEI ENIDE CORRÊA GUAITOLINI">CMEI ENIDE CORRÊA GUAITOLINI</option>
             <option value="CMEI PADRE JOSE DE ANCHIETA">CMEI PADRE JOSE DE ANCHIETA</option>
             <option value="CMEI TIA IRENI AMARAL">CMEI TIA IRENI AMARAL</option>
+            <option value="EEEFM CORONEL GOMES DE OLIVEIRA">EEEFM CORONEL GOMES DE OLIVEIRA</option>
             <option value="EFA OLIVÂNIA">EFA OLIVÂNIA</option>
             <option value="EMEB ALCIDES CECCON">EMEB ALCIDES CECCON</option>
             <option value="EMEB AMARILIS FERNANDES GARCIA">EMEB AMARILIS FERNANDES GARCIA</option>
@@ -2313,6 +2347,17 @@
                 <button type="button" class="link-multi" data-campo="aluno" data-acao="nenhum">Limpar</button>
               </div>
               <div class="lista-opcoes-multi" id="opcoesFiltroAluno"></div>
+            </div>
+          </div>
+          <div class="campo-filtro campo-filtro-multi">
+            <label>Tipo de unidade</label>
+            <button type="button" class="seletor-multi" id="botaoFiltroTipoUnidade">Todos os tipos</button>
+            <div class="painel-multi" id="painelFiltroTipoUnidade" style="display:none;">
+              <div class="painel-multi-acoes">
+                <button type="button" class="link-multi" data-campo="tipoUnidade" data-acao="todos">Marcar todas</button>
+                <button type="button" class="link-multi" data-campo="tipoUnidade" data-acao="nenhum">Limpar</button>
+              </div>
+              <div class="lista-opcoes-multi" id="opcoesFiltroTipoUnidade"></div>
             </div>
           </div>
           <div class="campo-filtro campo-filtro-multi">
@@ -2777,6 +2822,14 @@
                 </select>
               </div>
               <div class="campo-filtro">
+                <label>Tipo de unidade</label>
+                <select id="filtroRotaTipo">
+                  <option value="">Todos</option>
+                  <option value="ESTADUAL">Estadual</option>
+                  <option value="MUNICIPAL">Municipal</option>
+                </select>
+              </div>
+              <div class="campo-filtro">
                 <label>Escola atendida</label>
                 <select id="filtroRotaEscola">
                   <option value="">Todas</option>
@@ -2995,11 +3048,21 @@
           <label for="editNomeAluno">Nome do aluno</label>
           <input type="text" id="editNomeAluno">
         </div>
+
+        <div class="campo">
+          <label for="editTipoUnidade">Tipo de Unidade</label>
+          <select id="editTipoUnidade">
+            <option value="">Selecione o tipo de unidade</option>
+            <option value="ESTADUAL">ESTADUAL</option>
+            <option value="MUNICIPAL">MUNICIPAL</option>
+          </select>
+        </div>
         <div class="linha-dupla">
           <div class="campo">
             <label for="editEscola">Escola</label>
             <select id="editEscola">
               <option value="">Selecione a escola</option>
+            <option value="CEEMTI PAULO FREIRE">CEEMTI PAULO FREIRE</option>
             <option value="CEMEI SARA ALMEIDA LIMA">CEMEI SARA ALMEIDA LIMA</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES">CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES</option>
             <option value="CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES">CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES</option>
@@ -3007,6 +3070,7 @@
             <option value="CMEI ENIDE CORRÊA GUAITOLINI">CMEI ENIDE CORRÊA GUAITOLINI</option>
             <option value="CMEI PADRE JOSE DE ANCHIETA">CMEI PADRE JOSE DE ANCHIETA</option>
             <option value="CMEI TIA IRENI AMARAL">CMEI TIA IRENI AMARAL</option>
+            <option value="EEEFM CORONEL GOMES DE OLIVEIRA">EEEFM CORONEL GOMES DE OLIVEIRA</option>
             <option value="EFA OLIVÂNIA">EFA OLIVÂNIA</option>
             <option value="EMEB ALCIDES CECCON">EMEB ALCIDES CECCON</option>
             <option value="EMEB AMARILIS FERNANDES GARCIA">EMEB AMARILIS FERNANDES GARCIA</option>
@@ -3187,10 +3251,10 @@
 
   // matriz oficial: para cada escola, os turnos ofertados e, em cada turno, as séries/anos ofertados
   // gerada a partir da planilha de referência enviada pela Secretaria de Educação
-  var MATRIZ_ESCOLAS = {"CEMEI SARA ALMEIDA LIMA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO"]}, "CMEI BELMIRO ALBERTO ALPOIM": {"Matutino": ["MATERNAL I", "1º PERÍODO", "2º PERÍODO"], "Vespertino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO"], "Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "CMEI ENIDE CORRÊA GUAITOLINI": {"Matutino": ["2º PERÍODO"], "Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CMEI PADRE JOSE DE ANCHIETA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CMEI TIA IRENI AMARAL": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEB TIA MARLENE PETRI": {"Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EMEB ALCIDES CECCON": {"Integral": ["2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB AMARILIS FERNANDES GARCIA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["2º ANO", "3º ANO", "4º ANO", "5º ANO", "6º ANO", "7º ANO", "8º ANO"]}, "EMEB DUAS BARRAS": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB DULCINEA SILVA LYRIO RUPF": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEB JOSEFINA RAMOS NUNES - DONA MULATA": {"Matutino": ["2º ANO", "3º ANO", "4º ANO", "5º ANO", "6º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Noturno": ["1ª ETAPA", "2ª ETAPA", "3ª ETAPA", "4ª ETAPA", "5ª ETAPA", "6ª ETAPA", "7ª ETAPA", "8ª ETAPA"]}, "EMEB LIMEIRA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO"]}, "EMEB MARIANA DA PURIFICACAO SIMOES": {"Matutino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB PROFESSORA PATRICIA FERNANDES ROFFES": {"Matutino": ["1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF IRMA TEREZINHA GODOY DE ALMEIDA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF MANOEL DE PAULA SERRAO": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF OLIVÂNIA": {"Matutino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF PROFESSOR TIO LILIU": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ALIPIO PORTO DA SILVA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEIEF CORREGO DA PRATA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF ELSON GARCIA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ESMERALDA MORACA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF ESTHER SOARES DA TRINDADE SANTANA": {"Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF GOEMBE": {"Matutino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ITAJOBAIA": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "5º ANO"]}, "EMEIEF ITAPEROROMA BAIXA": {"Integral": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF LAUROMAR POMPERMAYER PORTO": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA ADY LYRIO MARCHEZI": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES": {"Matutino": ["4º ANO", "5º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO"]}, "EMEIEF PROFESSORA JOCELINA NOGUEIRA": {"Matutino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"], "Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA MARIA LUIZA FLORES": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EMEIEF ROSALINO SIMOES": {"Matutino": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF SAO MATEUS": {"Integral": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF SIMPATIA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO": {"Integral": ["3º ANO", "4º ANO", "5º ANO", "6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EFA OLIVÂNIA": {"Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO", "1º ANO ENS. MÉDIO", "2º ANO ENS. MÉDIO", "3º ANO ENS. MÉDIO"]}};
+  var MATRIZ_ESCOLAS = {"CEMEI SARA ALMEIDA LIMA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO"]}, "CMEI BELMIRO ALBERTO ALPOIM": {"Matutino": ["MATERNAL I", "1º PERÍODO", "2º PERÍODO"], "Vespertino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO"], "Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "CMEI ENIDE CORRÊA GUAITOLINI": {"Matutino": ["2º PERÍODO"], "Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CMEI PADRE JOSE DE ANCHIETA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "CMEI TIA IRENI AMARAL": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEB TIA MARLENE PETRI": {"Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EMEB ALCIDES CECCON": {"Integral": ["2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB AMARILIS FERNANDES GARCIA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["2º ANO", "3º ANO", "4º ANO", "5º ANO", "6º ANO", "7º ANO", "8º ANO"]}, "EMEB DUAS BARRAS": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB DULCINEA SILVA LYRIO RUPF": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEB JOSEFINA RAMOS NUNES - DONA MULATA": {"Matutino": ["2º ANO", "3º ANO", "4º ANO", "5º ANO", "6º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Noturno": ["1ª ETAPA", "2ª ETAPA", "3ª ETAPA", "4ª ETAPA", "5ª ETAPA", "6ª ETAPA", "7ª ETAPA", "8ª ETAPA"]}, "EMEB LIMEIRA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO"]}, "EMEB MARIANA DA PURIFICACAO SIMOES": {"Matutino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEB PROFESSORA PATRICIA FERNANDES ROFFES": {"Matutino": ["1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF IRMA TEREZINHA GODOY DE ALMEIDA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF MANOEL DE PAULA SERRAO": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF OLIVÂNIA": {"Matutino": ["MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEF PROFESSOR TIO LILIU": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ALIPIO PORTO DA SILVA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II"]}, "EMEIEF CORREGO DA PRATA": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF ELSON GARCIA": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ESMERALDA MORACA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF ESTHER SOARES DA TRINDADE SANTANA": {"Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF GOEMBE": {"Matutino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF ITAJOBAIA": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "5º ANO"]}, "EMEIEF ITAPEROROMA BAIXA": {"Integral": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF LAUROMAR POMPERMAYER PORTO": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA ADY LYRIO MARCHEZI": {"Integral": ["BERÇÁRIO I", "BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI": {"Matutino": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"], "Vespertino": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES": {"Matutino": ["4º ANO", "5º ANO"], "Vespertino": ["1º ANO", "2º ANO", "3º ANO"]}, "EMEIEF PROFESSORA JOCELINA NOGUEIRA": {"Matutino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"], "Vespertino": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO"]}, "EMEIEF PROFESSORA MARIA LUIZA FLORES": {"Matutino": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"], "Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EMEIEF ROSALINO SIMOES": {"Matutino": ["MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF SAO MATEUS": {"Integral": ["1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEF SIMPATIA": {"Integral": ["BERÇÁRIO II", "MATERNAL I", "MATERNAL II", "1º PERÍODO", "2º PERÍODO", "1º ANO", "2º ANO", "3º ANO", "4º ANO", "5º ANO"]}, "EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO": {"Integral": ["3º ANO", "4º ANO", "5º ANO", "6º ANO", "7º ANO", "8º ANO", "9º ANO"]}, "EFA OLIVÂNIA": {"Integral": ["6º ANO", "7º ANO", "8º ANO", "9º ANO", "1º ANO ENS. MÉDIO", "2º ANO ENS. MÉDIO", "3º ANO ENS. MÉDIO"]}, "CEEMTI PAULO FREIRE": {"INTERMEDIÁRIO MATUTINO": ["1º TEC. ELETROTÉCNICA", "1º TEC. MECÂNICA", "1º TEC. QUÍMICA", "1º TEC. EDIFICAÇÕES", "2º TEC. EDIFICAÇÕES", "2º TEC. QUÍMICA", "2º TEC. ELETROTÉCNICA", "2º TEC. MECÂNICA", "3º TEC. ELETROTÉCNICA", "3º TEC. QUÍMICA", "3º TEC. MECÂNICA"], "INTERMEDIÁRIO VESPERTINO": ["1º TEC. ELETROTÉCNICA", "1º TEC. AUTOMAÇÃO INDUSTRIAL", "1º TEC. ELETROMECÂNICA", "2º TEC. ELETROMECÂNICA", "2º TEC. AUTOMAÇÃO INDUSTRIAL", "2º TEC. MECÂNICA", "3º TEC. SEGURANÇA DO TRABALHO", "3º TEC. ELETROTÉCNICA", "3º TEC. ELETROMECÂNICA", "3º TEC. SISTEMAS DE ENERGIA RENOVÁVEL", "3º TEC. MECÂNICA"]}, "EEEFM CORONEL GOMES DE OLIVEIRA": {"INTERMEDIÁRIO MATUTINO": ["1º ANO - MÉDIO REGULAR", "2º ANO - MÉDIO REGULAR", "3º ANO - MÉDIO REGULAR", "1º TEC. ADMINISTRAÇÃO", "2º TEC. ADMINISTRAÇÃO", "3º TEC. ADMINISTRAÇÃO", "1º TEC. SEGURANÇA DO TRABALHO", "2º TEC. SEGURANÇA DO TRABALHO", "3º TEC. SEGURANÇA DO TRABALHO", "1º TEC. INFORMÁTICA PARA INTERNET", "2º TEC. INFORMÁTICA PARA INTERNET", "3º TEC. INFORMÁTICA PARA INTERNET"], "INTERMEDIÁRIO VESPERTINO": ["NEEJA"], "NOTURNO": ["1º ANO - MÉDIO REGULAR", "2º ANO - MÉDIO REGULAR", "3º ANO - MÉDIO REGULAR"]}};
 
   // coordenadas das escolas (para exibir a localização delas no mapa da secretaria)
-  var ESCOLAS_COORDENADAS = {"EMEB DUAS BARRAS": {"lat": -20.625036, "lng": -40.660851}, "CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES": {"lat": -20.685147, "lng": -40.677275}, "CMEI ENIDE CORRÊA GUAITOLINI": {"lat": -20.764292, "lng": -40.576363}, "EMEB DULCINEA SILVA LYRIO RUPF": {"lat": -20.813604, "lng": -40.633385}, "CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES": {"lat": -20.821282, "lng": -40.684724}, "EMEF MANOEL DE PAULA SERRAO": {"lat": -20.829413, "lng": -40.694653}, "CMEI BELMIRO ALBERTO ALPOIM": {"lat": -20.831396, "lng": -40.695973}, "EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI": {"lat": -20.777838, "lng": -40.744031}, "EMEB JOSEFINA RAMOS NUNES - DONA MULATA": {"lat": -20.807476, "lng": -40.661967}, "EMEIEF ESTHER SOARES DA TRINDADE SANTANA": {"lat": -20.804348, "lng": -40.600508}, "EMEF PROFESSOR TIO LILIU": {"lat": -20.804605, "lng": -40.653385}, "EMEIEF PROFESSORA JOCELINA NOGUEIRA": {"lat": -20.80731, "lng": -40.639783}, "EMEB AMARILIS FERNANDES GARCIA": {"lat": -20.80834, "lng": -40.638795}, "EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO": {"lat": -20.685569, "lng": -40.676521}, "EMEB LIMEIRA": {"lat": -20.696347, "lng": -40.677312}, "EMEIEF PROFESSORA MARIA LUIZA FLORES": {"lat": -20.765468, "lng": -40.576135}, "EMEB PROFESSORA PATRICIA FERNANDES ROFFES": {"lat": -20.800235, "lng": -40.641916}, "CMEI PADRE JOSE DE ANCHIETA": {"lat": -20.793659, "lng": -40.637176}, "EMEIEF ESMERALDA MORACA": {"lat": -20.818409, "lng": -40.623955}, "EMEB ALCIDES CECCON": {"lat": -20.831045, "lng": -40.622149}, "EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES": {"lat": -20.795029, "lng": -40.60309}, "EMEIEF SIMPATIA": {"lat": -20.716057, "lng": -40.714962}, "EMEIEF ELSON GARCIA": {"lat": -20.801538, "lng": -40.588874}, "CEMEI SARA ALMEIDA LIMA": {"lat": -20.795072, "lng": -40.602341}, "EMEF IRMA TEREZINHA GODOY DE ALMEIDA": {"lat": -20.804289, "lng": -40.642123}, "EMEB TIA MARLENE PETRI": {"lat": -20.730289, "lng": -40.777609}, "EMEIEF CORREGO DA PRATA": {"lat": -20.740483, "lng": -40.787531}, "EMEIEF PROFESSORA ADY LYRIO MARCHEZI": {"lat": -20.707076, "lng": -40.75905}, "EMEIEF ITAPEROROMA BAIXA": {"lat": -20.765472, "lng": -40.759975}, "EMEIEF ALIPIO PORTO DA SILVA": {"lat": -20.74669, "lng": -40.710093}, "EMEIEF SAO MATEUS": {"lat": -20.764227, "lng": -40.727721}, "EMEIEF LAUROMAR POMPERMAYER PORTO": {"lat": -20.7775, "lng": -40.702093}, "EMEB MARIANA DA PURIFICACAO SIMOES": {"lat": -20.74179, "lng": -40.609538}, "EMEIEF GOEMBE": {"lat": -20.717595, "lng": -40.610847}, "EMEIEF ITAJOBAIA": {"lat": -20.683226, "lng": -40.628895}, "EMEF OLIVÂNIA": {"lat": -20.580983, "lng": -40.648441}, "EMEIEF ROSALINO SIMOES": {"lat": -20.768014, "lng": -40.630523}, "CMEI TIA IRENI AMARAL": {"lat": -20.803801, "lng": -40.641892}, "EFA OLIVÂNIA": {"lat": -20.582683333333332, "lng": -40.6463}};
+  var ESCOLAS_COORDENADAS = {"EMEB DUAS BARRAS": {"lat": -20.625036, "lng": -40.660851}, "CENTRO DE EDUCAÇÃO INFANTIL XODÓ DAS TITIAS - MEPES": {"lat": -20.685147, "lng": -40.677275}, "CMEI ENIDE CORRÊA GUAITOLINI": {"lat": -20.764292, "lng": -40.576363}, "EMEB DULCINEA SILVA LYRIO RUPF": {"lat": -20.813604, "lng": -40.633385}, "CENTRO DE EDUCAÇÃO INFANTIL PINGO DE GENTE - MEPES": {"lat": -20.821282, "lng": -40.684724}, "EMEF MANOEL DE PAULA SERRAO": {"lat": -20.829413, "lng": -40.694653}, "CMEI BELMIRO ALBERTO ALPOIM": {"lat": -20.831396, "lng": -40.695973}, "EMEIEF PROFESSORA EDMA MARIA MEZADRE MULINARI": {"lat": -20.777838, "lng": -40.744031}, "EMEB JOSEFINA RAMOS NUNES - DONA MULATA": {"lat": -20.807476, "lng": -40.661967}, "EMEIEF ESTHER SOARES DA TRINDADE SANTANA": {"lat": -20.804348, "lng": -40.600508}, "EMEF PROFESSOR TIO LILIU": {"lat": -20.804605, "lng": -40.653385}, "EMEIEF PROFESSORA JOCELINA NOGUEIRA": {"lat": -20.80731, "lng": -40.639783}, "EMEB AMARILIS FERNANDES GARCIA": {"lat": -20.80834, "lng": -40.638795}, "EMEIEFM PROFª ZULEIKA FLORES DA PURIFICAÇÃO": {"lat": -20.685569, "lng": -40.676521}, "EMEB LIMEIRA": {"lat": -20.696347, "lng": -40.677312}, "EMEIEF PROFESSORA MARIA LUIZA FLORES": {"lat": -20.765468, "lng": -40.576135}, "EMEB PROFESSORA PATRICIA FERNANDES ROFFES": {"lat": -20.800235, "lng": -40.641916}, "CMEI PADRE JOSE DE ANCHIETA": {"lat": -20.793659, "lng": -40.637176}, "EMEIEF ESMERALDA MORACA": {"lat": -20.818409, "lng": -40.623955}, "EMEB ALCIDES CECCON": {"lat": -20.831045, "lng": -40.622149}, "EMEIEF PROFESSORA GENELICE DOS REIS RAMOS HERMES": {"lat": -20.795029, "lng": -40.60309}, "EMEIEF SIMPATIA": {"lat": -20.716057, "lng": -40.714962}, "EMEIEF ELSON GARCIA": {"lat": -20.801538, "lng": -40.588874}, "CEMEI SARA ALMEIDA LIMA": {"lat": -20.795072, "lng": -40.602341}, "EMEF IRMA TEREZINHA GODOY DE ALMEIDA": {"lat": -20.804289, "lng": -40.642123}, "EMEB TIA MARLENE PETRI": {"lat": -20.730289, "lng": -40.777609}, "EMEIEF CORREGO DA PRATA": {"lat": -20.740483, "lng": -40.787531}, "EMEIEF PROFESSORA ADY LYRIO MARCHEZI": {"lat": -20.707076, "lng": -40.75905}, "EMEIEF ITAPEROROMA BAIXA": {"lat": -20.765472, "lng": -40.759975}, "EMEIEF ALIPIO PORTO DA SILVA": {"lat": -20.74669, "lng": -40.710093}, "EMEIEF SAO MATEUS": {"lat": -20.764227, "lng": -40.727721}, "EMEIEF LAUROMAR POMPERMAYER PORTO": {"lat": -20.7775, "lng": -40.702093}, "EMEB MARIANA DA PURIFICACAO SIMOES": {"lat": -20.74179, "lng": -40.609538}, "EMEIEF GOEMBE": {"lat": -20.717595, "lng": -40.610847}, "EMEIEF ITAJOBAIA": {"lat": -20.683226, "lng": -40.628895}, "EMEF OLIVÂNIA": {"lat": -20.580983, "lng": -40.648441}, "EMEIEF ROSALINO SIMOES": {"lat": -20.768014, "lng": -40.630523}, "CMEI TIA IRENI AMARAL": {"lat": -20.803801, "lng": -40.641892}, "EFA OLIVÂNIA": {"lat": -20.582683333333332, "lng": -40.6463}, "EEEFM CORONEL GOMES DE OLIVEIRA": {"lat": -20.8040572, "lng": -40.6490244}, "CEEMTI PAULO FREIRE": {"lat": -20.805248958816314, "lng": -40.63587571937912}};
 
   // contorno oficial do município (IDAF/DTCAR, Lei Estadual 10.600/2016), simplificado para uso no mapa
   var LIMITE_MUNICIPIO = [[-20.545995,-40.643557],[-20.546316,-40.648257],[-20.547859,-40.649482],[-20.553783,-40.658941],[-20.555429,-40.660079],[-20.557822,-40.666811],[-20.560938,-40.66859],[-20.561343,-40.670561],[-20.565917,-40.67528],[-20.566125,-40.67656],[-20.565033,-40.677651],[-20.558491,-40.677681],[-20.556738,-40.67862],[-20.556508,-40.679984],[-20.557155,-40.680486],[-20.55787,-40.678876],[-20.559136,-40.679057],[-20.5616,-40.681944],[-20.566018,-40.684336],[-20.574593,-40.684269],[-20.577794,-40.682481],[-20.578548,-40.680604],[-20.577787,-40.677663],[-20.575769,-40.675865],[-20.575631,-40.672754],[-20.582051,-40.670787],[-20.585192,-40.671751],[-20.590185,-40.671662],[-20.593315,-40.670874],[-20.594197,-40.669822],[-20.594632,-40.675904],[-20.596058,-40.679487],[-20.599324,-40.685302],[-20.602094,-40.686184],[-20.604083,-40.687877],[-20.60547,-40.691911],[-20.604861,-40.695086],[-20.608123,-40.697111],[-20.608849,-40.698679],[-20.611121,-40.700439],[-20.612511,-40.70337],[-20.61202,-40.707904],[-20.614255,-40.711242],[-20.616027,-40.711169],[-20.617317,-40.71311],[-20.61914,-40.713556],[-20.620187,-40.715854],[-20.62299,-40.714766],[-20.624654,-40.716576],[-20.626186,-40.716573],[-20.626551,-40.720718],[-20.632285,-40.727719],[-20.634724,-40.725823],[-20.638318,-40.725957],[-20.641093,-40.727984],[-20.645883,-40.726287],[-20.64695,-40.728879],[-20.645518,-40.73387],[-20.647386,-40.736032],[-20.647448,-40.73782],[-20.64481,-40.741322],[-20.646866,-40.743512],[-20.650291,-40.745147],[-20.651604,-40.747331],[-20.654545,-40.746522],[-20.657208,-40.744019],[-20.658151,-40.744292],[-20.658636,-40.749122],[-20.657293,-40.757271],[-20.658239,-40.759382],[-20.677577,-40.770397],[-20.687329,-40.771361],[-20.688074,-40.770317],[-20.691093,-40.770813],[-20.699948,-40.767954],[-20.704773,-40.769426],[-20.704718,-40.770604],[-20.705509,-40.770948],[-20.70485,-40.774276],[-20.703669,-40.778873],[-20.702133,-40.780722],[-20.703204,-40.782283],[-20.703,-40.784317],[-20.699378,-40.790176],[-20.698579,-40.794189],[-20.697874,-40.795124],[-20.696729,-40.795149],[-20.694548,-40.798182],[-20.695162,-40.799628],[-20.693908,-40.804858],[-20.692765,-40.806242],[-20.693319,-40.807906],[-20.687829,-40.817717],[-20.681323,-40.833516],[-20.678016,-40.838642],[-20.677897,-40.839706],[-20.679305,-40.840828],[-20.680112,-40.843599],[-20.682656,-40.842694],[-20.683662,-40.83964],[-20.685708,-40.838981],[-20.686838,-40.839421],[-20.68896,-40.837874],[-20.689218,-40.835193],[-20.690398,-40.834314],[-20.691193,-40.831455],[-20.6904,-40.827533],[-20.693051,-40.824569],[-20.706071,-40.814921],[-20.708205,-40.810745],[-20.712337,-40.807283],[-20.71516,-40.808736],[-20.7161,-40.807439],[-20.717476,-40.805414],[-20.717353,-40.803814],[-20.714022,-40.80171],[-20.712526,-40.796648],[-20.712729,-40.794516],[-20.714637,-40.793531],[-20.716219,-40.791307],[-20.717056,-40.79218],[-20.721042,-40.792287],[-20.721151,-40.793703],[-20.72214,-40.794219],[-20.725731,-40.794625],[-20.72553,-40.7976],[-20.728788,-40.797823],[-20.729349,-40.799268],[-20.730864,-40.799118],[-20.732923,-40.805187],[-20.737087,-40.805512],[-20.738096,-40.807275],[-20.739908,-40.807872],[-20.743086,-40.806411],[-20.745496,-40.809491],[-20.750553,-40.810368],[-20.75373,-40.807799],[-20.754314,-40.804013],[-20.755595,-40.801668],[-20.754826,-40.800207],[-20.752645,-40.799199],[-20.749614,-40.793025],[-20.749132,-40.791055],[-20.749993,-40.789432],[-20.748476,-40.786446],[-20.748386,-40.784438],[-20.750522,-40.783075],[-20.75153,-40.780393],[-20.75477,-40.776666],[-20.757267,-40.776289],[-20.760314,-40.779162],[-20.763924,-40.78081],[-20.766158,-40.778793],[-20.765499,-40.777354],[-20.766363,-40.774617],[-20.765782,-40.772599],[-20.767235,-40.771682],[-20.770381,-40.771719],[-20.771241,-40.773641],[-20.773358,-40.774906],[-20.775419,-40.773558],[-20.779814,-40.772499],[-20.785198,-40.772763],[-20.786981,-40.771319],[-20.788993,-40.767553],[-20.789049,-40.763456],[-20.786022,-40.75388],[-20.786494,-40.752285],[-20.789383,-40.749602],[-20.794891,-40.748548],[-20.797542,-40.748815],[-20.799314,-40.747697],[-20.807156,-40.736814],[-20.807038,-40.734239],[-20.805089,-40.731935],[-20.805717,-40.729874],[-20.808898,-40.726691],[-20.810564,-40.727269],[-20.811127,-40.726065],[-20.813775,-40.72545],[-20.816441,-40.722381],[-20.817275,-40.722849],[-20.819346,-40.717312],[-20.817457,-40.714696],[-20.818629,-40.71461],[-20.81888,-40.713296],[-20.820188,-40.712679],[-20.821336,-40.710563],[-20.829575,-40.709226],[-20.83109,-40.707503],[-20.832122,-40.707521],[-20.833133,-40.704947],[-20.832271,-40.702364],[-20.833576,-40.7007],[-20.83458,-40.701176],[-20.833225,-40.697324],[-20.833563,-40.695772],[-20.835175,-40.695628],[-20.834652,-40.693222],[-20.833035,-40.692242],[-20.83244,-40.693844],[-20.831233,-40.693758],[-20.830233,-40.692246],[-20.831138,-40.691862],[-20.831508,-40.690303],[-20.829879,-40.690205],[-20.829219,-40.691041],[-20.827901,-40.690394],[-20.82793,-40.688164],[-20.826286,-40.684546],[-20.826611,-40.682665],[-20.82475,-40.680562],[-20.824443,-40.682679],[-20.822861,-40.682402],[-20.823562,-40.680307],[-20.822583,-40.678509],[-20.822987,-40.676214],[-20.822257,-40.675255],[-20.820812,-40.67566],[-20.821588,-40.67413],[-20.821095,-40.671964],[-20.819641,-40.670928],[-20.818357,-40.67174],[-20.817404,-40.671062],[-20.817654,-40.667414],[-20.816777,-40.665921],[-20.813851,-40.666594],[-20.813094,-40.665476],[-20.812274,-40.665812],[-20.812002,-40.663386],[-20.810896,-40.662264],[-20.811248,-40.661528],[-20.810284,-40.660991],[-20.811071,-40.659012],[-20.810349,-40.657067],[-20.810767,-40.655662],[-20.809131,-40.655753],[-20.805881,-40.653273],[-20.809723,-40.642345],[-20.813984,-40.633867],[-20.81671,-40.63071],[-20.820049,-40.628383],[-20.823427,-40.63003],[-20.823974,-40.631477],[-20.823778,-40.630681],[-20.824791,-40.630447],[-20.825315,-40.6319],[-20.827023,-40.631866],[-20.829931,-40.633292],[-20.831597,-40.632557],[-20.835973,-40.632557],[-20.83933,-40.630679],[-20.841114,-40.630833],[-20.841244,-40.628704],[-20.839684,-40.627013],[-20.838254,-40.627231],[-20.836102,-40.625976],[-20.834045,-40.62163],[-20.83216,-40.620081],[-20.827838,-40.618296],[-20.824302,-40.61537],[-20.821315,-40.615297],[-20.815654,-40.613463],[-20.813259,-40.611739],[-20.808484,-40.610271],[-20.805992,-40.607817],[-20.804812,-40.60365],[-20.805818,-40.599437],[-20.804211,-40.598026],[-20.801881,-40.591116],[-20.802943,-40.587388],[-20.803924,-40.586949],[-20.804585,-40.587924],[-20.80659,-40.58791],[-20.806603,-40.586458],[-20.802722,-40.583307],[-20.802623,-40.581597],[-20.804075,-40.582476],[-20.802248,-40.58059],[-20.801738,-40.581086],[-20.80249,-40.581706],[-20.80142,-40.58274],[-20.798215,-40.582531],[-20.793878,-40.580654],[-20.791596,-40.578005],[-20.788305,-40.576997],[-20.788186,-40.569619],[-20.785145,-40.568304],[-20.787964,-40.569891],[-20.787775,-40.571289],[-20.785049,-40.570351],[-20.787837,-40.571747],[-20.787995,-40.574888],[-20.787122,-40.57545],[-20.78247,-40.576691],[-20.776058,-40.576502],[-20.77099,-40.574665],[-20.765154,-40.570894],[-20.627563,-40.647819],[-20.585946,-40.645241],[-20.584117,-40.644305],[-20.582222,-40.645039],[-20.578893,-40.644895],[-20.57429,-40.642468],[-20.562846,-40.642407],[-20.559958,-40.641202],[-20.559148,-40.642952],[-20.557962,-40.64307],[-20.558307,-40.641817],[-20.55661,-40.640853],[-20.554917,-40.641598],[-20.55555,-40.6403],[-20.554571,-40.638999],[-20.553389,-40.638786],[-20.553337,-40.637372],[-20.552171,-40.637573],[-20.552226,-40.638664],[-20.550828,-40.637838],[-20.547361,-40.638686],[-20.545995,-40.643557]];
@@ -3447,23 +3511,27 @@
     var busca = painel.querySelector('.busca-campo-publico');
     var lista = painel.querySelector('.lista-opcoes-campo-publico');
 
-    var opcoes = Array.from(select.options)
-      .filter(function(o){ return o.value !== ''; })
-      .map(function(o){ return { valor: o.value, rotulo: o.textContent }; });
+    function lerOpcoes(){
+      return Array.from(select.options)
+        .filter(function(o){ return o.value !== ''; })
+        .map(function(o){ return { valor: o.value, rotulo: o.textContent }; });
+    }
 
     function atualizarBotao(){
       if(select.value){
         botao.textContent = select.value;
         botao.classList.add('tem-valor');
       } else {
-        botao.textContent = 'Selecione a escola';
+        botao.textContent = botao.disabled ? 'Selecione o tipo de unidade primeiro' : 'Selecione a escola';
         botao.classList.remove('tem-valor');
       }
     }
     atualizarBotao();
     select.addEventListener('change', atualizarBotao);
+    select.addEventListener('atualizar-botao', atualizarBotao);
 
     function renderizarLista(filtro){
+      var opcoes = lerOpcoes();
       var termo = (filtro || '').toLowerCase();
       var filtradas = termo ? opcoes.filter(function(o){ return o.rotulo.toLowerCase().indexOf(termo) !== -1; }) : opcoes;
       if(!filtradas.length){
@@ -3519,6 +3587,48 @@
   ].forEach(aplicarMaiusculas);
   configurarSeletorCampoPublico('escolaExtra', 'botaoEscolaExtra', 'painelEscolaExtra');
   configurarSeletorCampoPublico('revEscola', 'botaoRevEscola', 'painelRevEscola');
+
+  // ---------- TIPO DE UNIDADE (ESTADUAL / MUNICIPAL) ----------
+  var ESCOLAS_ESTADUAIS = ['CEEMTI PAULO FREIRE', 'EEEFM CORONEL GOMES DE OLIVEIRA'];
+  var LISTA_TODAS_ESCOLAS = Array.from(document.getElementById('escola').options)
+    .filter(function(o){ return o.value !== ''; })
+    .map(function(o){ return o.value; });
+
+  function tipoDaEscola(nome){
+    return ESCOLAS_ESTADUAIS.indexOf(nome) !== -1 ? 'ESTADUAL' : 'MUNICIPAL';
+  }
+  function tipoDoRegistro(r){
+    var t = String((r && r.tipoUnidade) || '').trim().toUpperCase();
+    if(t === 'ESTADUAL' || t === 'MUNICIPAL'){ return t; }
+    return tipoDaEscola(r && r.escola);
+  }
+
+  // Refaz a lista de escolas conforme o tipo escolhido; limpa a escola se ela não pertencer ao tipo
+  function aplicarTipoUnidade(idTipo, idEscola, idBotao){
+    var tipo = document.getElementById(idTipo).value;
+    var sel = document.getElementById(idEscola);
+    var anterior = sel.value;
+    var nomes = tipo ? LISTA_TODAS_ESCOLAS.filter(function(n){ return tipoDaEscola(n) === tipo; }) : [];
+    sel.innerHTML = '<option value="">' + (tipo ? 'Selecione a escola' : 'Selecione o tipo de unidade primeiro') + '</option>' +
+      nomes.map(function(n){ return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
+    sel.value = nomes.indexOf(anterior) !== -1 ? anterior : '';
+    if(idBotao){
+      document.getElementById(idBotao).disabled = !tipo;
+      sel.dispatchEvent(new Event('atualizar-botao'));
+    }
+    if(sel.value !== anterior){ sel.dispatchEvent(new Event('change', { bubbles: true })); }
+  }
+
+  [['tipoUnidade','escola','botaoEscola'], ['tipoUnidadeExtra','escolaExtra','botaoEscolaExtra'], ['revTipoUnidade','revEscola','botaoRevEscola']].forEach(function(par){
+    aplicarTipoUnidade(par[0], par[1], par[2]);
+    document.getElementById(par[0]).addEventListener('change', function(){ aplicarTipoUnidade(par[0], par[1], par[2]); });
+  });
+  document.getElementById('editTipoUnidade').addEventListener('change', function(){
+    aplicarTipoUnidade('editTipoUnidade', 'editEscola', null);
+    atualizarTurnos('editEscola', 'editTurno', 'editSerie');
+  });
+  document.getElementById('editEscola').addEventListener('change', function(){ atualizarTurnos('editEscola','editTurno','editSerie'); });
+  document.getElementById('editTurno').addEventListener('change', function(){ atualizarSeries('editEscola','editTurno','editSerie'); });
 
   document.addEventListener('click', function(){
     document.querySelectorAll('.painel-campo-publico').forEach(function(p){ p.style.display = 'none'; });
@@ -3586,8 +3696,8 @@
   // ---------- GUIA SEQUENCIAL: pulsa o campo atual e avança para o próximo ao preencher ----------
   var SEQUENCIA_CAMPOS = {
     passo1: ['nomeResp', 'telResp'],
-    passo2: ['nomeAluno', 'escola', 'turno', 'serie', 'rua', 'numero', 'localidade', 'referencia'],
-    passoAlunoExtra: ['nomeAlunoExtra', 'escolaExtra', 'turnoExtra', 'serieExtra']
+    passo2: ['nomeAluno', 'tipoUnidade', 'escola', 'turno', 'serie', 'rua', 'numero', 'localidade', 'referencia'],
+    passoAlunoExtra: ['nomeAlunoExtra', 'tipoUnidadeExtra', 'escolaExtra', 'turnoExtra', 'serieExtra']
   };
 
   function proximoCampoVazio(idsPasso){
@@ -3671,6 +3781,7 @@
   document.getElementById('irPasso3').addEventListener('click', function(){
     var erro = document.getElementById('erroAluno');
     var nomeAluno = document.getElementById('nomeAluno').value.trim();
+    var tipoUnidade = document.getElementById('tipoUnidade').value;
     var escola = document.getElementById('escola').value;
     var turno = document.getElementById('turno').value;
     var serie = document.getElementById('serie').value;
@@ -3681,6 +3792,7 @@
 
     var invalidos = [];
     if(!nomeAluno){ invalidos.push('nomeAluno'); }
+    if(!tipoUnidade){ invalidos.push('tipoUnidade'); }
     if(!escola){ invalidos.push('escola'); }
     if(!turno){ invalidos.push('turno'); }
     if(!serie){ invalidos.push('serie'); }
@@ -3689,8 +3801,8 @@
     if(!localidade){ invalidos.push('localidade'); }
 
     if(invalidos.length){
-      marcarCamposComErro(['nomeAluno','escola','turno','serie','rua','numero','localidade'], invalidos);
-      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua, número (ou marque S/N) e localidade antes de continuar.';
+      marcarCamposComErro(['nomeAluno','tipoUnidade','escola','turno','serie','rua','numero','localidade'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, tipo de unidade, escola, turno, série, rua, número (ou marque S/N) e localidade antes de continuar.';
       erro.classList.add('mostrar');
       return;
     }
@@ -3721,6 +3833,7 @@
     var enderecoLinha = escapeHtml(rua) + (numero ? ', ' + escapeHtml(numero) : '');
     document.getElementById('resumoRevisao').innerHTML =
       '<div><span>Aluno</span><span>' + escapeHtml(nomeAluno) + '</span></div>' +
+      '<div><span>Tipo de Unidade</span><span>' + escapeHtml(tipoDaEscola(escola)) + '</span></div>' +
       '<div><span>Escola</span><span>' + escapeHtml(escola) + '</span></div>' +
       '<div><span>Turno</span><span>' + escapeHtml(turno) + '</span></div>' +
       '<div><span>Série</span><span>' + escapeHtml(serie) + '</span></div>' +
@@ -3733,6 +3846,8 @@
 
   function abrirEdicaoRevisao(){
     document.getElementById('revNomeAluno').value = document.getElementById('nomeAluno').value;
+    document.getElementById('revTipoUnidade').value = document.getElementById('tipoUnidade').value;
+    aplicarTipoUnidade('revTipoUnidade','revEscola','botaoRevEscola');
     document.getElementById('revEscola').value = document.getElementById('escola').value;
     document.getElementById('revEscola').dispatchEvent(new Event('change'));
     document.getElementById('revTurno').value = document.getElementById('turno').value;
@@ -3744,7 +3859,7 @@
     document.getElementById('revNumero').disabled = ehSemNumero;
     document.getElementById('revNumero').value = document.getElementById('numero').value;
     document.getElementById('revLocalidade').value = document.getElementById('localidade').value;
-    ['revNomeAluno','revEscola','revTurno','revSerie','revRua','revNumero','revLocalidade'].forEach(function(id){
+    ['revNomeAluno','revTipoUnidade','revEscola','revTurno','revSerie','revRua','revNumero','revLocalidade'].forEach(function(id){
       atualizarPreenchido(document.getElementById(id));
     });
     document.getElementById('erroRevisao').classList.remove('mostrar');
@@ -3762,6 +3877,7 @@
   document.getElementById('btnSalvarRevisao').addEventListener('click', function(){
     var erro = document.getElementById('erroRevisao');
     var nomeAluno = document.getElementById('revNomeAluno').value.trim();
+    var tipoUnidade = document.getElementById('revTipoUnidade').value;
     var escola = document.getElementById('revEscola').value;
     var turno = document.getElementById('revTurno').value;
     var serie = document.getElementById('revSerie').value;
@@ -3772,6 +3888,7 @@
 
     var invalidos = [];
     if(!nomeAluno){ invalidos.push('revNomeAluno'); }
+    if(!tipoUnidade){ invalidos.push('revTipoUnidade'); }
     if(!escola){ invalidos.push('revEscola'); }
     if(!turno){ invalidos.push('revTurno'); }
     if(!serie){ invalidos.push('revSerie'); }
@@ -3780,25 +3897,29 @@
     if(!localidade){ invalidos.push('revLocalidade'); }
 
     if(invalidos.length){
-      marcarCamposComErro(['revNomeAluno','revEscola','revTurno','revSerie','revRua','revNumero','revLocalidade'], invalidos);
-      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua, número (ou marque S/N) e localidade antes de salvar.';
+      marcarCamposComErro(['revNomeAluno','revTipoUnidade','revEscola','revTurno','revSerie','revRua','revNumero','revLocalidade'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, tipo de unidade, escola, turno, série, rua, número (ou marque S/N) e localidade antes de salvar.';
       erro.classList.add('mostrar');
       return;
     }
     erro.classList.remove('mostrar');
 
     document.getElementById('nomeAluno').value = nomeAluno;
+    document.getElementById('tipoUnidade').value = tipoUnidade;
+    aplicarTipoUnidade('tipoUnidade','escola','botaoEscola');
     document.getElementById('escola').value = escola;
     document.getElementById('botaoEscola').textContent = escola || 'Selecione a escola';
     document.getElementById('botaoEscola').classList.toggle('tem-valor', !!escola);
+    atualizarTurnos('escola','turno','serie');
     document.getElementById('turno').value = turno;
+    atualizarSeries('escola','turno','serie');
     document.getElementById('serie').value = serie;
     document.getElementById('rua').value = rua;
     document.getElementById('semNumero').checked = semNumero;
     document.getElementById('numero').disabled = semNumero;
     document.getElementById('numero').value = semNumero ? 'S/N' : numero;
     document.getElementById('localidade').value = localidade;
-    ['nomeAluno','rua','numero','localidade'].forEach(function(id){
+    ['nomeAluno','tipoUnidade','escola','turno','serie','rua','numero','localidade'].forEach(function(id){
       atualizarPreenchido(document.getElementById(id));
     });
 
@@ -3840,6 +3961,7 @@
       nomeResp: document.getElementById('nomeResp').value.trim(),
       telResp: document.getElementById('telResp').value.trim(),
       nomeAluno: nomeAluno,
+      tipoUnidade: tipoDaEscola(escola),
       escola: escola,
       turno: turno,
       serie: serie,
@@ -3885,6 +4007,7 @@
     var enderecoLinha = escapeHtml(r.rua) + (r.numero ? ', ' + escapeHtml(r.numero) : '');
     el.innerHTML =
       '<div><span>Aluno</span><span>' + escapeHtml(r.nomeAluno) + '</span></div>' +
+      '<div><span>Tipo de Unidade</span><span>' + escapeHtml(r.tipoUnidade) + '</span></div>' +
       '<div><span>Escola</span><span>' + escapeHtml(r.escola) + '</span></div>' +
       '<div><span>Turno</span><span>' + escapeHtml(r.turno) + '</span></div>' +
       '<div><span>Série</span><span>' + escapeHtml(r.serie) + '</span></div>' +
@@ -3905,8 +4028,9 @@
     document.getElementById('trilhaWrapper').style.display = 'none';
     document.getElementById('passo5').classList.remove('ativo');
     document.getElementById('nomeAlunoExtra').value = '';
+    document.getElementById('tipoUnidadeExtra').value = '';
+    aplicarTipoUnidade('tipoUnidadeExtra','escolaExtra','botaoEscolaExtra');
     document.getElementById('escolaExtra').value = '';
-    document.getElementById('botaoEscolaExtra').textContent = 'Selecione a escola';
     document.getElementById('botaoEscolaExtra').classList.remove('tem-valor');
     atualizarTurnos('escolaExtra','turnoExtra','serieExtra');
     document.getElementById('erroAlunoExtra').classList.remove('mostrar');
@@ -3929,23 +4053,26 @@
   document.getElementById('irRevisaoAlunoExtra').addEventListener('click', function(){
     var erro = document.getElementById('erroAlunoExtra');
     var nomeAlunoExtra = document.getElementById('nomeAlunoExtra').value.trim();
+    var tipoExtra = document.getElementById('tipoUnidadeExtra').value;
     var escolaExtra = document.getElementById('escolaExtra').value;
     var turnoExtra = document.getElementById('turnoExtra').value;
     var serieExtra = document.getElementById('serieExtra').value.trim();
     var invalidos = [];
     if(!nomeAlunoExtra){ invalidos.push('nomeAlunoExtra'); }
+    if(!tipoExtra){ invalidos.push('tipoUnidadeExtra'); }
     if(!escolaExtra){ invalidos.push('escolaExtra'); }
     if(!turnoExtra){ invalidos.push('turnoExtra'); }
     if(!serieExtra){ invalidos.push('serieExtra'); }
     if(invalidos.length){
-      marcarCamposComErro(['nomeAlunoExtra','escolaExtra','turnoExtra','serieExtra'], invalidos);
-      erro.textContent = 'Preencha nome do aluno, escola, turno e série antes de continuar.';
+      marcarCamposComErro(['nomeAlunoExtra','tipoUnidadeExtra','escolaExtra','turnoExtra','serieExtra'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, tipo de unidade, escola, turno e série antes de continuar.';
       erro.classList.add('mostrar');
       return;
     }
     erro.classList.remove('mostrar');
     document.getElementById('resumoAlunoExtra').innerHTML =
       '<div><span>Aluno</span><span>' + escapeHtml(nomeAlunoExtra) + '</span></div>' +
+      '<div><span>Tipo de Unidade</span><span>' + escapeHtml(tipoExtra) + '</span></div>' +
       '<div><span>Escola</span><span>' + escapeHtml(escolaExtra) + '</span></div>' +
       '<div><span>Turno</span><span>' + escapeHtml(turnoExtra) + '</span></div>' +
       '<div><span>Série</span><span>' + escapeHtml(serieExtra) + '</span></div>';
@@ -4670,6 +4797,7 @@
         return;
       }
       registrosCache = Array.isArray(lista) ? lista : [];
+      registrosCache.forEach(function(r){ r.tipoUnidade = tipoDoRegistro(r); });
       popularFiltros();
       aplicarFiltros();
     }).catch(function(erro){
@@ -4787,8 +4915,8 @@
   }
 
   // ---------- FILTROS (múltipla seleção por categoria) ----------
-  var ROTULOS_FILTRO = { aluno: 'Todos os alunos', escola: 'Todas as escolas', turno: 'Todos os turnos', serie: 'Todas as séries', localidade: 'Todas as localidades' };
-  var filtrosSelecionados = { aluno: new Set(), escola: new Set(), turno: new Set(), serie: new Set(), localidade: new Set() };
+  var ROTULOS_FILTRO = { aluno: 'Todos os alunos', tipoUnidade: 'Todos os tipos', escola: 'Todas as escolas', turno: 'Todos os turnos', serie: 'Todas as séries', localidade: 'Todas as localidades' };
+  var filtrosSelecionados = { aluno: new Set(), tipoUnidade: new Set(), escola: new Set(), turno: new Set(), serie: new Set(), localidade: new Set() };
 
   function capitalizar(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
@@ -4817,8 +4945,8 @@
     atualizarRotuloBotaoFiltro(campo);
   }
 
-  var CAMPO_PARA_CHAVE_DADO = { aluno: 'nomeAluno', escola: 'escola', turno: 'turno', serie: 'serie', localidade: 'localidade' };
-  var ORDEM_CAMPOS_FILTRO = ['aluno', 'escola', 'turno', 'serie', 'localidade'];
+  var CAMPO_PARA_CHAVE_DADO = { aluno: 'nomeAluno', tipoUnidade: 'tipoUnidade', escola: 'escola', turno: 'turno', serie: 'serie', localidade: 'localidade' };
+  var ORDEM_CAMPOS_FILTRO = ['aluno', 'tipoUnidade', 'escola', 'turno', 'serie', 'localidade'];
 
   function popularFiltros(){
     ORDEM_CAMPOS_FILTRO.forEach(function(campoAtual){
@@ -4838,6 +4966,7 @@
   function obterListaFiltrada(){
     return registrosCache.filter(function(r){
       if(filtrosSelecionados.aluno.size && !filtrosSelecionados.aluno.has(r.nomeAluno)){ return false; }
+      if(filtrosSelecionados.tipoUnidade.size && !filtrosSelecionados.tipoUnidade.has(r.tipoUnidade)){ return false; }
       if(filtrosSelecionados.escola.size && !filtrosSelecionados.escola.has(r.escola)){ return false; }
       if(filtrosSelecionados.turno.size && !filtrosSelecionados.turno.has(r.turno)){ return false; }
       if(filtrosSelecionados.serie.size && !filtrosSelecionados.serie.has(r.serie)){ return false; }
@@ -4849,6 +4978,7 @@
   function obterDescricaoFiltro(){
     var partes = [];
     if(filtrosSelecionados.aluno.size){ partes.push('Aluno(s): ' + Array.from(filtrosSelecionados.aluno).join(', ')); }
+    if(filtrosSelecionados.tipoUnidade.size){ partes.push('Tipo de unidade: ' + Array.from(filtrosSelecionados.tipoUnidade).join(', ')); }
     if(filtrosSelecionados.escola.size){ partes.push('Escola(s): ' + Array.from(filtrosSelecionados.escola).join(', ')); }
     if(filtrosSelecionados.turno.size){ partes.push('Turno(s): ' + Array.from(filtrosSelecionados.turno).join(', ')); }
     if(filtrosSelecionados.serie.size){ partes.push('Série(s): ' + Array.from(filtrosSelecionados.serie).join(', ')); }
@@ -4894,7 +5024,7 @@
   });
 
   // marcar/desmarcar um item
-  ['aluno','escola','turno','serie','localidade'].forEach(function(campo){
+  ['aluno','tipoUnidade','escola','turno','serie','localidade'].forEach(function(campo){
     document.getElementById('opcoesFiltro' + capitalizar(campo)).addEventListener('change', function(e){
       if(e.target.type !== 'checkbox'){ return; }
       if(e.target.checked){ filtrosSelecionados[campo].add(e.target.value); }
@@ -4943,7 +5073,7 @@
   }
 
   document.getElementById('btnLimparFiltros').addEventListener('click', function(){
-    ['aluno','escola','turno','serie','localidade'].forEach(function(campo){
+    ['aluno','tipoUnidade','escola','turno','serie','localidade'].forEach(function(campo){
       filtrosSelecionados[campo].clear();
       document.querySelectorAll('#opcoesFiltro' + capitalizar(campo) + ' input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
       atualizarRotuloBotaoFiltro(campo);
@@ -7658,7 +7788,8 @@
   function popularFiltroEscolaRotas(){
     var select = document.getElementById('filtroRotaEscola');
     var valorAtual = select.value;
-    var nomes = Object.keys(ESCOLAS_COORDENADAS).sort();
+    var tipoRota = document.getElementById('filtroRotaTipo').value;
+    var nomes = Object.keys(ESCOLAS_COORDENADAS).filter(function(n){ return !tipoRota || tipoDaEscola(n) === tipoRota; }).sort();
     select.innerHTML = '<option value="">Todas</option>' + nomes.map(function(n){ return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
     select.value = valorAtual;
   }
@@ -7793,6 +7924,7 @@
     var tipoVeiculo = document.getElementById('filtroRotaTipoVeiculo').value;
     var propriedade = document.getElementById('filtroRotaPropriedade').value;
     var escola = document.getElementById('filtroRotaEscola').value;
+    var tipoRota = document.getElementById('filtroRotaTipo').value;
     var sentido = document.getElementById('filtroRotaSentido').value;
     var somenteProblema = document.getElementById('btnFiltroSoComProblema').getAttribute('aria-pressed') === 'true';
 
@@ -7802,6 +7934,7 @@
       if(tipoVeiculo && c.tipoVeiculo !== tipoVeiculo){ return false; }
       if(propriedade && c.propriedade !== propriedade){ return false; }
       if(escola && (x.rota.escolas || []).indexOf(escola) === -1){ return false; }
+      if(tipoRota && !(x.rota.escolas || []).some(function(n){ return tipoDaEscola(n) === tipoRota; })){ return false; }
       if(sentido && c.sentido !== sentido){ return false; }
       if(somenteProblema){
         var qtdAlunosRota = x.rota.pontos.reduce(function(acc, p){ return acc + (p.alunos || []).length; }, 0);
@@ -7898,11 +8031,19 @@
   ['filtroRotaTurno', 'filtroRotaTipoVeiculo', 'filtroRotaPropriedade', 'filtroRotaEscola', 'filtroRotaSentido', 'ordenarRotasPor'].forEach(function(id){
     document.getElementById(id).addEventListener('change', renderizarListaRotasCadastradas);
   });
+  document.getElementById('filtroRotaTipo').addEventListener('change', function(){
+    var selEsc = document.getElementById('filtroRotaEscola');
+    var atual = selEsc.value;
+    popularFiltroEscolaRotas();
+    if(selEsc.value !== atual){ selEsc.value = ''; }
+    renderizarListaRotasCadastradas();
+  });
 
   document.getElementById('btnLimparFiltrosRotas').addEventListener('click', function(){
-    ['filtroRotaTurno', 'filtroRotaTipoVeiculo', 'filtroRotaPropriedade', 'filtroRotaEscola', 'filtroRotaSentido'].forEach(function(id){
+    ['filtroRotaTurno', 'filtroRotaTipoVeiculo', 'filtroRotaPropriedade', 'filtroRotaTipo', 'filtroRotaEscola', 'filtroRotaSentido'].forEach(function(id){
       document.getElementById(id).value = '';
     });
+    popularFiltroEscolaRotas();
     document.getElementById('ordenarRotasPor').value = 'recente';
     document.getElementById('btnFiltroSoComProblema').setAttribute('aria-pressed', 'false');
     renderizarListaRotasCadastradas(); renderizarAlunosSemRota(); renderizarDashboardFrota();
@@ -8812,6 +8953,8 @@
     registroEmEdicao = registro;
     document.getElementById('erroEdicao').classList.remove('mostrar');
     document.getElementById('editNomeAluno').value = registro.nomeAluno || '';
+    document.getElementById('editTipoUnidade').value = tipoDoRegistro(registro);
+    aplicarTipoUnidade('editTipoUnidade', 'editEscola', null);
     document.getElementById('editEscola').value = registro.escola || '';
     atualizarTurnos('editEscola', 'editTurno', 'editSerie');
     document.getElementById('editTurno').value = registro.turno || '';
@@ -8845,6 +8988,7 @@
   document.getElementById('salvarEdicao').addEventListener('click', function(){
     var erro = document.getElementById('erroEdicao');
     var nomeAluno = document.getElementById('editNomeAluno').value.trim();
+    var tipoUnidade = document.getElementById('editTipoUnidade').value;
     var escola = document.getElementById('editEscola').value;
     var turno = document.getElementById('editTurno').value;
     var serie = document.getElementById('editSerie').value;
@@ -8855,6 +8999,7 @@
 
     var invalidos = [];
     if(!nomeAluno){ invalidos.push('editNomeAluno'); }
+    if(!tipoUnidade){ invalidos.push('editTipoUnidade'); }
     if(!escola){ invalidos.push('editEscola'); }
     if(!turno){ invalidos.push('editTurno'); }
     if(!serie){ invalidos.push('editSerie'); }
@@ -8863,8 +9008,8 @@
     if(!localidade){ invalidos.push('editLocalidade'); }
 
     if(invalidos.length){
-      marcarCamposComErro(['editNomeAluno','editEscola','editTurno','editSerie','editRua','editNumero','editLocalidade'], invalidos);
-      erro.textContent = 'Preencha nome do aluno, escola, turno, série, rua, número (ou marque S/N) e localidade.';
+      marcarCamposComErro(['editNomeAluno','editTipoUnidade','editEscola','editTurno','editSerie','editRua','editNumero','editLocalidade'], invalidos);
+      erro.textContent = 'Preencha nome do aluno, tipo de unidade, escola, turno, série, rua, número (ou marque S/N) e localidade.';
       erro.classList.add('mostrar');
       return;
     }
@@ -8881,6 +9026,7 @@
       nomeResp: document.getElementById('editNomeResp').value.trim(),
       telResp: document.getElementById('editTelResp').value.trim(),
       nomeAluno: nomeAluno,
+      tipoUnidade: tipoUnidade,
       escola: escola,
       turno: turno,
       serie: serie,
@@ -8941,7 +9087,7 @@
   // ---------- EXPORTAÇÕES (respeitam o filtro ativo) ----------
   document.getElementById('btnExportar').addEventListener('click', function(){
     if(!listaFiltradaCache.length){ mostrarAviso('Não há registros para exportar.'); return; }
-    var colunas = ['nomeAluno','escola','turno','serie','rua','numero','localidade','referencia','nomeResp','telResp','lat','lng','dataEnvio'];
+    var colunas = ['nomeAluno','tipoUnidade','escola','turno','serie','rua','numero','localidade','referencia','nomeResp','telResp','lat','lng','dataEnvio'];
     var linhas = [colunas.join(';')];
     listaFiltradaCache.forEach(function(r){
       linhas.push(colunas.map(function(c){
